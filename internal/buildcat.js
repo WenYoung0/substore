@@ -43,7 +43,6 @@ config["proxy-groups"].map((selector) => {
     )
     .map((p) => p.name.trim())
     .filter((p) => p && p.length > 0);
-  console.log("for" + selector.name);
 
   if (
     ["🙋 Select", "🔍 Google", "🪟 Microsoft", "📺 Media, Social"].includes(
