@@ -52,7 +52,7 @@ const sortNodes = ({ nodes }) => {
   }
 
   nodes.sort((a, b) => {
-    const orderDiff = getOrder(a) - getOrder(b);
+    const orderDiff = getOrder({ name: a }) - getOrder({ name: b });
     if (orderDiff !== 0) return orderDiff;
 
     return a.localeCompare(b);

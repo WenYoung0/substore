@@ -2,28 +2,39 @@ if (!context?.young?.features?.properties?.load) {
   throw "feature properties required";
 }
 
+const featureProperties = context.young.features.properties;
+
 const propertiesTransport = "T";
 const propertiesDestination = "D";
 
-const applyTransportSingBox = ({ config, proxies, transportDetourSelector }) => {
+const applyTransportSingBox = ({
+  config,
+  proxies,
+  transportDetourSelector,
+}) => {
   const removeTransportSelectorInConfig = () => {
     config.outbounds = config.outbounds.filter(
       (outbound) => outbound.tag !== transportDetourSelector
     );
   };
-
   const transportProxies = proxies.filter((p) =>
-    p.nodeProperties.includes(propertiesTransport)
+    featureProperties.func
+      .getPropertiesFromProxy({ proxy: p })
+      .includes(propertiesTransport)
   );
 
   const destinationProxies = proxies.filter((p) =>
-    p.nodeProperties.includes(propertiesDestination)
+    featureProperties.func
+      .getPropertiesFromProxy({ proxy: p })
+      .includes(propertiesDestination)
   );
-
   if (!(transportProxies.length > 0 && destinationProxies.length > 0)) {
     removeTransportSelectorInConfig();
     return proxies.filter(
-      (p) => !p.nodeProperties.includes(propertiesDestination)
+      (p) =>
+        !featureProperties.func
+          .getPropertiesFromProxy({ proxy: p })
+          .includes(propertiesDestination)
     );
   }
 
@@ -34,14 +45,14 @@ const applyTransportSingBox = ({ config, proxies, transportDetourSelector }) => 
     });
     return proxies;
   }
-
+  
   const transportGroup = config.outbounds.find(
     (outbound) => outbound.tag === transportDetourSelector
   );
 
-  transportGroup.outbounds.push(...proxies.map((p) => p.raw.tag));
+  transportGroup.outbounds.push(...proxies.map((p) => p.tag));
   destinationProxies.forEach((dp) => {
-    dp.raw['detour'] = transportDetourSelector;
+    dp["detour"] = transportDetourSelector;
   });
 
   return proxies;
@@ -55,17 +66,24 @@ const applyTransportMihomo = ({ config, proxies, transportDetourSelector }) => {
   };
 
   const transportProxies = proxies.filter((p) =>
-    p.nodeProperties.includes(propertiesTransport)
+    featureProperties.func
+      .getPropertiesFromProxy(p)
+      .includes(propertiesTransport)
   );
 
   const destinationProxies = proxies.filter((p) =>
-    p.nodeProperties.includes(propertiesDestination)
+    featureProperties.func
+      .getPropertiesFromProxy(p)
+      .includes(propertiesDestination)
   );
 
   if (!(transportProxies.length > 0 && destinationProxies.length > 0)) {
     removeTransportSelectorInConfig();
     proxies = proxies.filter(
-      (p) => !p.nodeProperties.includes(propertiesDestination)
+      (p) =>
+        !featureProperties.func
+          .getPropertiesFromProxy(p)
+          .includes(propertiesDestination)
     );
     return proxies;
   }
@@ -92,14 +110,22 @@ const applyTransportMihomo = ({ config, proxies, transportDetourSelector }) => {
 
 const apply = ({ config, proxies, transportDetourSelector, platform }) => {
   if (platform === "sing-box") {
-    return applyTransportSingBox({ config, proxies, transportDetourSelector })
+    return applyTransportSingBox({
+      config: config,
+      proxies: proxies,
+      transportDetourSelector: transportDetourSelector,
+    });
   }
   if (platform === "mihomo") {
-    return applyTransportMihomo({ config, proxies, transportDetourSelector })
+    return applyTransportMihomo({
+      config: config,
+      proxies: proxies,
+      transportDetourSelector: transportDetourSelector,
+    });
   }
 
-  return proxies
-}
+  return proxies;
+};
 
 let transportObj = { load: true, func: {} };
 
