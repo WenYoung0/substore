@@ -2,10 +2,12 @@ const propertiesRemove = "_remove_properties";
 
 const keyFroProperties = "nodeProperties";
 
+const commons = context.young.commons;
+
 const lookupNameKeyPlatform = ({ platform }) => {
-  if (platform == "sing-box") {
+  if (platform == commons.builtin.platformNameSingbox) {
     return "tag";
-  } else if (platform == "mihomo") {
+  } else if (platform == commons.builtin.platformNameMihomo) {
     return "name";
   }
   return "";
@@ -27,7 +29,7 @@ const getPropertiesFromName = ({ name }) => {
 };
 
 const getPropertiesFromProxy = ({ proxy, platform }) => {
-  if (keyFroProperties in proxy ) {
+  if (keyFroProperties in proxy) {
     return proxy[keyFroProperties];
   }
   return getPropertiesFromName({
@@ -37,7 +39,7 @@ const getPropertiesFromProxy = ({ proxy, platform }) => {
 
 const cleanNameByProperties = ({ name, properties }) => {
   if (!(name.includes("(") && name.includes(")"))) {
-    return name
+    return name;
   }
 
   const noPropertiesName = name.substring(0, name.indexOf("(")).trim();
@@ -65,7 +67,7 @@ const bindProxy = ({ proxy, platform }) => {
 };
 
 const unbindProxy = ({ proxy }) => {
-  if (keyFroProperties in proxy ) {
+  if (keyFroProperties in proxy) {
     delete proxy[keyFroProperties];
   }
   return proxy;

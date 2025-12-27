@@ -2,6 +2,8 @@ if (!context?.young?.features?.properties?.load) {
   throw "feature properties required";
 }
 
+const commons = context.young.commons;
+
 const featureProperties = context.young.features.properties;
 
 const propertiesTransport = "T";
@@ -17,40 +19,42 @@ const applyTransportSingBox = ({
       (outbound) => outbound.tag !== transportDetourSelector
     );
   };
+
+  const getProperties = (p) => {
+    return featureProperties.func.getPropertiesFromProxy({
+      proxy: p,
+      platform: commons.builtin.platformNameSingbox,
+    });
+  };
+
   const transportProxies = proxies.filter((p) =>
-    featureProperties.func
-      .getPropertiesFromProxy({ proxy: p })
-      .includes(propertiesTransport)
+    getProperties(p).includes(propertiesTransport)
   );
 
   const destinationProxies = proxies.filter((p) =>
-    featureProperties.func
-      .getPropertiesFromProxy({ proxy: p })
-      .includes(propertiesDestination)
+    getProperties(p).includes(propertiesDestination)
   );
+
   if (!(transportProxies.length > 0 && destinationProxies.length > 0)) {
     removeTransportSelectorInConfig();
     return proxies.filter(
-      (p) =>
-        !featureProperties.func
-          .getPropertiesFromProxy({ proxy: p })
-          .includes(propertiesDestination)
+      (p) => !getProperties(p).includes(propertiesDestination)
     );
   }
 
   if (transportProxies.length === 1) {
     removeTransportSelectorInConfig();
     destinationProxies.forEach((dp) => {
-      dp.raw.detour = transportProxies[0].raw.tag;
+      dp.detour = transportProxies[0].tag;
     });
     return proxies;
   }
-  
+
   const transportGroup = config.outbounds.find(
     (outbound) => outbound.tag === transportDetourSelector
   );
 
-  transportGroup.outbounds.push(...proxies.map((p) => p.tag));
+  transportGroup.outbounds.push(...transportProxies.map(p => p.tag));
   destinationProxies.forEach((dp) => {
     dp["detour"] = transportDetourSelector;
   });
@@ -65,25 +69,25 @@ const applyTransportMihomo = ({ config, proxies, transportDetourSelector }) => {
     );
   };
 
+  const getProperties = (p) => {
+    return featureProperties.func.getPropertiesFromProxy({
+      proxy: p,
+      platform: commons.builtin.platformNameMihomo,
+    });
+  };
+
   const transportProxies = proxies.filter((p) =>
-    featureProperties.func
-      .getPropertiesFromProxy(p)
-      .includes(propertiesTransport)
+    getProperties(p).includes(propertiesTransport)
   );
 
   const destinationProxies = proxies.filter((p) =>
-    featureProperties.func
-      .getPropertiesFromProxy(p)
-      .includes(propertiesDestination)
+    getProperties(p).includes(propertiesDestination)
   );
 
   if (!(transportProxies.length > 0 && destinationProxies.length > 0)) {
     removeTransportSelectorInConfig();
     proxies = proxies.filter(
-      (p) =>
-        !featureProperties.func
-          .getPropertiesFromProxy(p)
-          .includes(propertiesDestination)
+      (p) => !getProperties(p).includes(propertiesDestination)
     );
     return proxies;
   }
@@ -91,7 +95,7 @@ const applyTransportMihomo = ({ config, proxies, transportDetourSelector }) => {
   if (transportProxies.length === 1) {
     removeTransportSelectorInConfig();
     destinationProxies.forEach((dp) => {
-      dp.raw["dialer-proxy"] = transportProxies[0].raw.name;
+      dp["dialer-proxy"] = transportProxies[0].name;
     });
     return proxies;
   }
@@ -99,24 +103,26 @@ const applyTransportMihomo = ({ config, proxies, transportDetourSelector }) => {
   const transportGroup = config["proxy-groups"].find(
     (outbound) => outbound.name === transportDetourSelector
   );
-
-  transportGroup.proxies.push(...proxies.map((p) => p.raw.name));
+  if (!("proxies" in transportGroup)) {
+    transportGroup.proxies = []
+  }
+  transportGroup.proxies.push(...transportProxies.map((p) => p.name));
   destinationProxies.forEach((dp) => {
-    dp.raw["dialer-proxy"] = transportDetourSelector;
+    dp["dialer-proxy"] = transportDetourSelector;
   });
 
   return proxies;
 };
 
 const apply = ({ config, proxies, transportDetourSelector, platform }) => {
-  if (platform === "sing-box") {
+  if (platform === commons.builtin.platformNameSingbox) {
     return applyTransportSingBox({
       config: config,
       proxies: proxies,
       transportDetourSelector: transportDetourSelector,
     });
   }
-  if (platform === "mihomo") {
+  if (platform === commons.builtin.platformNameMihomo) {
     return applyTransportMihomo({
       config: config,
       proxies: proxies,

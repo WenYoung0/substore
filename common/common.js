@@ -1,10 +1,10 @@
 const clearProxies = ({ proxies, platform }) => {
-  if (platform === "sing-box") {
+  if (platform === commons.builtin.platformNameSingbox) {
     proxies.forEach((element) => {
       element.tag = element.tag.trim();
     });
   }
-  if (platform === "mihomo") {
+  if (platform === commons.builtin.platformNameMihomo) {
     proxies.forEach((element) => {
       element.name = element.name.trim();
     });
@@ -61,20 +61,15 @@ const sortNodes = ({ nodes }) => {
   return nodes;
 };
 
-const filterLocation = ({ tags, loc, reverse }) => {
-  if (reverse) {
-    return tags.filter((tag) => loc.some((ll) => !tag.startsWith(ll)));
-  }
-  return tags.filter((tag) => loc.some((ll) => tag.startsWith(ll)));
-};
-
-let commonObj = { load: true, func: {} };
+let commonObj = { load: true, func: {}, builtin: {} };
 
 commonObj.func.clearProxies = clearProxies;
 commonObj.func.sortNodes = sortNodes;
-commonObj.func.filterLocation = filterLocation;
+
+commonObj.builtin.platformNameSingbox = "sing-box";
+commonObj.builtin.platformNameMihomo = "mihomo";
 
 context.young = {
   ...(context.young || {}),
-  common: commonObj,
+  commons: commonObj,
 };
