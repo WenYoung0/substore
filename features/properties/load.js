@@ -1,5 +1,16 @@
 const propertiesRemove = "_remove_properties"
 
+const keyFroProperties = "nodeProperties"
+
+const lookupNameKeyPlatform = ({ platform }) => {
+  if (platform == "sing-box") {
+    return "tag"
+  } else if (platform == "mihomo") {
+    return "name"
+  }
+  return ""
+}
+
 const getPropertiesFromName = ({ name }) => {
   if (!(name.includes("(") && name.includes(")"))) {
     return []
@@ -15,6 +26,13 @@ const getPropertiesFromName = ({ name }) => {
   return properties
 }
 
+const getPropertiesFromProxy = ({ proxy, platform }) => {
+  if (proxy[keyFroProperties]) {
+    return proxy[keyFroProperties]
+  }
+  return getPropertiesFromName({ name: proxy[lookupNameKeyPlatform(platform)] })
+}
+
 const cleanNameByProperties = ({ name, properties }) => {
   if (!(name.includes("(") && name.includes(")"))) {
     return name
@@ -28,18 +46,28 @@ const cleanNameByProperties = ({ name, properties }) => {
   return noPropertiesName + " " + "(" + properties.filter(p => !p.startsWith("_")).join(",") + ")"
 }
 
-const castProxy = ({ proxy, lookup }) => {
-  const ret = { nodeProperties: getPropertiesFromName(proxy[lookup]), raw: proxy }
-  proxy[lookup] = cleanNameByProperties(proxy[lookup], ret.nodeProperties)
-  return ret
+const bindProxy = ({ proxy, platform }) => {
+  const lookup = lookupNameKeyPlatform({ platform: platform })
+  proxy[keyFroProperties] = getPropertiesFromName()
+  proxy[lookup] = cleanNameByProperties(proxy[lookup], proxy[keyFroProperties])
+  return proxy
 }
 
-let propertiesObj = { load: true }
+const unbindProxy = ({ proxy }) => {
+  delete proxy[keyFroProperties]
+  return proxy
+}
+
+let propertiesObj = { load: true, func: {}, builtin: {} }
 
 propertiesObj.func.getPropertiesFromName = getPropertiesFromName
+propertiesObj.func.getPropertiesFromProxy = getPropertiesFromProxy
 propertiesObj.func.cleanNameByProperties = cleanNameByProperties
-propertiesObj.func.castProxy = castProxy
+propertiesObj.func.bindProxy = bindProxy
+propertiesObj.func.unbindProxy = unbindProxy
+
 propertiesObj.builtin.propertiesRemove = propertiesRemove
+propertiesObj.builtin.keyFroProperties = keyFroProperties
 
 context.young = {
   ...(context.young || {}),

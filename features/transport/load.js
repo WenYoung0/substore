@@ -90,10 +90,20 @@ const applyTransportMihomo = ({ config, proxies, transportDetourSelector }) => {
   return proxies;
 };
 
-let transportObj = { load: true };
+const apply = ({ config, proxies, transportDetourSelector, platform }) => {
+  if (platform === "sing-box") {
+    return applyTransportSingBox({ config, proxies, transportDetourSelector })
+  }
+  if (platform === "mihomo") {
+    return applyTransportMihomo({ config, proxies, transportDetourSelector })
+  }
 
-transportObj.func.applyMihomo = applyTransportMihomo;
-transportObj.func.applySingbox = applyTransportSingBox;
+  return proxies
+}
+
+let transportObj = { load: true, func: {} };
+
+transportObj.func.apply = apply;
 
 context.young = {
   ...(context.young || {}),
