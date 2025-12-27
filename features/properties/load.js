@@ -1,6 +1,6 @@
 const propertiesRemove = "_remove_properties"
 
-const getPropertiesFromName = (name) => {
+const getPropertiesFromName = ({ name }) => {
   if (!(name.includes("(") && name.includes(")"))) {
     return []
   }
@@ -15,7 +15,7 @@ const getPropertiesFromName = (name) => {
   return properties
 }
 
-const cleanNameByProperties = (name, properties) => {
+const cleanNameByProperties = ({ name, properties }) => {
   if (!(name.includes("(") && name.includes(")"))) {
     return name
   }
@@ -28,7 +28,7 @@ const cleanNameByProperties = (name, properties) => {
   return noPropertiesName + " " + "(" + properties.filter(p => !p.startsWith("_")).join(",") + ")"
 }
 
-const castProxy = (proxy, lookup) => {
+const castProxy = ({ proxy, lookup }) => {
   const ret = { nodeProperties: getPropertiesFromName(proxy[lookup]), raw: proxy }
   proxy[lookup] = cleanNameByProperties(proxy[lookup], ret.nodeProperties)
   return ret

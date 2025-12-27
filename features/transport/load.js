@@ -5,7 +5,7 @@ if (!context?.young?.features?.properties?.load) {
 const propertiesTransport = "T";
 const propertiesDestination = "D";
 
-const applyTransportSingBox = (config, proxies, transportDetourSelector) => {
+const applyTransportSingBox = ({ config, proxies, transportDetourSelector }) => {
   const removeTransportSelectorInConfig = () => {
     config.outbounds = config.outbounds.filter(
       (outbound) => outbound.tag !== transportDetourSelector
@@ -47,7 +47,7 @@ const applyTransportSingBox = (config, proxies, transportDetourSelector) => {
   return proxies;
 };
 
-const applyTransportMihomo = (config, proxies, transportDetourSelector) => {
+const applyTransportMihomo = ({ config, proxies, transportDetourSelector }) => {
   const removeTransportSelectorInConfig = () => {
     config.outbounds = config["proxy-groups"].filter(
       (outbound) => outbound.name !== transportDetourSelector
