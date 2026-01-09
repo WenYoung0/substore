@@ -31,7 +31,8 @@ const sortNodes = ({ nodes }) => {
     "🇰🇷",
     "🇷🇺",
     "🇦🇺",
-    "🇺🇸",
+    "🇺🇸", // \ud83c\uddfa\ud83c\uddf8
+    "🇺🇲", // \ud83c\uddfa\ud83c\uddf2 // https://en.wikipedia.org/wiki/United_States_Minor_Outlying_Islands
     "🇨🇦",
     "🇩🇪",
     "🇺🇦",
