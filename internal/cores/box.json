@@ -1,0 +1,470 @@
+{
+  "log"         : {"disabled": false, "level": "warn"},
+  "dns"         : {
+    "servers"          : [
+      {"tag": "dns-bootstrap", "type": "udp", "server": "223.5.5.5"},
+      {"tag": "dns-local", "type": "local"},
+      {"tag": "dns-cn", "type": "https", "server": "doh.pub", "domain_resolver": "dns-bootstrap"},
+      {"tag": "dns-final", "type": "https", "server": "1.1.1.1", "detour": "🙋 Select"},
+      {"tag": "dns-google", "type": "https", "server": "8.8.8.8", "detour": "🔍 Google"},
+      {"tag": "dns-microsoft", "type": "https", "server": "1.1.1.1", "detour": "🪟 Microsoft"},
+      {"tag": "dns-telegram", "type": "https", "server": "1.1.1.1", "detour": "✈️ TelegramDC4(EU)"},
+      {"tag": "dns-ai", "type": "https", "server": "1.1.1.1", "detour": "🤖 AI-Service"},
+      {"tag": "dns-stream", "type": "https", "server": "1.1.1.1", "detour": "📺 Media, Social"},
+      {"tag": "dns-fake", "type": "fakeip", "inet4_range": "32.81.0.0/16", "inet6_range": "5f00:7a61:b56:2170::/92"}
+    ],
+    "rules"            : [
+      { "query_type": ["HTTPS", "SVCB"], "action": "reject" },
+      {"clash_mode": "Global", "server": "dns-final"},
+      {"rule_set": "@geosite-block", "action": "reject"},
+      {"rule_set": "geosite-private", "server": "dns-local"},
+      {"rule_set": "geosite-connectivity-check", "server": "dns-cn"},
+      {"rule_set": "geosite-microsoft@cn", "server": "dns-cn"},
+      {"rule_set": "geosite-netflix", "server": "dns-stream"},
+      {
+        "clash_mode" : "FakeIP",
+        "query_type" : ["A", "AAAA"],
+        "rule_set"   : ["@geosite-category-ai-!cn", "geosite-category-ai-!cn", "geosite-google", "geosite-microsoft"],
+        "action"     : "route",
+        "rewrite_ttl": 1,
+        "server"     : "dns-fake"
+      },
+      {
+        "clash_mode": "Smart",
+        "rule_set"  : ["@geosite-category-ai-!cn", "geosite-category-ai-!cn"],
+        "action"    : "route",
+        "server"    : "dns-ai"
+      },
+      {
+        "clash_mode": "Smart",
+        "rule_set"  : ["geosite-google"],
+        "action"    : "route",
+        "strategy"  : "ipv4_only",
+        "server"    : "dns-google"
+      },
+      { "clash_mode": "Smart", "rule_set": ["geosite-microsoft"], "action": "route", "server": "dns-microsoft" },
+      {
+        "rule_set": ["@geosite-cn", "geosite-cn", "geosite-steam@cn", "geosite-gamedownload", "geosite-apple@cn"],
+        "action"  : "route",
+        "server"  : "dns-cn",
+        "strategy": "ipv4_only"
+      },
+      {
+        "type"       : "logical",
+        "mode"       : "and",
+        "rules"      : [
+          { "clash_mode": "FakeIP", "query_type": ["A", "AAAA"]                                                 },
+          {                                                      "rule_set": ["@fakeip-filter"], "invert": true }
+        ],
+        "action"     : "route",
+        "server"     : "dns-fake",
+        "rewrite_ttl": 1
+      },
+      {"clash_mode": "Smart", "rule_set": "geosite-telegram", "action": "route", "server": "dns-telegram"},
+      {
+        "clash_mode": "Smart",
+        "rule_set"  : [
+          "geosite-stream",    "geosite-telegram",  "geosite-twitter",   "geosite-facebook",  "geosite-instagram",
+          "geosite-snap",      "geosite-reddit",    "geosite-whatsapp",  "geosite-discord",   "geosite-line"
+        ],
+        "action"    : "route",
+        "server"    : "dns-stream"
+      },
+      { "rule_set": ["geosite-category-ads-all"], "action": "reject" }
+    ],
+    "final"            : "dns-final",
+    "independent_cache": true,
+    "reverse_mapping"  : true
+  },
+  "route"       : {
+    "rules": [
+      {"port": 53, "action": "hijack-dns"},
+      {"ip_is_private": true, "action": "route", "outbound": "Direct"},
+      {"clash_mode": "Global", "action": "route", "outbound": "🙋 Select"},
+      { "network": "udp", "port": [123], "outbound": "Direct" },
+      { "port": [80, 443], "network": "udp", "action": "reject" },
+      {"rule_set": "geoip-cn", "action": "route", "outbound": "Direct"},
+      {"rule_set": "@geoip-telegram@dc1", "outbound": "✈️ TelegramDC1(NA)"},
+      {"rule_set": "@geoip-telegram@dc4", "outbound": "✈️ TelegramDC4(EU)"},
+      {"rule_set": "@geoip-telegram@dc5", "outbound": "✈️ TelegramDC5(AP)"},
+      { "action": "sniff", "sniffer": ["http", "tls", "quic", "ssh"], "timeout": "50ms" },
+      {"rule_set": "@geosite-block", "action": "reject"},
+      {"rule_set": "geosite-private", "outbound": "Direct"},
+      {"rule_set": "geosite-telegram", "outbound": "✈️ TelegramDC4(EU)"},
+      { "rule_set": ["@geosite-category-ai-!cn", "geosite-category-ai-!cn"], "outbound": "🤖 AI-Service" },
+      {"rule_set": "geosite-google", "outbound": "🔍 Google"},
+      {"rule_set": "geosite-microsoft@cn", "outbound": "Direct"},
+      {"rule_set": "geosite-microsoft", "outbound": "🪟 Microsoft"},
+      {
+        "rule_set": [
+          "@geosite-cn",            "geosite-geolocation-cn", "geosite-steam@cn",       "geosite-gamedownload",
+          "geosite-apple@cn"
+        ],
+        "outbound": "Direct"
+      },
+      {
+        "rule_set": [
+          "geosite-stream",    "geosite-twitter",   "geosite-facebook",  "geosite-instagram", "geosite-snap",
+          "geosite-reddit",    "geosite-whatsapp",  "geosite-discord",   "geosite-line"
+        ],
+        "outbound": "📺 Media, Social"
+      },
+      { "rule_set": ["geosite-category-ads-all"], "action": "reject" }
+    ],
+    "rule_set": [
+      {
+        "type": "remote",
+        "tag": "geoip-cn",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/srs/cn.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geoip-google",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/Loyalsoldier/geoip/release/srs/google.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-telegram",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-telegram.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-private",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-private.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-apple@cn",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-apple@cn.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-cn",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-google",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-google.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-microsoft",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-microsoft.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-category-ai-!cn",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ai-!cn.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-twitter",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-twitter.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-instagram",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-instagram.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-facebook",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-facebook.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-snap",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-snap.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-reddit",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-reddit.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-whatsapp",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-whatsapp.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-discord",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-discord.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-line",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-line.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type"           : "remote",
+        "tag"            : "geosite-stream",
+        "format"         : "source",
+        "url"            : "https://p.dua.im/https://ruleset.skk.moe/sing-box/non_ip/stream.json",
+        "download_detour": "Direct"
+      },
+      {
+        "type"           : "remote",
+        "tag"            : "geosite-gamedownload",
+        "format"         : "source",
+        "url"            : "https://p.dua.im/https://ruleset.skk.moe/sing-box/domainset/game-download.json",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-steam@cn",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-steam@cn.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-microsoft@cn",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-microsoft@cn.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-geolocation-cn",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-cn.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-category-ads-all",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-connectivity-check",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-connectivity-check.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-netflix",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-netflix.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type" : "inline",
+        "tag"  : "@geosite-stream",
+        "rules": [
+          { "domain": ["android.ngp.prod.cloud.netflix.com", "ios.ngp.prod.cloud.netflix.com"] }
+        ]
+      },
+      {
+        "type" : "inline",
+        "tag"  : "@fakeip-filter",
+        "rules": [
+          { "domain_suffix": ["lancache.steamcontent.com", "ducknet.work"] }
+        ]
+      },
+      {
+        "type" : "inline",
+        "tag"  : "@geosite-block",
+        "rules": [
+          { "domain": ["dns.weixin.qq.com", "api.installer.xiaomi.com"] }
+        ]
+      },
+      {
+        "type" : "inline",
+        "tag"  : "@geosite-cn",
+        "rules": [
+          {
+            "domain_suffix": [
+              "p.dua.im",               "halocloudnet.com",       "steamserver.net",        "greencloudvps.com",
+              "halocloudnet.com",       "subscribe.ducknet.work", "api-huacloud.dev",       "api-flowercloud.com"
+            ]
+          }
+        ]
+      },
+      {
+        "type" : "inline",
+        "tag"  : "@geosite-category-ai-!cn",
+        "rules": [
+          {
+            "domain_suffix": [
+              "copilot.microsoft.com",
+              "gateway-copilot.bingviz.microsoftapp.net",
+              "mobile.events.data.microsoft.com",
+              "graph.microsoft.com",
+              "analytics.adjust.com",
+              "analytics.adjust.net.in",
+              "api.revenuecat.com",
+              "t-msedge.net",
+              "cloudapp.azure.com",
+              "browser-intake-datadoghq.com",
+              "in.appcenter.ms",
+              "guzzoni.apple.com",
+              "smoot.apple.com",
+              "apple-relay.cloudflare.com",
+              "apple-relay.fastly-edge.com",
+              "cp4.cloudflare.com",
+              "apple-relay.apple.com"
+            ]
+          }
+        ]
+      },
+      {
+        "type" : "inline",
+        "tag"  : "@geoip-telegram@dc4",
+        "rules": [
+          {
+            "ip_cidr": [
+              "5.28.192.0/18",      "91.105.192.0/23",    "91.108.4.0/22",      "91.108.8.0/22",
+              "91.108.56.0/22",     "95.161.64.0/20",     "109.239.140.0/24",   "149.154.160.0/21",
+              "185.76.151.0/24",    "2001:67c:4e8::/48",  "2a0a:f280:203::/48"
+            ]
+          }
+        ]
+      },
+      {
+        "type" : "inline",
+        "tag"  : "@geoip-telegram@dc1",
+        "rules": [
+          { "ip_cidr": ["91.108.12.0/22", "149.154.172.0/22", "2001:b28:f23d::/48"] }
+        ]
+      },
+      {
+        "type" : "inline",
+        "tag"  : "@geoip-telegram@dc5",
+        "rules": [
+          {
+            "ip_cidr": [
+              "91.108.16.0/21",     "91.108.56.0/23",     "149.154.168.0/22",   "2001:b28:f23c::/48",
+              "2001:b28:f23f::/48"
+            ]
+          }
+        ]
+      }
+    ],
+    "final": "🙋 Select",
+    "auto_detect_interface": true,
+    "default_domain_resolver": {"server": "dns-cn", "rewrite_ttl": 3600, "strategy": "prefer_ipv4"}
+  },
+  "experimental": {
+    "cache_file": {"enabled": true, "store_rdrc": true},
+    "clash_api" : {
+      "external_controller": "127.0.0.1:19091",
+      "default_mode": "FakeIP",
+      "secret": "20002000",
+      "external_ui": "zashboard",
+      "external_ui_download_url": "https://p.dua.im/https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip",
+      "external_ui_download_detour": "Direct"
+    }
+  },
+  "inbounds"    : [
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "address": ["172.27.0.1/30", "fdfe:dcba:9876::1/126"],
+      "auto_route": true,
+      "strict_route": true,
+      "route_exclude_address": ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7"],
+      "platform": { "http_proxy": {"enabled": true, "server": "127.0.0.1", "server_port": 20808} }
+    },
+    {"type": "mixed", "tag": "mixed-in", "listen": "127.0.0.1", "listen_port": 20808, "set_system_proxy": false}
+  ],
+  "outbounds"   : [
+    {"type": "direct", "tag": "Direct", "domain_resolver": "dns-cn"},
+    {"type": "selector", "tag": "🚀 Transport", "outbounds": [], "interrupt_exist_connections": true},
+    {
+      "type": "selector",
+      "tag": "🙋 Select",
+      "outbounds": ["Direct"],
+      "default": "Direct",
+      "interrupt_exist_connections": true
+    },
+    {
+      "type": "selector",
+      "tag": "🔍 Google",
+      "outbounds": ["🙋 Select"],
+      "default": "🙋 Select",
+      "interrupt_exist_connections": true
+    },
+    {
+      "type": "selector",
+      "tag": "🪟 Microsoft",
+      "outbounds": ["🙋 Select"],
+      "default": "🙋 Select",
+      "interrupt_exist_connections": true
+    },
+    {
+      "type": "selector",
+      "tag": "🤖 AI-Service",
+      "outbounds": ["🙋 Select"],
+      "default": "🙋 Select",
+      "interrupt_exist_connections": true
+    },
+    {
+      "type": "selector",
+      "tag": "📺 Media, Social",
+      "outbounds": ["🙋 Select"],
+      "default": "🙋 Select",
+      "interrupt_exist_connections": true
+    },
+    {
+      "type": "selector",
+      "tag": "✈️ TelegramDC1(NA)",
+      "outbounds": ["🙋 Select"],
+      "default": "🙋 Select",
+      "interrupt_exist_connections": true
+    },
+    {
+      "type": "selector",
+      "tag": "✈️ TelegramDC4(EU)",
+      "outbounds": ["🙋 Select"],
+      "default": "🙋 Select",
+      "interrupt_exist_connections": true
+    },
+    {
+      "type": "selector",
+      "tag": "✈️ TelegramDC5(AP)",
+      "outbounds": ["🙋 Select"],
+      "default": "🙋 Select",
+      "interrupt_exist_connections": true
+    }
+  ]
+}

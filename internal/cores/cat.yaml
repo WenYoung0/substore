@@ -1,0 +1,433 @@
+mixed-port: 7890
+socks-port: 7891
+port: 7892
+allow-lan: false
+bind-address: "*"
+unified-delay: true
+tcp-concurrent: true
+rule-providers:
+  geoip-private:
+    type: http
+    interval: 86400
+    behavior: ipcidr
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/private.mrs
+  geoip-cn:
+    type: http
+    interval: 86400
+    behavior: ipcidr
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/cn.mrs
+  geosite-private:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/private.mrs
+  geosite-steam@cn:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/steam@cn.mrs
+  geosite-cn:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/cn.mrs
+  geosite-geolocation-cn:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/geolocation-cn.mrs
+  geosite-category-ads-all:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ads-all.mrs
+  geosite-google:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/google.mrs
+  geosite-telegram:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/telegram.mrs
+  geosite-twitter:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/twitter.mrs
+  geosite-facebook:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/facebook.mrs
+  geosite-instagram:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/instagram.mrs
+  geosite-snap:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/snap.mrs
+  geosite-reddit:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/reddit.mrs
+  geosite-whatsapp:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/whatsapp.mrs
+  geosite-discord:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/discord.mrs
+  geosite-category-ai-chat-!cn:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-chat-!cn.mrs
+  geosite-line:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/line.mrs
+  geosite-connectivity-check:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/connectivity-check.mrs
+  geosite-microsoft:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/microsoft.mrs
+  geosite-netflix:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/netflix.mrs
+  geosite-gamedownload:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: text
+    proxy: DIRECT
+    url: "https://p.dua.im/https://ruleset.skk.moe/Clash/domainset/game-download.txt"
+  geosite-apple@cn:
+    type: http
+    interval: 86400
+    behavior: classical
+    format: text
+    proxy: DIRECT
+    url: "https://p.dua.im/https://ruleset.skk.moe/Clash/non_ip/apple_cn.txt"
+  geosite-stream:
+    type: http
+    interval: 86400
+    behavior: classical
+    format: text
+    proxy: DIRECT
+    url: "https://p.dua.im/https://ruleset.skk.moe/Clash/non_ip/stream.txt"
+  geoip-telegram@dc1:
+    type: inline
+    behavior: ipcidr
+    payload: ["91.108.12.0/22", "149.154.172.0/22", "2001:b28:f23d::/48"]
+  geoip-telegram@dc4:
+    type: inline
+    behavior: ipcidr
+    payload:
+      [
+        "5.28.192.0/18",
+        "91.105.192.0/23",
+        "91.108.4.0/22",
+        "91.108.8.0/22",
+        "91.108.56.0/22",
+        "95.161.64.0/20",
+        "109.239.140.0/24",
+        "149.154.160.0/21",
+        "185.76.151.0/24",
+        "2001:67c:4e8::/48",
+        "2a0a:f280:203::/48",
+      ]
+  geoip-telegram@dc5:
+    type: inline
+    behavior: ipcidr
+    payload:
+      [
+        "91.108.16.0/21",
+        "91.108.56.0/23",
+        "149.154.168.0/22",
+        "2001:b28:f23c::/48",
+        "2001:b28:f23f::/48",
+      ]
+  geosite-category-ai-extra:
+    type: inline
+    behavior: classical
+    payload:
+      - "DOMAIN-SUFFIX,copilot.microsoft.com"
+      - "DOMAIN-SUFFIX,gateway-copilot.bingviz.microsoftapp.net"
+      - "DOMAIN-SUFFIX,mobile.events.data.microsoft.com"
+      - "DOMAIN-SUFFIX,graph.microsoft.com"
+      - "DOMAIN-SUFFIX,analytics.adjust.com"
+      - "DOMAIN-SUFFIX,analytics.adjust.net.in"
+      - "DOMAIN-SUFFIX,api.revenuecat.com"
+      - "DOMAIN-SUFFIX,t-msedge.net"
+      - "DOMAIN-SUFFIX,cloudapp.azure.com"
+      - "DOMAIN-SUFFIX,browser-intake-datadoghq.com"
+      - "DOMAIN-SUFFIX,in.appcenter.ms"
+      - "DOMAIN-SUFFIX,guzzoni.apple.com"
+      - "DOMAIN-SUFFIX,smoot.apple.com"
+      - "DOMAIN-SUFFIX,apple-relay.cloudflare.com"
+      - "DOMAIN-SUFFIX,apple-relay.fastly-edge.com"
+      - "DOMAIN-SUFFIX,cp4.cloudflare.com"
+      - "DOMAIN-SUFFIX,apple-relay.apple.com"
+  must-block:
+    type: inline
+    behavior: classical
+    payload:
+      - "DOMAIN,dns.weixin.qq.com"
+      - "DOMAIN,api.installer.xiaomi.com"
+      - "DOMAIN,appboot.netflix.com"
+      - "DOMAIN,ios.prod.cloud.netflix.com"
+      - "DOMAIN,android-appboot.netflix.com"
+      - "DOMAIN,android.prod.cloud.netflix.com"
+
+rules:
+  - RULE-SET,geoip-private,DIRECT,no-resolve
+  - RULE-SET,geosite-private,DIRECT
+  - AND,((NETWORK,udp),(DST-PORT,135/137/138/139/5353)),REJECT
+  - AND,((NETWORK,udp),(DST-PORT,67/68/123)),DIRECT
+  - AND,((NETWORK,udp),(SRC-PORT,67/68/123)),DIRECT
+  - RULE-SET,must-block,REJECT,no-resolve
+  - RULE-SET,geoip-cn,DIRECT,no-resolve
+  - RULE-SET,geoip-telegram@dc1,✈️ TelegramDC1(NA),no-resolve
+  - RULE-SET,geoip-telegram@dc4,✈️ TelegramDC4(EU),no-resolve
+  - RULE-SET,geoip-telegram@dc5,✈️ TelegramDC5(AP),no-resolve
+  - RULE-SET,geosite-telegram,✈️ TelegramDC4(EU)
+  - RULE-SET,geosite-category-ai-chat-!cn,🤖 AI-Service
+  - RULE-SET,geosite-category-ai-extra,🤖 AI-Service
+
+  - RULE-SET,geosite-google,🔍 Google
+  - RULE-SET,geosite-microsoft,🪟 Microsoft
+
+  - DOMAIN-SUFFIX,steamserver.net,DIRECT
+  - RULE-SET,geosite-connectivity-check,DIRECT
+  - RULE-SET,geosite-steam@cn,DIRECT
+  - RULE-SET,geosite-geolocation-cn,DIRECT
+  - RULE-SET,geosite-gamedownload,DIRECT
+  - RULE-SET,geosite-apple@cn,DIRECT
+
+  - RULE-SET,geosite-stream,📺 SocialMedia
+  - RULE-SET,geosite-telegram,📺 SocialMedia
+  - RULE-SET,geosite-twitter,📺 SocialMedia
+  - RULE-SET,geosite-facebook,📺 SocialMedia
+  - RULE-SET,geosite-instagram,📺 SocialMedia
+  - RULE-SET,geosite-snap,📺 SocialMedia
+  - RULE-SET,geosite-reddit,📺 SocialMedia
+  - RULE-SET,geosite-whatsapp,📺 SocialMedia
+  - RULE-SET,geosite-discord,📺 SocialMedia
+  - RULE-SET,geosite-line,📺 SocialMedia
+  - RULE-SET,geosite-category-ads-all,REJECT
+  - MATCH,🙋 Select
+
+proxy-groups:
+  - name: "🚀 Transport"
+    type: select
+
+  - name: "🙋 Select"
+    type: select
+    include-all-proxies: true
+    proxies:
+      - DIRECT
+    interval: 0
+    lazy: true
+    timeout: 3000
+
+  - name: "🔍 Google"
+    type: select
+    include-all-proxies: true
+    proxies:
+      - "🙋 Select"
+    interval: 0
+    lazy: true
+    timeout: 3000
+  - name: "🪟 Microsoft"
+    type: select
+    include-all-proxies: true
+    proxies:
+      - "🙋 Select"
+    interval: 0
+    lazy: true
+    timeout: 3000
+  - name: "📺 SocialMedia"
+    type: select
+    include-all-proxies: true
+    proxies:
+      - "🙋 Select"
+    interval: 0
+    lazy: true
+    timeout: 3000
+  - name: "🤖 AI-Service"
+    type: select
+    include-all-proxies: true
+    proxies:
+      - "🙋 Select"
+    interval: 0
+    lazy: true
+    timeout: 3000
+  - name: "✈️ TelegramDC1(NA)"
+    type: select
+    include-all-proxies: true
+    filter: "^🇺🇸"
+    proxies:
+      - "🙋 Select"
+    interval: 0
+    lazy: true
+    timeout: 3000
+  - name: "✈️ TelegramDC4(EU)"
+    type: select
+    include-all-proxies: true
+    filter: "^🇩🇪|^🇳🇱"
+    proxies:
+      - "🙋 Select"
+    interval: 0
+    lazy: true
+    timeout: 3000
+  - name: "✈️ TelegramDC5(AP)"
+    type: select
+    include-all-proxies: true
+    filter: "^🇭🇰|^🇯🇵|^🇸🇬|^🇹🇼"
+    proxies:
+      - "🙋 Select"
+    interval: 0
+    lazy: true
+    timeout: 3000
+
+dns:
+  enable: true
+  ipv6: true
+  use-hosts: true
+  use-system-hosts: true
+  enhanced-mode: fake-ip
+  cache-algorithm: arc
+  listen: 127.0.0.1:10853
+  fake-ip-range: 32.81.0.0/16
+  fake-ip-range6: 5f00:7a61:b56:2170::/92
+  fake-ip-filter:
+    - "+.lan"
+    - "+.local"
+    - "+.market.xiaomi.com"
+    - "+.lancache.steamcontent.com"
+    - "rule-set:geosite-private"
+    - "rule-set:geosite-connectivity-check"
+    - "rule-set:geosite-netflix"
+  nameserver-policy:
+    "rule-set:geosite-private": ["system"]
+    "rule-set:geosite-connectivity-check": ["system"]
+    "rule-set:geosite-netflix": ["https://1.1.1.1/dns-query#📺 SocialMedia"]
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  nameserver:
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
+  direct-nameserver:
+    - system
+  proxy-nameserver:
+    - https://doh.pub/dns-query
+
+ntp:
+  enable: true
+  write-to-system: false
+  server: time.aliyun.com
+  port: 123
+  interval: 30
+profile:
+  store-selected: true
+  store-fake-ip: true
+sniffer:
+  enable: true
+  override-destination: false
+  sniff:
+    HTTP:
+      ports:
+        - 80
+        - 8080-8880
+    TLS:
+      ports:
+        - 443
+        - 8443
+    QUIC:
+      ports:
+        - 443
+        - 8443
+  skip-domain:
+    - Mijia Cloud
+    - +.push.apple.com
