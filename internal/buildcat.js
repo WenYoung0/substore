@@ -29,7 +29,7 @@ await produceArtifact({
       platform: context.productionPlatform,
     })
   )
-  .then((proxies) =>
+  .then((proxies) => {
     config["proxy-groups"].map((selector) => {
       const out = proxies
         .filter(
@@ -75,8 +75,9 @@ await produceArtifact({
       commons.func.sortNodes({
         nodes: selector.proxies,
       });
-    })
-  )
+    });
+    return proxies;
+  })
   .then((proxies) => {
     config.proxies = [];
     config.proxies.push(

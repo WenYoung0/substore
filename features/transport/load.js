@@ -30,11 +30,9 @@ const applyTransportSingBox = ({
   const transportProxies = proxies.filter((p) =>
     getProperties(p).includes(propertiesTransport)
   );
-
   const destinationProxies = proxies.filter((p) =>
     getProperties(p).includes(propertiesDestination)
   );
-
   if (!(transportProxies.length > 0 && destinationProxies.length > 0)) {
     removeTransportSelectorInConfig();
     return proxies.filter(
@@ -54,7 +52,7 @@ const applyTransportSingBox = ({
     (outbound) => outbound.tag === transportDetourSelector
   );
 
-  transportGroup.outbounds.push(...transportProxies.map(p => p.tag));
+  transportGroup.outbounds.push(...transportProxies.map((p) => p.tag));
   destinationProxies.forEach((dp) => {
     dp["detour"] = transportDetourSelector;
   });
@@ -104,7 +102,7 @@ const applyTransportMihomo = ({ config, proxies, transportDetourSelector }) => {
     (outbound) => outbound.name === transportDetourSelector
   );
   if (!("proxies" in transportGroup)) {
-    transportGroup.proxies = []
+    transportGroup.proxies = [];
   }
   transportGroup.proxies.push(...transportProxies.map((p) => p.name));
   destinationProxies.forEach((dp) => {
@@ -133,7 +131,7 @@ const apply = ({ config, proxies, transportDetourSelector, platform }) => {
   return proxies;
 };
 
-let transportObj = { load: true, func: {} };
+const transportObj = { load: true, func: {} };
 
 transportObj.func.apply = apply;
 

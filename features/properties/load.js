@@ -17,7 +17,6 @@ const getPropertiesFromName = ({ name }) => {
   if (!(name.includes("(") && name.includes(")"))) {
     return [];
   }
-
   name = name.trim();
   const properties = name
     .substring(name.indexOf("(") + 1, name.indexOf(")"))
@@ -73,7 +72,7 @@ const unbindProxy = ({ proxy }) => {
   return proxy;
 };
 
-let propertiesObj = { load: true, func: {}, builtin: {} };
+const propertiesObj = { load: true, func: {}, builtin: {} };
 
 propertiesObj.func.getPropertiesFromName = getPropertiesFromName;
 propertiesObj.func.getPropertiesFromProxy = getPropertiesFromProxy;

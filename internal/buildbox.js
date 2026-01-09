@@ -8,17 +8,19 @@ const featureProperties = context.young.features.properties;
 const featureTransport = context.young.features.transport;
 const commons = context.young.commons;
 
+const productionPlatform = commons.builtin.platformNameSingbox;
+
 await produceArtifact({
   type: context.productionType,
   name: context.productionTarget,
-  platform: commons.builtin.platformNameSingbox,
+  platform: productionPlatform,
   produceType: "internal",
 })
   .then((proxies) =>
     proxies.map((p) =>
       featureProperties.func.bindProxy({
         proxy: p,
-        platform: context.productionPlatform,
+        platform: productionPlatform,
       })
     )
   )
@@ -27,23 +29,22 @@ await produceArtifact({
       config: config,
       proxies: proxies,
       transportDetourSelector: transportDetourSelector,
-      platform: context.productionPlatform,
+      platform: productionPlatform,
     })
   )
-  .then((proxies) =>
+  .then((proxies) => {
     config.outbounds
       .filter((p) => p.type === "selector" || p.type === "urltest")
       .map((selector) => {
         const out = proxies
-          .filter(
-            (p) =>
-              !featureProperties.func
-                .getPropertiesFromProxy({
-                  proxy: p,
-                  platform: context.productionPlatform,
-                })
-                .includes(propertiesHidden)
-          )
+          .filter((p) => {
+            return !featureProperties.func
+              .getPropertiesFromProxy({
+                proxy: p,
+                platform: productionPlatform,
+              })
+              .includes(propertiesHidden);
+          })
           .filter((p) => !p.tag.includes("_shadowtls"))
           .map((p) => p.tag.trim())
           .filter((p) => p && p.length > 0);
@@ -82,8 +83,9 @@ await produceArtifact({
         commons.func.sortNodes({
           nodes: selector.outbounds,
         });
-      })
-  )
+      });
+    return proxies;
+  })
   .then((proxies) =>
     config.outbounds.push(
       ...proxies.map((p) => featureProperties.func.unbindProxy({ proxy: p }))
