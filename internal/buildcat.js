@@ -85,7 +85,7 @@ config.proxies.push(
           delete p[element];
         }
       });
-      return p
+      return p;
     })
 );
 

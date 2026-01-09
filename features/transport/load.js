@@ -64,7 +64,7 @@ const applyTransportSingBox = ({
 
 const applyTransportMihomo = ({ config, proxies, transportDetourSelector }) => {
   const removeTransportSelectorInConfig = () => {
-    config.outbounds = config["proxy-groups"].filter(
+    config["proxy-groups"] = config["proxy-groups"].filter(
       (outbound) => outbound.name !== transportDetourSelector
     );
   };
