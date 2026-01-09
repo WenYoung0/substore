@@ -64,7 +64,8 @@ await produceArtifact({
           );
         } else if (["✈️ TelegramDC1(NA)"].includes(selector.tag)) {
           selector.outbounds.push(
-            ...out.filter((o) => ["🇺🇸"].some((loc) => o.startsWith(loc)))
+            // see commons/commons.js function sortNodes
+            ...out.filter((o) => ["🇺🇸", "🇺🇲"].some((loc) => o.startsWith(loc)))
           );
         } else if (["✈️ TelegramDC4(EU)"].includes(selector.tag)) {
           selector.outbounds.push(
