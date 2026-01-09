@@ -7,17 +7,19 @@ const featureProperties = context.young.features.properties;
 const featureTransport = context.young.features.transport;
 const commons = context.young.commons;
 
+const productionPlatform = commons.builtin.platformNameMihomo;
+
 await produceArtifact({
   type: context.productionType,
   name: context.productionTarget,
-  platform: commons.builtin.platformNameMihomo,
+  platform: productionPlatform,
   produceType: "internal",
 })
   .then((proxies) =>
     proxies.map((p) =>
       featureProperties.func.bindProxy({
         proxy: p,
-        platform: context.productionPlatform,
+        platform: productionPlatform,
       })
     )
   )
@@ -26,7 +28,7 @@ await produceArtifact({
       config: config,
       proxies: proxies,
       transportDetourSelector: transportDetourSelector,
-      platform: context.productionPlatform,
+      platform: productionPlatform,
     })
   )
   .then((proxies) => {
@@ -37,7 +39,7 @@ await produceArtifact({
             !featureProperties.func
               .getPropertiesFromProxy({
                 proxy: p,
-                platform: context.productionPlatform,
+                platform: productionPlatform,
               })
               .includes(propertiesHidden)
         )
