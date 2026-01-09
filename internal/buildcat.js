@@ -8,9 +8,9 @@ const featureTransport = context.young.features.transport;
 const commons = context.young.commons;
 
 let proxies = await produceArtifact({
-  type: "collection",
+  type: context.productionType,
   name: context.productionTarget,
-  platform: context.productionPlatform,
+  platform: commons.builtin.platformNameMihomo,
   produceType: "internal",
 })
   .then((proxies) =>
