@@ -4,7 +4,7 @@
     "servers"          : [
       {"tag": "dns-bootstrap", "type": "udp", "server": "223.5.5.5"},
       {"tag": "dns-local", "type": "local"},
-      {"tag": "dns-cn", "type": "https", "server": "doh.pub", "domain_resolver": "dns-bootstrap"},
+      {"tag": "dns-cn", "type": "https", "server": "223.5.5.5"},
       {"tag": "dns-final", "type": "https", "server": "1.1.1.1", "detour": "🙋 Select"},
       {"tag": "dns-google", "type": "https", "server": "8.8.8.8", "detour": "🔍 Google"},
       {"tag": "dns-microsoft", "type": "https", "server": "1.1.1.1", "detour": "🪟 Microsoft"},
@@ -382,7 +382,7 @@
     ],
     "final": "🙋 Select",
     "auto_detect_interface": true,
-    "default_domain_resolver": {"server": "dns-cn", "rewrite_ttl": 3600, "strategy": "prefer_ipv4"}
+    "default_domain_resolver": {"server": "dns-bootstrap", "rewrite_ttl": 3600, "strategy": "prefer_ipv4"}
   },
   "experimental": {
     "cache_file": {"enabled": true, "store_rdrc": true},

@@ -6,9 +6,11 @@ const transportDetourSelector = "🚀 Transport";
 
 const featureProperties = context.young.features.properties;
 const featureTransport = context.young.features.transport;
+const featureLocation = context.young.features.location;
+
 const commons = context.young.commons;
 
-const productionPlatform = commons.builtin.platformNameSingbox;
+const productionPlatform = commons.const.platformNameSingbox;
 
 await produceArtifact({
   type: context.productionType,
@@ -37,14 +39,15 @@ await produceArtifact({
       .filter((p) => p.type === "selector" || p.type === "urltest")
       .map((selector) => {
         const out = proxies
-          .filter((p) => {
-            return !featureProperties.func
-              .getPropertiesFromProxy({
-                proxy: p,
-                platform: productionPlatform,
-              })
-              .includes(propertiesHidden);
-          })
+          .filter(
+            (p) =>
+              !featureProperties.func
+                .getPropertiesFromProxy({
+                  proxy: p,
+                  platform: productionPlatform,
+                })
+                .includes(propertiesHidden)
+          )
           .filter((p) => !p.tag.includes("_shadowtls"))
           .map((p) => p.tag.trim())
           .filter((p) => p && p.length > 0);
@@ -60,37 +63,42 @@ await produceArtifact({
           selector.outbounds.push(...out);
         } else if (["🤖 AI-Service"].includes(selector.tag)) {
           selector.outbounds.push(
-            ...out.filter((o) => !["🇭🇰"].some((loc) => o.startsWith(loc)))
+            ...out.filter(
+              (o) => featureLocation.getLocation({ name: o }) !== "HK"
+            )
           );
         } else if (["✈️ TelegramDC1(NA)"].includes(selector.tag)) {
           selector.outbounds.push(
-            // see commons/commons.js function sortNodes
-            ...out.filter((o) => ["🇺🇸", "🇺🇲"].some((loc) => o.startsWith(loc)))
+            ...out.filter((o) => featureLocation.getArea({ name: o }) === "NA")
           );
         } else if (["✈️ TelegramDC4(EU)"].includes(selector.tag)) {
           selector.outbounds.push(
-            ...out.filter((o) =>
-              ["🇩🇪", "🇬🇧", "🇳🇱"].some((loc) => o.startsWith(loc))
-            )
+            ...out.filter((o) => featureLocation.getArea({ name: o }) === "EU")
           );
         } else if (["✈️ TelegramDC5(AP)"].includes(selector.tag)) {
           selector.outbounds.push(
-            ...out.filter((o) =>
-              ["🇭🇰", "🇹🇼", "🇸🇬", "🇲🇾", "🇯🇵"].some((loc) => o.startsWith(loc))
+            ...out.filter(
+              (o) => featureLocation.getArea({ name: o }) === "ASIA"
             )
           );
         }
 
-        commons.func.sortNodes({
-          nodes: selector.outbounds,
+        selector.outbounds.sort((a, b) => {
+          const orderDiff =
+            featureLocation.getOrder({ name: a }) -
+            featureLocation.getOrder({ name: b });
+          if (orderDiff !== 0) return orderDiff;
+
+          return a.localeCompare(b);
         });
       });
     return proxies;
   })
-  .then((proxies) =>
+  .then((proxies) => {
     config.outbounds.push(
       ...proxies.map((p) => featureProperties.func.unbindProxy({ proxy: p }))
-    )
-  );
+    );
+    return proxies;
+  });
 
 $content = JSON.stringify(config, null, 2);

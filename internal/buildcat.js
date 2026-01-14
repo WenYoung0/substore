@@ -5,9 +5,11 @@ const transportDetourSelector = "🚀 Transport";
 
 const featureProperties = context.young.features.properties;
 const featureTransport = context.young.features.transport;
+const featureLocation = context.young.features.location;
+
 const commons = context.young.commons;
 
-const productionPlatform = commons.builtin.platformNameMihomo;
+const productionPlatform = commons.const.platformNameMihomo;
 
 await produceArtifact({
   type: context.productionType,
@@ -54,29 +56,31 @@ await produceArtifact({
         selector.proxies.push(...out);
       } else if (["🤖 AI-Service"].includes(selector.name)) {
         selector.proxies.push(
-          ...out.filter((o) => !["🇭🇰"].some((loc) => o.startsWith(loc)))
+          ...out.filter(
+            (o) => featureLocation.getLocation({ name: o }) !== "HK"
+          )
         );
       } else if (["✈️ TelegramDC1(NA)"].includes(selector.name)) {
         selector.proxies.push(
-          // see commons/commons.js function sortNodes
-          ...out.filter((o) => ["🇺🇸","🇺🇲"].some((loc) => o.startsWith(loc)))
+          ...out.filter((o) => featureLocation.getArea({ name: o }) === "NA")
         );
       } else if (["✈️ TelegramDC4(EU)"].includes(selector.name)) {
         selector.proxies.push(
-          ...out.filter((o) =>
-            ["🇩🇪", "🇬🇧", "🇳🇱"].some((loc) => o.startsWith(loc))
-          )
+          ...out.filter((o) => featureLocation.getArea({ name: o }) === "EU")
         );
       } else if (["✈️ TelegramDC5(AP)"].includes(selector.name)) {
         selector.proxies.push(
-          ...out.filter((o) =>
-            ["🇭🇰", "🇹🇼", "🇸🇬", "🇲🇾", "🇯🇵"].some((loc) => o.startsWith(loc))
-          )
+          ...out.filter((o) => featureLocation.getArea({ name: o }) === "ASIA")
         );
       }
 
-      commons.func.sortNodes({
-        nodes: selector.proxies,
+      selector.proxies.sort((a, b) => {
+        const orderDiff =
+          featureLocation.getOrder({ name: a }) -
+          featureLocation.getOrder({ name: b });
+        if (orderDiff !== 0) return orderDiff;
+
+        return a.localeCompare(b);
       });
     });
     return proxies;
@@ -95,6 +99,7 @@ await produceArtifact({
           return p;
         })
     );
+    return proxies;
   });
 
 $content = ProxyUtils.yaml.dump(config);

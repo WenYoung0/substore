@@ -1,10 +1,10 @@
 const clearProxies = ({ proxies, platform }) => {
-  if (platform === commons.builtin.platformNameSingbox) {
+  if (platform === commons.const.platformNameSingbox) {
     proxies.forEach((element) => {
       element.tag = element.tag.trim();
     });
   }
-  if (platform === commons.builtin.platformNameMihomo) {
+  if (platform === commons.const.platformNameMihomo) {
     proxies.forEach((element) => {
       element.name = element.name.trim();
     });
@@ -13,66 +13,12 @@ const clearProxies = ({ proxies, platform }) => {
   return proxies;
 };
 
-const sortNodes = ({ nodes }) => {
-  if (!Array.isArray(nodes)) {
-    return nodes;
-  }
-
-  const orders = [
-    "🇨🇳",
-    "🇭🇰",
-    "🇻🇳",
-    "🇹🇭",
-    "🇮🇳",
-    "🇹🇼",
-    "🇯🇵",
-    "🇸🇬",
-    "🇲🇾",
-    "🇰🇷",
-    "🇷🇺",
-    "🇦🇺",
-    "🇺🇸", // \ud83c\uddfa\ud83c\uddf8
-    "🇺🇲", // \ud83c\uddfa\ud83c\uddf2 // https://en.wikipedia.org/wiki/United_States_Minor_Outlying_Islands
-    "🇨🇦",
-    "🇩🇪",
-    "🇺🇦",
-    "🇫🇷",
-    "🇳🇱",
-    "🇬🇧",
-    "🇹🇷",
-    "🇧🇷",
-    "🇦🇷",
-    "🇳🇬",
-  ];
-
-  function getOrder({ name }) {
-    name = name.toLowerCase();
-    for (let idx = 0; idx < orders.length; idx++) {
-      const element = orders[idx];
-      if (name.startsWith(element)) {
-        return idx;
-      }
-    }
-    return -1;
-  }
-
-  nodes.sort((a, b) => {
-    const orderDiff = getOrder({ name: a }) - getOrder({ name: b });
-    if (orderDiff !== 0) return orderDiff;
-
-    return a.localeCompare(b);
-  });
-
-  return nodes;
-};
-
-let commonObj = { load: true, func: {}, builtin: {} };
+let commonObj = { load: true, func: {}, const: {} };
 
 commonObj.func.clearProxies = clearProxies;
-commonObj.func.sortNodes = sortNodes;
 
-commonObj.builtin.platformNameSingbox = "sing-box";
-commonObj.builtin.platformNameMihomo = "mihomo";
+commonObj.const.platformNameSingbox = "sing-box";
+commonObj.const.platformNameMihomo = "mihomo";
 
 context.young = {
   ...(context.young || {}),

@@ -23,7 +23,7 @@ const applyTransportSingBox = ({
   const getProperties = (p) => {
     return featureProperties.func.getPropertiesFromProxy({
       proxy: p,
-      platform: commons.builtin.platformNameSingbox,
+      platform: commons.const.platformNameSingbox,
     });
   };
 
@@ -70,7 +70,7 @@ const applyTransportMihomo = ({ config, proxies, transportDetourSelector }) => {
   const getProperties = (p) => {
     return featureProperties.func.getPropertiesFromProxy({
       proxy: p,
-      platform: commons.builtin.platformNameMihomo,
+      platform: commons.const.platformNameMihomo,
     });
   };
 
@@ -113,14 +113,14 @@ const applyTransportMihomo = ({ config, proxies, transportDetourSelector }) => {
 };
 
 const apply = ({ config, proxies, transportDetourSelector, platform }) => {
-  if (platform === commons.builtin.platformNameSingbox) {
+  if (platform === commons.const.platformNameSingbox) {
     return applyTransportSingBox({
       config: config,
       proxies: proxies,
       transportDetourSelector: transportDetourSelector,
     });
   }
-  if (platform === commons.builtin.platformNameMihomo) {
+  if (platform === commons.const.platformNameMihomo) {
     return applyTransportMihomo({
       config: config,
       proxies: proxies,

@@ -5,9 +5,9 @@ const keyFroProperties = "nodeProperties";
 const commons = context.young.commons;
 
 const lookupNameKeyPlatform = ({ platform }) => {
-  if (platform == commons.builtin.platformNameSingbox) {
+  if (platform == commons.const.platformNameSingbox) {
     return "tag";
-  } else if (platform == commons.builtin.platformNameMihomo) {
+  } else if (platform == commons.const.platformNameMihomo) {
     return "name";
   }
   return "";
@@ -72,7 +72,7 @@ const unbindProxy = ({ proxy }) => {
   return proxy;
 };
 
-const propertiesObj = { load: true, func: {}, builtin: {} };
+const propertiesObj = { load: true, func: {}, const: {} };
 
 propertiesObj.func.getPropertiesFromName = getPropertiesFromName;
 propertiesObj.func.getPropertiesFromProxy = getPropertiesFromProxy;
@@ -80,8 +80,8 @@ propertiesObj.func.cleanNameByProperties = cleanNameByProperties;
 propertiesObj.func.bindProxy = bindProxy;
 propertiesObj.func.unbindProxy = unbindProxy;
 
-propertiesObj.builtin.propertiesRemove = propertiesRemove;
-propertiesObj.builtin.keyFroProperties = keyFroProperties;
+propertiesObj.const.propertiesRemove = propertiesRemove;
+propertiesObj.const.keyFroProperties = keyFroProperties;
 
 context.young = {
   ...(context.young || {}),
