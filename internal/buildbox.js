@@ -64,29 +64,29 @@ await produceArtifact({
         } else if (["🤖 AI-Service"].includes(selector.tag)) {
           selector.outbounds.push(
             ...out.filter(
-              (o) => featureLocation.getLocation({ name: o }) !== "HK"
+              (o) => featureLocation.func.getLocation({ name: o }) !== "HK"
             )
           );
         } else if (["✈️ TelegramDC1(NA)"].includes(selector.tag)) {
           selector.outbounds.push(
-            ...out.filter((o) => featureLocation.getArea({ name: o }) === "NA")
+            ...out.filter((o) => featureLocation.func.getArea({ name: o }) === "NA")
           );
         } else if (["✈️ TelegramDC4(EU)"].includes(selector.tag)) {
           selector.outbounds.push(
-            ...out.filter((o) => featureLocation.getArea({ name: o }) === "EU")
+            ...out.filter((o) => featureLocation.func.getArea({ name: o }) === "EU")
           );
         } else if (["✈️ TelegramDC5(AP)"].includes(selector.tag)) {
           selector.outbounds.push(
             ...out.filter(
-              (o) => featureLocation.getArea({ name: o }) === "ASIA"
+              (o) => featureLocation.func.getArea({ name: o }) === "ASIA"
             )
           );
         }
 
         selector.outbounds.sort((a, b) => {
           const orderDiff =
-            featureLocation.getOrder({ name: a }) -
-            featureLocation.getOrder({ name: b });
+            featureLocation.func.getOrder({ name: a }) -
+            featureLocation.func.getOrder({ name: b });
           if (orderDiff !== 0) return orderDiff;
 
           return a.localeCompare(b);
