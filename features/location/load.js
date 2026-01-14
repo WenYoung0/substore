@@ -43,41 +43,41 @@ const getOrder = ({ name }) => {
   if (!name) {
     return 0;
   }
-  let priority = 1;
+  let priority = 0;
   for (const key in locations) {
+    priority++;
     const regex = locations[key];
     if (regex.test(name)) {
       return priority;
     }
-    priority++;
   }
-  return priority;
+  return -1;
 };
 
 const areas = {
-  CN: "ASIA",
-  HK: "ASIA",
-  VN: "ASIA",
-  TH: "ASIA",
-  IN: "ASIA",
-  TW: "ASIA",
-  JP: "ASIA",
-  SG: "ASIA",
-  MY: "ASIA",
-  KR: "ASIA",
-  RU: "EU",
-  AU: "OCEANIA",
-  US: "NA",
-  CA: "NA",
-  DE: "EU",
-  UA: "EU",
-  FR: "EU",
-  NL: "EU",
-  GB: "EU",
-  TR: "EU",
-  BR: "SA",
-  AR: "SA",
-  NG: "AFRICA",
+  CN: "AREA_ASIA",
+  HK: "AREA_ASIA",
+  VN: "AREA_ASIA",
+  TH: "AREA_ASIA",
+  IN: "AREA_ASIA",
+  TW: "AREA_ASIA",
+  JP: "AREA_ASIA",
+  SG: "AREA_ASIA",
+  MY: "AREA_ASIA",
+  KR: "AREA_ASIA",
+  RU: "AREA_EU",
+  AU: "AREA_OCEANIA",
+  US: "AREA_NA",
+  CA: "AREA_NA",
+  DE: "AREA_EU",
+  UA: "AREA_EU",
+  FR: "AREA_EU",
+  NL: "AREA_EU",
+  GB: "AREA_EU",
+  TR: "AREA_EU",
+  BR: "AREA_SA",
+  AR: "AREA_SA",
+  NG: "AREA_AFRICA",
 };
 
 const getArea = ({ name }) => {

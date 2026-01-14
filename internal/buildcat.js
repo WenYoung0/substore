@@ -62,26 +62,32 @@ await produceArtifact({
         );
       } else if (["✈️ TelegramDC1(NA)"].includes(selector.name)) {
         selector.proxies.push(
-          ...out.filter((o) => featureLocation.func.getArea({ name: o }) === "NA")
+          ...out.filter(
+            (o) => featureLocation.func.getArea({ name: o }) === "NA"
+          )
         );
       } else if (["✈️ TelegramDC4(EU)"].includes(selector.name)) {
         selector.proxies.push(
-          ...out.filter((o) => featureLocation.func.getArea({ name: o }) === "EU")
+          ...out.filter(
+            (o) => featureLocation.func.getArea({ name: o }) === "EU"
+          )
         );
       } else if (["✈️ TelegramDC5(AP)"].includes(selector.name)) {
         selector.proxies.push(
-          ...out.filter((o) => featureLocation.func.getArea({ name: o }) === "ASIA")
+          ...out.filter(
+            (o) => featureLocation.func.getArea({ name: o }) === "ASIA"
+          )
         );
       }
 
-      selector.proxies.sort((a, b) => {
-        const orderDiff =
-          featureLocation.func.getOrder({ name: a }) -
-          featureLocation.func.getOrder({ name: b });
-        if (orderDiff !== 0) return orderDiff;
+      // selector.proxies.sort((a, b) => {
+      //   const orderDiff =
+      //     featureLocation.func.getOrder({ name: a }) -
+      //     featureLocation.func.getOrder({ name: b });
+      //   if (orderDiff !== 0) return orderDiff;
 
-        return a.localeCompare(b);
-      });
+      //   return a.localeCompare(b);
+      // });
     });
     return proxies;
   })
