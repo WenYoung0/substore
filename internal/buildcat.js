@@ -80,14 +80,48 @@ await produceArtifact({
         );
       }
 
-      // selector.proxies.sort((a, b) => {
-      //   const orderDiff =
-      //     featureLocation.func.getOrder({ name: a }) -
-      //     featureLocation.func.getOrder({ name: b });
-      //   if (orderDiff !== 0) return orderDiff;
+      selector.proxies.sort((a, b) => {
+        const special = ["DIRECT", "🙋 Select"];
+        if (special.includes(a) && !special.includes(b)) {
+          return -1;
+        }
+        if (!special.includes(a) && special.includes(b)) {
+          return 1;
+        }
 
-      //   return a.localeCompare(b);
-      // });
+        const locationDiff =
+          featureLocation.func.getOrder({ name: a }) -
+          featureLocation.func.getOrder({ name: b });
+        if (locationDiff !== 0) return locationDiff;
+
+        const propertiesA = featureProperties.func.getPropertiesFromName({
+          name: a,
+        });
+        const propertiesB = featureProperties.func.getPropertiesFromName({
+          name: b,
+        });
+
+        const getPropertyPriority = (properties) => {
+          const hasDestination = featureProperties.func.hasProperties({
+            properties: properties,
+            target: featureTransport.const.propertiesDestination,
+          });
+
+          const hasTransport = featureProperties.func.hasProperties({
+            properties: properties,
+            target: featureTransport.const.propertiesTransport,
+          });
+          if (hasDestination) return -1; // front
+          if (hasTransport) return 1; // last
+          return 0; // middle
+        };
+
+        const priorityDiff =
+          getPropertyPriority(propertiesA) - getPropertyPriority(propertiesB);
+        if (priorityDiff !== 0) return priorityDiff;
+
+        return a.localeCompare(b);
+      });
     });
     return proxies;
   })
