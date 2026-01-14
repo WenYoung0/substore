@@ -1,24 +1,42 @@
-const clearProxies = ({ proxies, platform }) => {
-  if (platform === commons.const.platformNameSingbox) {
-    proxies.forEach((element) => {
-      element.tag = element.tag.trim();
-    });
-  }
-  if (platform === commons.const.platformNameMihomo) {
-    proxies.forEach((element) => {
-      element.name = element.name.trim();
-    });
-  }
+const platformSingbox = "sing-box";
+const platformMihomo = "mihomo";
 
-  return proxies;
+const getPlatform = () => {
+  return context.productionPlatform;
 };
 
-let commonObj = { load: true, func: {}, const: {} };
+const getPlatformNameKey = ({ platform }) => {
+  if (!platform) {
+    platform = getPlatform();
+  }
+  if (platform === platformMihomo) {
+    return "name";
+  }
+  if (platform === platformSingbox) {
+    return "tag";
+  }
+  throw "unknwon platform";
+};
 
+const getName = ({ proxy, platform }) => {
+  return proxy[getPlatformNameKey({ platform: platform })];
+};
+
+const clearProxies = ({ proxies, platform }) => {
+  const key = getPlatformNameKey({ platform: platform });
+
+  return proxies.map((p) => (p[key] = p[key].trim()));
+};
+
+const commonObj = { load: true, func: {}, const: {} };
+
+commonObj.func.getPlatform = getPlatform;
+commonObj.func.getPlatformNameKey = getPlatformNameKey;
+commonObj.func.getName = getName;
 commonObj.func.clearProxies = clearProxies;
 
-commonObj.const.platformNameSingbox = "sing-box";
-commonObj.const.platformNameMihomo = "mihomo";
+commonObj.const.platformSingbox = platformSingbox;
+commonObj.const.platformMihomo = platformMihomo;
 
 context.young = {
   ...(context.young || {}),

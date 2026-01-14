@@ -23,7 +23,7 @@ const applyTransportSingBox = ({
   const getProperties = (p) => {
     return featureProperties.func.getPropertiesFromProxy({
       proxy: p,
-      platform: commons.const.platformNameSingbox,
+      platform: commons.const.platformSingbox,
     });
   };
 
@@ -70,7 +70,7 @@ const applyTransportMihomo = ({ config, proxies, transportDetourSelector }) => {
   const getProperties = (p) => {
     return featureProperties.func.getPropertiesFromProxy({
       proxy: p,
-      platform: commons.const.platformNameMihomo,
+      platform: commons.const.platformMihomo,
     });
   };
 
@@ -113,14 +113,14 @@ const applyTransportMihomo = ({ config, proxies, transportDetourSelector }) => {
 };
 
 const apply = ({ config, proxies, transportDetourSelector, platform }) => {
-  if (platform === commons.const.platformNameSingbox) {
+  if (platform === commons.const.platformSingbox) {
     return applyTransportSingBox({
       config: config,
       proxies: proxies,
       transportDetourSelector: transportDetourSelector,
     });
   }
-  if (platform === commons.const.platformNameMihomo) {
+  if (platform === commons.const.platformMihomo) {
     return applyTransportMihomo({
       config: config,
       proxies: proxies,
@@ -131,9 +131,11 @@ const apply = ({ config, proxies, transportDetourSelector, platform }) => {
   return proxies;
 };
 
-const transportObj = { load: true, func: {} };
+const transportObj = { load: true, func: {}, const: {} };
 
 transportObj.func.apply = apply;
+transportObj.const.propertiesTransport = propertiesTransport;
+transportObj.const.propertiesDestination = propertiesDestination;
 
 context.young = {
   ...(context.young || {}),

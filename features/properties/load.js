@@ -1,24 +1,15 @@
 const propertiesRemove = "_remove_properties";
 
-const keyFroProperties = "nodeProperties";
+const KeyProperties = "nodeProperties";
 
 const commons = context.young.commons;
-
-const lookupNameKeyPlatform = ({ platform }) => {
-  if (platform == commons.const.platformNameSingbox) {
-    return "tag";
-  } else if (platform == commons.const.platformNameMihomo) {
-    return "name";
-  }
-  return "";
-};
 
 const getPropertiesFromName = ({ name }) => {
   if (!(name.includes("(") && name.includes(")"))) {
     return [];
   }
-  name = name.trim();
   const properties = name
+    .trim()
     .substring(name.indexOf("(") + 1, name.indexOf(")"))
     .split(",")
     .map((p) => p.trim())
@@ -28,11 +19,11 @@ const getPropertiesFromName = ({ name }) => {
 };
 
 const getPropertiesFromProxy = ({ proxy, platform }) => {
-  if (keyFroProperties in proxy) {
-    return proxy[keyFroProperties];
+  if (KeyProperties in proxy) {
+    return proxy[KeyProperties];
   }
   return getPropertiesFromName({
-    name: proxy[lookupNameKeyPlatform(platform)],
+    name: commons.func.getName({ proxy: proxy, platform: platform }),
   });
 };
 
@@ -50,24 +41,58 @@ const cleanNameByProperties = ({ name, properties }) => {
     noPropertiesName +
     " " +
     "(" +
-    properties.filter((p) => !p.startsWith("_")).join(",") +
+    properties
+      .filter((p) => !p.startsWith("_"))
+      .map((p) => p.split(":")[0])
+      .join(",") +
     ")"
   );
 };
 
+const hasProperties = ({ properties, target }) => {
+  if (!Array.isArray(properties) || properties.length === 0) {
+    return false;
+  }
+
+  for (let i = 0; i < properties.length; i++) {
+    const p = properties[i]
+    if (!p.includes(":") && p === target) {
+      return true
+    }
+    if (p.split(":")[0] === target) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const getPropertiesArgs = ({ properties, target }) => {
+  if (!Array.isArray(properties) || properties.length === 0) {
+    return [];
+  }
+  for (const p in properties) {
+    const sp = p.split(":");
+    if (sp[0] === target) {
+      sp.shift();
+      return sp;
+    }
+  }
+  return [];
+};
+
 const bindProxy = ({ proxy, platform }) => {
-  const lookup = lookupNameKeyPlatform({ platform: platform });
-  proxy[keyFroProperties] = getPropertiesFromName({ name: proxy[lookup] });
-  proxy[lookup] = cleanNameByProperties({
-    name: proxy[lookup],
-    properties: proxy[keyFroProperties],
+  const nameKey = commons.func.getPlatformNameKey({ platform: platform });
+  proxy[KeyProperties] = getPropertiesFromName({ name: proxy[nameKey] });
+  proxy[nameKey] = cleanNameByProperties({
+    name: proxy[nameKey],
+    properties: proxy[KeyProperties],
   });
   return proxy;
 };
 
 const unbindProxy = ({ proxy }) => {
-  if (keyFroProperties in proxy) {
-    delete proxy[keyFroProperties];
+  if (KeyProperties in proxy) {
+    delete proxy[KeyProperties];
   }
   return proxy;
 };
@@ -77,11 +102,14 @@ const propertiesObj = { load: true, func: {}, const: {} };
 propertiesObj.func.getPropertiesFromName = getPropertiesFromName;
 propertiesObj.func.getPropertiesFromProxy = getPropertiesFromProxy;
 propertiesObj.func.cleanNameByProperties = cleanNameByProperties;
+propertiesObj.func.hasProperties = hasProperties;
+propertiesObj.func.getPropertiesArgs = getPropertiesArgs;
+
 propertiesObj.func.bindProxy = bindProxy;
 propertiesObj.func.unbindProxy = unbindProxy;
 
 propertiesObj.const.propertiesRemove = propertiesRemove;
-propertiesObj.const.keyFroProperties = keyFroProperties;
+propertiesObj.const.KeyProperties = KeyProperties;
 
 context.young = {
   ...(context.young || {}),

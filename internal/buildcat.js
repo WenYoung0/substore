@@ -9,7 +9,7 @@ const featureLocation = context.young.features.location;
 
 const commons = context.young.commons;
 
-const productionPlatform = commons.const.platformNameMihomo;
+const productionPlatform = commons.const.platformMihomo;
 
 await produceArtifact({
   type: context.productionType,
