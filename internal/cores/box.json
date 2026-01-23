@@ -27,7 +27,7 @@
         "query_type" : ["A", "AAAA"],
         "rule_set"   : [
           "@geosite-category-ai-!cn", "geosite-category-ai-!cn",  "geosite-google",
-          "geosite-microsoft",        "geosite-category-dev",     "@geosite-category-dev",    "geosite-tech-media"
+          "geosite-microsoft",        "geosite-category-dev",     "@geosite-category-dev",    "geosite-category-tech-media"
         ],
         "action"     : "route",
         "rewrite_ttl": 1,
@@ -41,7 +41,7 @@
       },
       {
         "clash_mode": "Smart",
-        "rule_set"  : ["geosite-category-dev", "@geosite-category-dev", "geosite-tech-media"],
+        "rule_set"  : ["geosite-category-dev", "@geosite-category-dev", "geosite-category-tech-media"],
         "action"    : "route",
         "server"    : "dns-dev"
       },
@@ -102,7 +102,7 @@
       {"rule_set": "geosite-private", "outbound": "Direct"},
       {"rule_set": "geosite-telegram", "outbound": "✈️ TelegramDC4(EU)"},
       { "rule_set": ["@geosite-category-ai-!cn", "geosite-category-ai-!cn"], "outbound": "🤖 AI-Service" },
-      { "rule_set": ["@geosite-category-dev", "geosite-category-dev", "geosite-tech-media"], "outbound": "💻 Dev" },
+      { "rule_set": ["@geosite-category-dev", "geosite-category-dev", "geosite-category-tech-media"], "outbound": "💻 Dev" },
       {"rule_set": "geosite-google", "outbound": "🔍 Google"},
       {"rule_set": "geosite-microsoft@cn", "outbound": "Direct"},
       {"rule_set": "geosite-microsoft", "outbound": "🪟 Microsoft"},
@@ -244,9 +244,9 @@
       },
       {
         "type": "remote",
-        "tag": "geosite-tech-media",
+        "tag": "geosite-category-tech-media",
         "format": "binary",
-        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-tech-media.srs",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-tech-media.srs",
         "download_detour": "Direct"
       },
       {

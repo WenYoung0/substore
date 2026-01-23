@@ -182,14 +182,14 @@ rule-providers:
     proxy: DIRECT
     url: >-
       https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-dev.mrs
-  geosite-tech-media:
+  geosite-category-tech-media:
     type: http
     interval: 86400
     behavior: domain
     format: mrs
     proxy: DIRECT
     url: >-
-      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/tech-media.mrs
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-tech-media.mrs
   geosite-gamedownload:
     type: http
     interval: 86400
@@ -367,7 +367,7 @@ rules:
   - RULE-SET,_geosite-category-ai,🤖 AI-Service
   - RULE-SET,_geosite-category-dev,💻 Dev
   - RULE-SET,geosite-category-dev,💻 Dev
-  - RULE-SET,geosite-tech-media,💻 Dev
+  - RULE-SET,geosite-category-tech-media,💻 Dev
   - RULE-SET,geosite-google,🔍 Google
   - RULE-SET,geosite-microsoft@cn,DIRECT
   - RULE-SET,geosite-microsoft,🪟 Microsoft
