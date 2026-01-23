@@ -23,8 +23,8 @@ await produceArtifact({
       featureProperties.func.bindProxy({
         proxy: p,
         platform: productionPlatform,
-      })
-    )
+      }),
+    ),
   )
   .then((proxies) =>
     featureTransport.func.apply({
@@ -32,7 +32,7 @@ await produceArtifact({
       proxies: proxies,
       transportDetourSelector: transportDetourSelector,
       platform: productionPlatform,
-    })
+    }),
   )
   .then((proxies) => {
     config.outbounds
@@ -46,7 +46,7 @@ await produceArtifact({
                   proxy: p,
                   platform: productionPlatform,
                 })
-                .includes(propertiesHidden)
+                .includes(propertiesHidden),
           )
           .filter((p) => !p.tag.includes("_shadowtls"))
           .map((p) => p.tag.trim())
@@ -57,33 +57,34 @@ await produceArtifact({
             "🙋 Select",
             "🔍 Google",
             "🪟 Microsoft",
-            "📺 Media, Social","💻 Dev"
+            "📺 Media-Social",
+            "💻 Dev",
           ].includes(selector.tag)
         ) {
           selector.outbounds.push(...out);
         } else if (["🤖 AI-Service"].includes(selector.tag)) {
           selector.outbounds.push(
             ...out.filter(
-              (o) => featureLocation.func.getLocation({ name: o }) !== "HK"
-            )
+              (o) => featureLocation.func.getLocation({ name: o }) !== "HK",
+            ),
           );
         } else if (["✈️ TelegramDC1(NA)"].includes(selector.tag)) {
           selector.outbounds.push(
             ...out.filter(
-              (o) => featureLocation.func.getArea({ name: o }) === "AREA_NA"
-            )
+              (o) => featureLocation.func.getArea({ name: o }) === "AREA_NA",
+            ),
           );
         } else if (["✈️ TelegramDC4(EU)"].includes(selector.tag)) {
           selector.outbounds.push(
             ...out.filter(
-              (o) => featureLocation.func.getArea({ name: o }) === "AREA_EU"
-            )
+              (o) => featureLocation.func.getArea({ name: o }) === "AREA_EU",
+            ),
           );
         } else if (["✈️ TelegramDC5(AP)"].includes(selector.tag)) {
           selector.outbounds.push(
             ...out.filter(
-              (o) => featureLocation.func.getArea({ name: o }) === "AREA_ASIA"
-            )
+              (o) => featureLocation.func.getArea({ name: o }) === "AREA_ASIA",
+            ),
           );
         }
 
@@ -134,7 +135,7 @@ await produceArtifact({
   })
   .then((proxies) => {
     config.outbounds.push(
-      ...proxies.map((p) => featureProperties.func.unbindProxy({ proxy: p }))
+      ...proxies.map((p) => featureProperties.func.unbindProxy({ proxy: p })),
     );
     return proxies;
   });

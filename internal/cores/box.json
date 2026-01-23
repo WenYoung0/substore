@@ -11,7 +11,7 @@
       {"tag": "dns-microsoft", "type": "udp", "server": "1.1.1.1", "detour": "🪟 Microsoft"},
       {"tag": "dns-telegram", "type": "udp", "server": "1.1.1.1", "detour": "✈️ TelegramDC4(EU)"},
       {"tag": "dns-ai", "type": "udp", "server": "1.1.1.1", "detour": "🤖 AI-Service"},
-      {"tag": "dns-stream", "type": "udp", "server": "1.1.1.1", "detour": "📺 Media, Social"},
+      {"tag": "dns-stream", "type": "udp", "server": "1.1.1.1", "detour": "📺 Media-Social"},
       {"tag": "dns-fake", "type": "fakeip", "inet4_range": "32.81.0.0/16", "inet6_range": "5f00:7a61:b56:2170::/92"}
     ],
     "rules"            : [
@@ -118,7 +118,7 @@
           "geosite-stream",    "geosite-twitter",   "geosite-facebook",  "geosite-instagram", "geosite-snap",
           "geosite-reddit",    "geosite-whatsapp",  "geosite-discord",   "geosite-line"
         ],
-        "outbound": "📺 Media, Social"
+        "outbound": "📺 Media-Social"
       },
       { "rule_set": ["geosite-category-ads-all"], "action": "reject" }
     ],
@@ -507,7 +507,7 @@
     },
     {
       "type": "selector",
-      "tag": "📺 Media, Social",
+      "tag": "📺 Media-Social",
       "outbounds": ["🙋 Select"],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
