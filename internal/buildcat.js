@@ -49,7 +49,7 @@ await produceArtifact({
         .filter((p) => p && p.length > 0);
 
       if (
-        ["🙋 Select", "🔍 Google", "🪟 Microsoft", "📺 Media, Social"].includes(
+        ["🙋 Select", "🔍 Google", "🪟 Microsoft", "📺 Media, Social","💻 Dev"].includes(
           selector.name
         )
       ) {

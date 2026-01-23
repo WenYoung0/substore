@@ -4,13 +4,14 @@
     "servers"          : [
       {"tag": "dns-bootstrap", "type": "udp", "server": "223.5.5.5"},
       {"tag": "dns-local", "type": "local"},
-      {"tag": "dns-cn", "type": "https", "server": "223.5.5.5"},
-      {"tag": "dns-final", "type": "https", "server": "1.1.1.1", "detour": "🙋 Select"},
-      {"tag": "dns-google", "type": "https", "server": "8.8.8.8", "detour": "🔍 Google"},
-      {"tag": "dns-microsoft", "type": "https", "server": "1.1.1.1", "detour": "🪟 Microsoft"},
-      {"tag": "dns-telegram", "type": "https", "server": "1.1.1.1", "detour": "✈️ TelegramDC4(EU)"},
-      {"tag": "dns-ai", "type": "https", "server": "1.1.1.1", "detour": "🤖 AI-Service"},
-      {"tag": "dns-stream", "type": "https", "server": "1.1.1.1", "detour": "📺 Media, Social"},
+      {"tag": "dns-cn", "type": "udp", "server": "223.5.5.5"},
+      {"tag": "dns-final", "type": "udp", "server": "1.1.1.1", "detour": "🙋 Select"},
+      {"tag": "dns-google", "type": "udp", "server": "8.8.8.8", "detour": "🔍 Google"},
+      {"tag": "dns-dev", "type": "udp", "server": "1.1.1.1", "detour": "💻 Dev"},
+      {"tag": "dns-microsoft", "type": "udp", "server": "1.1.1.1", "detour": "🪟 Microsoft"},
+      {"tag": "dns-telegram", "type": "udp", "server": "1.1.1.1", "detour": "✈️ TelegramDC4(EU)"},
+      {"tag": "dns-ai", "type": "udp", "server": "1.1.1.1", "detour": "🤖 AI-Service"},
+      {"tag": "dns-stream", "type": "udp", "server": "1.1.1.1", "detour": "📺 Media, Social"},
       {"tag": "dns-fake", "type": "fakeip", "inet4_range": "32.81.0.0/16", "inet6_range": "5f00:7a61:b56:2170::/92"}
     ],
     "rules"            : [
@@ -24,7 +25,10 @@
       {
         "clash_mode" : "FakeIP",
         "query_type" : ["A", "AAAA"],
-        "rule_set"   : ["@geosite-category-ai-!cn", "geosite-category-ai-!cn", "geosite-google", "geosite-microsoft"],
+        "rule_set"   : [
+          "@geosite-category-ai-!cn", "geosite-category-ai-!cn",  "geosite-google",
+          "geosite-microsoft",        "geosite-category-dev",     "@geosite-category-dev",    "geosite-tech-media"
+        ],
         "action"     : "route",
         "rewrite_ttl": 1,
         "server"     : "dns-fake"
@@ -34,6 +38,12 @@
         "rule_set"  : ["@geosite-category-ai-!cn", "geosite-category-ai-!cn"],
         "action"    : "route",
         "server"    : "dns-ai"
+      },
+      {
+        "clash_mode": "Smart",
+        "rule_set"  : ["geosite-category-dev", "@geosite-category-dev", "geosite-tech-media"],
+        "action"    : "route",
+        "server"    : "dns-dev"
       },
       {
         "clash_mode": "Smart",
@@ -92,6 +102,7 @@
       {"rule_set": "geosite-private", "outbound": "Direct"},
       {"rule_set": "geosite-telegram", "outbound": "✈️ TelegramDC4(EU)"},
       { "rule_set": ["@geosite-category-ai-!cn", "geosite-category-ai-!cn"], "outbound": "🤖 AI-Service" },
+      { "rule_set": ["@geosite-category-dev", "geosite-category-dev", "geosite-tech-media"], "outbound": "💻 Dev" },
       {"rule_set": "geosite-google", "outbound": "🔍 Google"},
       {"rule_set": "geosite-microsoft@cn", "outbound": "Direct"},
       {"rule_set": "geosite-microsoft", "outbound": "🪟 Microsoft"},
@@ -232,6 +243,20 @@
         "download_detour": "Direct"
       },
       {
+        "type": "remote",
+        "tag": "geosite-tech-media",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-tech-media.srs",
+        "download_detour": "Direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-category-dev",
+        "format": "binary",
+        "url": "https://p.dua.im/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-dev.srs",
+        "download_detour": "Direct"
+      },
+      {
         "type"           : "remote",
         "tag"            : "geosite-stream",
         "format"         : "source",
@@ -303,6 +328,40 @@
       },
       {
         "type" : "inline",
+        "tag"  : "@geosite-category-dev",
+        "rules": [
+          {
+            "domain_suffix": [
+              "bitbucket.org",                "api.bitbucket.org",            "dev.azure.com",
+              "visualstudio.com",             "codecommit.amazonaws.com",     "source.developers.google.com",
+              "sourcerepo.googleapis.com",    "codeberg.org",                 "gitlab.freedesktop.org",
+              "git.kernel.org",               "savannah.gnu.org",             "git.savannah.gnu.org",
+              "pagure.io",                    "src.fedoraproject.org",        "sourceforge.net",
+              "git.code.sf.net",              "repo.or.cz",                   "launchpad.net",
+              "assembla.com",                 "beanstalkapp.com",             "codebase.io",
+              "plan.io",                      "rhodecode.com",                "git.sr.ht",
+              "sr.ht",                        "notabug.org",                  "framagit.org",
+              "proxy.golang.org",             "pkg.go.dev",                   "services.gradle.org",
+              "plugins.gradle.org",           "registry.npmjs.org",           "pypi.org",
+              "files.pythonhosted.org",       "repo.maven.apache.org",        "central.sonatype.com",
+              "search.maven.org",             "hub.docker.com",               "registry.hub.docker.com",
+              "crates.io",                    "static.crates.io",             "rubygems.org",
+              "packagist.org",                "nuget.org",                    "api.nuget.org",
+              "developer.mozilla.org",        "learn.microsoft.com",          "docs.python.org",
+              "docs.rust-lang.org",           "godoc.org",                    "gitea.io",
+              "gittea.com",                   "cgit.freedesktop.org",         "invent.kde.org",
+              "salsa.debian.org",             "gitlab.gnome.org",             "gitlab.alpinelinux.org",
+              "code.qt.io",                   "hg.sr.ht",                     "maven.org",
+              "jcenter.bintray.com",          "jitpack.io",                   "bintray.com",
+              "oss.sonatype.org",             "clojars.org",                  "hex.pm",
+              "pub.dev",                      "cocoapods.org",                "cdn.jsdelivr.net",
+              "cdnjs.cloudflare.com",         "unpkg.com",                    "yarnpkg.com"
+            ]
+          }
+        ]
+      },
+      {
+        "type" : "inline",
         "tag"  : "@geosite-block",
         "rules": [
           { "domain": ["dns.weixin.qq.com", "api.installer.xiaomi.com"] }
@@ -316,7 +375,8 @@
             "domain_suffix": [
               "p.dua.im",               "halocloudnet.com",       "steamserver.net",        "greencloudvps.com",
               "halocloudnet.com",       "subscribe.ducknet.work", "api-huacloud.dev",       "api-flowercloud.com"
-            ]
+            ],
+            "domain_regex" : ["(?i)^frp-[a-z0-9]{1,3}\\.com$"]
           }
         ]
       },
@@ -401,7 +461,7 @@
       "tag": "tun-in",
       "address": ["172.27.0.1/30", "fdfe:dcba:9876::1/126"],
       "auto_route": true,
-      "strict_route": true,
+      "strict_route": false,
       "route_exclude_address": ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7"],
       "platform": { "http_proxy": {"enabled": true, "server": "127.0.0.1", "server_port": 20808} }
     },
@@ -420,6 +480,13 @@
     {
       "type": "selector",
       "tag": "🔍 Google",
+      "outbounds": ["🙋 Select"],
+      "default": "🙋 Select",
+      "interrupt_exist_connections": true
+    },
+    {
+      "type": "selector",
+      "tag": "💻 Dev",
       "outbounds": ["🙋 Select"],
       "default": "🙋 Select",
       "interrupt_exist_connections": true

@@ -57,7 +57,7 @@ await produceArtifact({
             "🙋 Select",
             "🔍 Google",
             "🪟 Microsoft",
-            "📺 Media, Social",
+            "📺 Media, Social","💻 Dev"
           ].includes(selector.tag)
         ) {
           selector.outbounds.push(...out);

@@ -174,6 +174,22 @@ rule-providers:
     proxy: DIRECT
     url: >-
       https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/netflix.mrs
+  geosite-category-dev:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-dev.mrs
+  geosite-tech-media:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/tech-media.mrs
   geosite-gamedownload:
     type: http
     interval: 86400
@@ -195,11 +211,11 @@ rule-providers:
     format: text
     proxy: DIRECT
     url: "https://p.dua.im/https://ruleset.skk.moe/Clash/non_ip/stream.txt"
-  geoip-telegram@dc1:
+  _geoip-telegram@dc1:
     type: inline
     behavior: ipcidr
     payload: ["91.108.12.0/22", "149.154.172.0/22", "2001:b28:f23d::/48"]
-  geoip-telegram@dc4:
+  _geoip-telegram@dc4:
     type: inline
     behavior: ipcidr
     payload:
@@ -216,7 +232,7 @@ rule-providers:
         "2001:67c:4e8::/48",
         "2a0a:f280:203::/48",
       ]
-  geoip-telegram@dc5:
+  _geoip-telegram@dc5:
     type: inline
     behavior: ipcidr
     payload:
@@ -227,7 +243,7 @@ rule-providers:
         "2001:b28:f23c::/48",
         "2001:b28:f23f::/48",
       ]
-  geosite-category-ai-extra:
+  _geosite-category-ai:
     type: inline
     behavior: classical
     payload:
@@ -248,16 +264,92 @@ rule-providers:
       - "DOMAIN-SUFFIX,apple-relay.fastly-edge.com"
       - "DOMAIN-SUFFIX,cp4.cloudflare.com"
       - "DOMAIN-SUFFIX,apple-relay.apple.com"
-  must-block:
+  _geosite-block:
     type: inline
     behavior: classical
     payload:
       - "DOMAIN,dns.weixin.qq.com"
       - "DOMAIN,api.installer.xiaomi.com"
-      - "DOMAIN,appboot.netflix.com"
-      - "DOMAIN,ios.prod.cloud.netflix.com"
-      - "DOMAIN,android-appboot.netflix.com"
-      - "DOMAIN,android.prod.cloud.netflix.com"
+      # - "DOMAIN,appboot.netflix.com"
+      # - "DOMAIN,ios.prod.cloud.netflix.com"
+      # - "DOMAIN,android-appboot.netflix.com"
+      # - "DOMAIN,android.prod.cloud.netflix.com"
+  _geosite-category-dev:
+    type: inline
+    behavior: classical
+    payload:
+      - "DOMAIN-SUFFIX,bitbucket.org"
+      - "DOMAIN-SUFFIX,api.bitbucket.org"
+      - "DOMAIN-SUFFIX,dev.azure.com"
+      - "DOMAIN-SUFFIX,visualstudio.com"
+      - "DOMAIN-SUFFIX,codecommit.amazonaws.com"
+      - "DOMAIN-SUFFIX,source.developers.google.com"
+      - "DOMAIN-SUFFIX,sourcerepo.googleapis.com"
+      - "DOMAIN-SUFFIX,codeberg.org"
+      - "DOMAIN-SUFFIX,gitlab.freedesktop.org"
+      - "DOMAIN-SUFFIX,git.kernel.org"
+      - "DOMAIN-SUFFIX,savannah.gnu.org"
+      - "DOMAIN-SUFFIX,git.savannah.gnu.org"
+      - "DOMAIN-SUFFIX,pagure.io"
+      - "DOMAIN-SUFFIX,src.fedoraproject.org"
+      - "DOMAIN-SUFFIX,sourceforge.net"
+      - "DOMAIN-SUFFIX,git.code.sf.net"
+      - "DOMAIN-SUFFIX,repo.or.cz"
+      - "DOMAIN-SUFFIX,launchpad.net"
+      - "DOMAIN-SUFFIX,assembla.com"
+      - "DOMAIN-SUFFIX,beanstalkapp.com"
+      - "DOMAIN-SUFFIX,codebase.io"
+      - "DOMAIN-SUFFIX,plan.io"
+      - "DOMAIN-SUFFIX,rhodecode.com"
+      - "DOMAIN-SUFFIX,git.sr.ht"
+      - "DOMAIN-SUFFIX,sr.ht"
+      - "DOMAIN-SUFFIX,notabug.org"
+      - "DOMAIN-SUFFIX,framagit.org"
+      - "DOMAIN-SUFFIX,proxy.golang.org"
+      - "DOMAIN-SUFFIX,pkg.go.dev"
+      - "DOMAIN-SUFFIX,services.gradle.org"
+      - "DOMAIN-SUFFIX,plugins.gradle.org"
+      - "DOMAIN-SUFFIX,registry.npmjs.org"
+      - "DOMAIN-SUFFIX,pypi.org"
+      - "DOMAIN-SUFFIX,files.pythonhosted.org"
+      - "DOMAIN-SUFFIX,repo.maven.apache.org"
+      - "DOMAIN-SUFFIX,central.sonatype.com"
+      - "DOMAIN-SUFFIX,search.maven.org"
+      - "DOMAIN-SUFFIX,hub.docker.com"
+      - "DOMAIN-SUFFIX,registry.hub.docker.com"
+      - "DOMAIN-SUFFIX,crates.io"
+      - "DOMAIN-SUFFIX,static.crates.io"
+      - "DOMAIN-SUFFIX,rubygems.org"
+      - "DOMAIN-SUFFIX,packagist.org"
+      - "DOMAIN-SUFFIX,nuget.org"
+      - "DOMAIN-SUFFIX,api.nuget.org"
+      - "DOMAIN-SUFFIX,developer.mozilla.org"
+      - "DOMAIN-SUFFIX,learn.microsoft.com"
+      - "DOMAIN-SUFFIX,docs.python.org"
+      - "DOMAIN-SUFFIX,docs.rust-lang.org"
+      - "DOMAIN-SUFFIX,godoc.org"
+      - "DOMAIN-SUFFIX,gitea.io"
+      - "DOMAIN-SUFFIX,gittea.com"
+      - "DOMAIN-SUFFIX,cgit.freedesktop.org"
+      - "DOMAIN-SUFFIX,invent.kde.org"
+      - "DOMAIN-SUFFIX,salsa.debian.org"
+      - "DOMAIN-SUFFIX,gitlab.gnome.org"
+      - "DOMAIN-SUFFIX,gitlab.alpinelinux.org"
+      - "DOMAIN-SUFFIX,code.qt.io"
+      - "DOMAIN-SUFFIX,hg.sr.ht"
+      - "DOMAIN-SUFFIX,maven.org"
+      - "DOMAIN-SUFFIX,jcenter.bintray.com"
+      - "DOMAIN-SUFFIX,jitpack.io"
+      - "DOMAIN-SUFFIX,bintray.com"
+      - "DOMAIN-SUFFIX,oss.sonatype.org"
+      - "DOMAIN-SUFFIX,clojars.org"
+      - "DOMAIN-SUFFIX,hex.pm"
+      - "DOMAIN-SUFFIX,pub.dev"
+      - "DOMAIN-SUFFIX,cocoapods.org"
+      - "DOMAIN-SUFFIX,cdn.jsdelivr.net"
+      - "DOMAIN-SUFFIX,cdnjs.cloudflare.com"
+      - "DOMAIN-SUFFIX,unpkg.com"
+      - "DOMAIN-SUFFIX,yarnpkg.com"
 
 rules:
   - RULE-SET,geoip-private,DIRECT,no-resolve
@@ -265,16 +357,19 @@ rules:
   - AND,((NETWORK,udp),(DST-PORT,135/137/138/139/5353)),REJECT
   - AND,((NETWORK,udp),(DST-PORT,67/68/123)),DIRECT
   - AND,((NETWORK,udp),(SRC-PORT,67/68/123)),DIRECT
-  - RULE-SET,must-block,REJECT,no-resolve
+  - RULE-SET,_geosite-block,REJECT,no-resolve
   - RULE-SET,geoip-cn,DIRECT,no-resolve
-  - RULE-SET,geoip-telegram@dc1,✈️ TelegramDC1(NA),no-resolve
-  - RULE-SET,geoip-telegram@dc4,✈️ TelegramDC4(EU),no-resolve
-  - RULE-SET,geoip-telegram@dc5,✈️ TelegramDC5(AP),no-resolve
+  - RULE-SET,_geoip-telegram@dc1,✈️ TelegramDC1(NA),no-resolve
+  - RULE-SET,_geoip-telegram@dc4,✈️ TelegramDC4(EU),no-resolve
+  - RULE-SET,_geoip-telegram@dc5,✈️ TelegramDC5(AP),no-resolve
   - RULE-SET,geosite-telegram,✈️ TelegramDC4(EU)
   - RULE-SET,geosite-category-ai-chat-!cn,🤖 AI-Service
-  - RULE-SET,geosite-category-ai-extra,🤖 AI-Service
-
+  - RULE-SET,_geosite-category-ai,🤖 AI-Service
+  - RULE-SET,_geosite-category-dev,💻 Dev
+  - RULE-SET,geosite-category-dev,💻 Dev
+  - RULE-SET,geosite-tech-media,💻 Dev
   - RULE-SET,geosite-google,🔍 Google
+  - RULE-SET,geosite-microsoft@cn,DIRECT
   - RULE-SET,geosite-microsoft,🪟 Microsoft
 
   - DOMAIN-SUFFIX,steamserver.net,DIRECT
@@ -284,16 +379,16 @@ rules:
   - RULE-SET,geosite-gamedownload,DIRECT
   - RULE-SET,geosite-apple@cn,DIRECT
 
-  - RULE-SET,geosite-stream,📺 SocialMedia
-  - RULE-SET,geosite-telegram,📺 SocialMedia
-  - RULE-SET,geosite-twitter,📺 SocialMedia
-  - RULE-SET,geosite-facebook,📺 SocialMedia
-  - RULE-SET,geosite-instagram,📺 SocialMedia
-  - RULE-SET,geosite-snap,📺 SocialMedia
-  - RULE-SET,geosite-reddit,📺 SocialMedia
-  - RULE-SET,geosite-whatsapp,📺 SocialMedia
-  - RULE-SET,geosite-discord,📺 SocialMedia
-  - RULE-SET,geosite-line,📺 SocialMedia
+  - RULE-SET,geosite-stream,📺 Media, Social
+  - RULE-SET,geosite-telegram,📺 Media, Social
+  - RULE-SET,geosite-twitter,📺 Media, Social
+  - RULE-SET,geosite-facebook,📺 Media, Social
+  - RULE-SET,geosite-instagram,📺 Media, Social
+  - RULE-SET,geosite-snap,📺 Media, Social
+  - RULE-SET,geosite-reddit,📺 Media, Social
+  - RULE-SET,geosite-whatsapp,📺 Media, Social
+  - RULE-SET,geosite-discord,📺 Media, Social
+  - RULE-SET,geosite-line,📺 Media, Social
   - RULE-SET,geosite-category-ads-all,REJECT
   - MATCH,🙋 Select
 
@@ -303,72 +398,41 @@ proxy-groups:
 
   - name: "🙋 Select"
     type: select
-    include-all-proxies: true
     proxies:
       - DIRECT
-    interval: 0
-    lazy: true
-    timeout: 3000
 
   - name: "🔍 Google"
     type: select
-    include-all-proxies: true
     proxies:
       - "🙋 Select"
-    interval: 0
-    lazy: true
-    timeout: 3000
+  - name: "💻 Dev"
+    type: select
+    proxies:
+      - "🙋 Select"
   - name: "🪟 Microsoft"
     type: select
-    include-all-proxies: true
     proxies:
       - "🙋 Select"
-    interval: 0
-    lazy: true
-    timeout: 3000
-  - name: "📺 SocialMedia"
+  - name: "📺 Media, Social"
     type: select
-    include-all-proxies: true
     proxies:
       - "🙋 Select"
-    interval: 0
-    lazy: true
-    timeout: 3000
   - name: "🤖 AI-Service"
     type: select
-    include-all-proxies: true
     proxies:
       - "🙋 Select"
-    interval: 0
-    lazy: true
-    timeout: 3000
   - name: "✈️ TelegramDC1(NA)"
     type: select
-    include-all-proxies: true
-    filter: "^🇺🇸"
     proxies:
       - "🙋 Select"
-    interval: 0
-    lazy: true
-    timeout: 3000
   - name: "✈️ TelegramDC4(EU)"
     type: select
-    include-all-proxies: true
-    filter: "^🇩🇪|^🇳🇱"
     proxies:
       - "🙋 Select"
-    interval: 0
-    lazy: true
-    timeout: 3000
   - name: "✈️ TelegramDC5(AP)"
     type: select
-    include-all-proxies: true
-    filter: "^🇭🇰|^🇯🇵|^🇸🇬|^🇹🇼"
     proxies:
       - "🙋 Select"
-    interval: 0
-    lazy: true
-    timeout: 3000
 
 dns:
   enable: true
@@ -399,16 +463,13 @@ dns:
     - https://doh.pub/dns-query
     - https://dns.alidns.com/dns-query
   direct-nameserver:
-    - system
+    - 223.5.5.5
+    - 223.6.6.6
+    - 119.29.29.29
+    - 114.114.114.114
   proxy-nameserver:
     - https://doh.pub/dns-query
 
-ntp:
-  enable: true
-  write-to-system: false
-  server: time.aliyun.com
-  port: 123
-  interval: 30
 profile:
   store-selected: true
   store-fake-ip: true
