@@ -166,6 +166,14 @@ rule-providers:
     proxy: DIRECT
     url: >-
       https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/microsoft.mrs
+  geosite-microsoft@cn:
+    type: http
+    interval: 86400
+    behavior: domain
+    format: mrs
+    proxy: DIRECT
+    url: >-
+      https://p.dua.im/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/microsoft@cn.mrs
   geosite-netflix:
     type: http
     interval: 86400
