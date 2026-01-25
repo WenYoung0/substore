@@ -2,16 +2,16 @@
   "log"         : {"disabled": false, "level": "warn"},
   "dns"         : {
     "servers"          : [
-      {"tag": "dns-bootstrap", "type": "udp", "server": "223.5.5.5"},
+      {"tag": "dns-bootstrap", "type": "https", "server": "223.5.5.5"},
       {"tag": "dns-local", "type": "local"},
-      {"tag": "dns-cn", "type": "udp", "server": "223.5.5.5"},
-      {"tag": "dns-final", "type": "udp", "server": "1.1.1.1", "detour": "🙋 Select"},
-      {"tag": "dns-google", "type": "udp", "server": "8.8.8.8", "detour": "🔍 Google"},
-      {"tag": "dns-dev", "type": "udp", "server": "1.1.1.1", "detour": "💻 Dev"},
-      {"tag": "dns-microsoft", "type": "udp", "server": "1.1.1.1", "detour": "🪟 Microsoft"},
-      {"tag": "dns-telegram", "type": "udp", "server": "1.1.1.1", "detour": "✈️ TelegramDC4(EU)"},
-      {"tag": "dns-ai", "type": "udp", "server": "1.1.1.1", "detour": "🤖 AI-Service"},
-      {"tag": "dns-stream", "type": "udp", "server": "1.1.1.1", "detour": "📺 Media-Social"},
+      {"tag": "dns-cn", "type": "https", "server": "223.5.5.5"},
+      {"tag": "dns-final", "type": "https", "server": "1.1.1.1", "detour": "🙋 Select"},
+      {"tag": "dns-google", "type": "https", "server": "8.8.8.8", "detour": "🔍 Google"},
+      {"tag": "dns-dev", "type": "https", "server": "1.1.1.1", "detour": "💻 Dev"},
+      {"tag": "dns-microsoft", "type": "https", "server": "1.1.1.1", "detour": "🪟 Microsoft"},
+      {"tag": "dns-telegram", "type": "https", "server": "1.1.1.1", "detour": "✈️ TelegramDC4(EU)"},
+      {"tag": "dns-ai", "type": "https", "server": "1.1.1.1", "detour": "🤖 AI-Service"},
+      {"tag": "dns-stream", "type": "https", "server": "1.1.1.1", "detour": "📺 Media-Social"},
       {"tag": "dns-fake", "type": "fakeip", "inet4_range": "32.81.0.0/16", "inet6_range": "5f00:7a61:b56:2170::/92"}
     ],
     "rules"            : [
