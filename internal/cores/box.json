@@ -26,8 +26,9 @@
         "clash_mode" : "FakeIP",
         "query_type" : ["A", "AAAA"],
         "rule_set"   : [
-          "@geosite-category-ai-!cn", "geosite-category-ai-!cn",  "geosite-google",
-          "geosite-microsoft",        "geosite-category-dev",     "@geosite-category-dev",    "geosite-category-tech-media"
+          "@geosite-category-ai-!cn",    "geosite-category-ai-!cn",     "geosite-google",
+          "geosite-microsoft",           "geosite-category-dev",        "@geosite-category-dev",
+          "geosite-category-tech-media"
         ],
         "action"     : "route",
         "rewrite_ttl": 1,
@@ -45,19 +46,12 @@
         "action"    : "route",
         "server"    : "dns-dev"
       },
-      {
-        "clash_mode": "Smart",
-        "rule_set"  : ["geosite-google"],
-        "action"    : "route",
-        "strategy"  : "ipv4_only",
-        "server"    : "dns-google"
-      },
+      { "clash_mode": "Smart", "rule_set": ["geosite-google"], "action": "route", "server": "dns-google" },
       { "clash_mode": "Smart", "rule_set": ["geosite-microsoft"], "action": "route", "server": "dns-microsoft" },
       {
         "rule_set": ["@geosite-cn", "geosite-cn", "geosite-steam@cn", "geosite-gamedownload", "geosite-apple@cn"],
         "action"  : "route",
-        "server"  : "dns-cn",
-        "strategy": "ipv4_only"
+        "server"  : "dns-cn"
       },
       {
         "type"       : "logical",
@@ -102,7 +96,10 @@
       {"rule_set": "geosite-private", "outbound": "Direct"},
       {"rule_set": "geosite-telegram", "outbound": "✈️ TelegramDC4(EU)"},
       { "rule_set": ["@geosite-category-ai-!cn", "geosite-category-ai-!cn"], "outbound": "🤖 AI-Service" },
-      { "rule_set": ["@geosite-category-dev", "geosite-category-dev", "geosite-category-tech-media"], "outbound": "💻 Dev" },
+      {
+        "rule_set": ["@geosite-category-dev", "geosite-category-dev", "geosite-category-tech-media"],
+        "outbound": "💻 Dev"
+      },
       {"rule_set": "geosite-google", "outbound": "🔍 Google"},
       {"rule_set": "geosite-microsoft@cn", "outbound": "Direct"},
       {"rule_set": "geosite-microsoft", "outbound": "🪟 Microsoft"},
@@ -469,7 +466,6 @@
   ],
   "outbounds"   : [
     {"type": "direct", "tag": "Direct", "domain_resolver": "dns-cn"},
-    {"type": "selector", "tag": "🚀 Transport", "outbounds": [], "interrupt_exist_connections": true},
     {
       "type": "selector",
       "tag": "🙋 Select",

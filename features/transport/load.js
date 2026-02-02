@@ -1,141 +1,128 @@
-if (!context?.young?.features?.properties?.load) {
-  throw "feature properties required";
-}
+const featureLocation = context.young.features.location;
 
-const commons = context.young.commons;
-
-const featureProperties = context.young.features.properties;
-
-const propertiesTransport = "T";
-const propertiesDestination = "D";
-
-const applyTransportSingBox = ({
-  config,
-  proxies,
-  transportDetourSelector,
-}) => {
-  const removeTransportSelectorInConfig = () => {
-    config.outbounds = config.outbounds.filter(
-      (outbound) => outbound.tag !== transportDetourSelector
-    );
-  };
-
-  const getProperties = (p) => {
-    return featureProperties.func.getPropertiesFromProxy({
-      proxy: p,
-      platform: commons.const.platformSingbox,
-    });
-  };
-
-  const transportProxies = proxies.filter((p) =>
-    getProperties(p).includes(propertiesTransport)
+const completeTransport = ({ proxies, detourName }) => {
+  const transportProxies = proxies.filter(
+    (p) =>
+      p.properties !== undefined &&
+      p.properties.transport !== undefined &&
+      ((typeof p.properties.transport === "boolean" &&
+        p.properties.transport) ||
+        p.properties.transport.is),
   );
-  const destinationProxies = proxies.filter((p) =>
-    getProperties(p).includes(propertiesDestination)
+  const destinationProxies = proxies.filter(
+    (p) =>
+      p.properties !== undefined &&
+      p.properties.destination !== undefined &&
+      ((typeof p.properties.destination === "boolean" &&
+        p.properties.destination) ||
+        p.properties.destination.is),
   );
-  if (!(transportProxies.length > 0 && destinationProxies.length > 0)) {
-    removeTransportSelectorInConfig();
-    return proxies.filter(
-      (p) => !getProperties(p).includes(propertiesDestination)
+  if (destinationProxies.length === 0) {
+    return {};
+  }
+
+  if (detourName === undefined) {
+    detourName = (cca2) => {
+      if (cca2 === "") {
+        return "🚀 Transport";
+      }
+      return "🚀 Transport (" + cca2 + ")";
+    };
+  } else if (typeof detourName === "string") {
+    destinationProxies.map((p) => (p["dialer-proxy"] = detourName));
+    return { [detourName]: transportProxies };
+  } else if (typeof detourName != "function") {
+    throw new Error(
+      "wrong detoruName type, excepted: function,string. got: " +
+        typeof detourName,
     );
   }
 
   if (transportProxies.length === 1) {
-    removeTransportSelectorInConfig();
-    destinationProxies.forEach((dp) => {
-      dp.detour = transportProxies[0].tag;
-    });
-    return proxies;
-  }
-
-  const transportGroup = config.outbounds.find(
-    (outbound) => outbound.tag === transportDetourSelector
-  );
-
-  transportGroup.outbounds.push(...transportProxies.map((p) => p.tag));
-  destinationProxies.forEach((dp) => {
-    dp["detour"] = transportDetourSelector;
-  });
-
-  return proxies;
-};
-
-const applyTransportMihomo = ({ config, proxies, transportDetourSelector }) => {
-  const removeTransportSelectorInConfig = () => {
-    config["proxy-groups"] = config["proxy-groups"].filter(
-      (outbound) => outbound.name !== transportDetourSelector
+    destinationProxies.map(
+      (p) => (p["dialer-proxy"] = transportProxies[0].name),
     );
-  };
+    return {};
+  } else if (transportProxies.length === 0) {
+    return {};
+  }
 
-  const getProperties = (p) => {
-    return featureProperties.func.getPropertiesFromProxy({
-      proxy: p,
-      platform: commons.const.platformMihomo,
+  const transportGroups = {};
+  for (const tp of transportProxies) {
+    const transportLocation = featureLocation.func.getLocation({
+      name: tp.name,
     });
-  };
-
-  const transportProxies = proxies.filter((p) =>
-    getProperties(p).includes(propertiesTransport)
-  );
-
-  const destinationProxies = proxies.filter((p) =>
-    getProperties(p).includes(propertiesDestination)
-  );
-
-  if (!(transportProxies.length > 0 && destinationProxies.length > 0)) {
-    removeTransportSelectorInConfig();
-    proxies = proxies.filter(
-      (p) => !getProperties(p).includes(propertiesDestination)
-    );
-    return proxies;
+    const generatedDetourName = detourName(transportLocation);
+    if (!Array.isArray(transportGroups[generatedDetourName])) {
+      transportGroups[generatedDetourName] = [];
+    }
+    transportGroups[generatedDetourName].push(tp.name);
   }
 
-  if (transportProxies.length === 1) {
-    removeTransportSelectorInConfig();
-    destinationProxies.forEach((dp) => {
-      dp["dialer-proxy"] = transportProxies[0].name;
-    });
-    return proxies;
+  for (const dp of destinationProxies) {
+    const destinationRequiredTransport = [];
+    if (typeof dp.properties.destination !== "boolean") {
+      if (typeof dp.properties.destination.require === "string")
+        destinationRequiredTransport.push(dp.properties.destination.require);
+      else if (Array.isArray(dp.properties.destination.require))
+        destinationRequiredTransport.push(...dp.properties.destination.require);
+
+      if (dp.properties.destination.require === undefined) {
+        const destinationLocation = featureLocation.func.getLocation({
+          name: dp.name,
+        });
+        if (destinationLocation !== "")
+          destinationRequiredTransport.push(destinationLocation);
+        if (typeof dp.properties.destination.suits === "string")
+          destinationRequiredTransport.push(dp.properties.destination.suits);
+        else if (Array.isArray(dp.properties.destination.suits))
+          destinationRequiredTransport.push(...dp.properties.destination.suits);
+      }
+    } else {
+      const destinationLocation = featureLocation.func.getLocation({
+        name: dp.name,
+      });
+      if (destinationLocation !== "")
+        destinationRequiredTransport.push(destinationLocation);
+    }
+
+    for (const drt of destinationRequiredTransport) {
+      const drtName = detourName(drt);
+      if (drtName in transportGroups) {
+        const selectedGroup = transportGroups[drtName];
+        dp["dialer-proxy"] = drtName;
+        if (selectedGroup.length === 1) {
+          dp["dialer-proxy"] = selectedGroup[0].name;
+        }
+        break;
+      }
+    }
+
+    // Fallback
+    if (
+      (!"dialer-proxy") in dp &&
+      typeof dp.properties.destination != "boolean" &&
+      dp.properties.destination.require === undefined
+    ) {
+      for (const loc of ["HK", "JP", "SG", "US"]) {
+        const dname = detourName("HK");
+        if (dname in transportGroups) {
+          dp["dialer-proxy"] = dname;
+          if (transportGroups[dname].length === 1) {
+            dp["dialer-proxy"] = transportGroups[dname][0].name;
+          }
+          break;
+        }
+      }
+    }
   }
 
-  const transportGroup = config["proxy-groups"].find(
-    (outbound) => outbound.name === transportDetourSelector
-  );
-  if (!("proxies" in transportGroup)) {
-    transportGroup.proxies = [];
-  }
-  transportGroup.proxies.push(...transportProxies.map((p) => p.name));
-  destinationProxies.forEach((dp) => {
-    dp["dialer-proxy"] = transportDetourSelector;
-  });
-
-  return proxies;
-};
-
-const apply = ({ config, proxies, transportDetourSelector, platform }) => {
-  if (platform === commons.const.platformSingbox) {
-    return applyTransportSingBox({
-      config: config,
-      proxies: proxies,
-      transportDetourSelector: transportDetourSelector,
-    });
-  }
-  if (platform === commons.const.platformMihomo) {
-    return applyTransportMihomo({
-      config: config,
-      proxies: proxies,
-      transportDetourSelector: transportDetourSelector,
-    });
-  }
-
-  return proxies;
+  return transportGroups;
 };
 
 const transportObj = { load: true, func: {}, const: {} };
 
-transportObj.func.apply = apply;
-transportObj.const.propertiesTransport = propertiesTransport;
-transportObj.const.propertiesDestination = propertiesDestination;
+transportObj.func.completeTransport = completeTransport;
 
 context.young = {
   ...(context.young || {}),

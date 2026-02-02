@@ -18,16 +18,18 @@ const getPropertiesFromName = ({ name }) => {
   return properties;
 };
 
-const getPropertiesFromProxy = ({ proxy, platform }) => {
+const getPropertiesFromProxy = ({ proxy }) => {
   if (KeyProperties in proxy) {
     return proxy[KeyProperties];
   }
   return getPropertiesFromName({
-    name: commons.func.getName({ proxy: proxy, platform: platform }),
+    name: proxy.name,
   });
 };
 
-const cleanNameByProperties = ({ name, properties }) => {
+const cleanNameByProperties = ({ proxy }) => {
+  const name = proxy.name
+
   if (!(name.includes("(") && name.includes(")"))) {
     return name;
   }
@@ -55,9 +57,9 @@ const hasProperties = ({ properties, target }) => {
   }
 
   for (let i = 0; i < properties.length; i++) {
-    const p = properties[i]
+    const p = properties[i];
     if (!p.includes(":") && p === target) {
-      return true
+      return true;
     }
     if (p.split(":")[0] === target) {
       return true;

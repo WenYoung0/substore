@@ -401,9 +401,6 @@ rules:
   - MATCH,🙋 Select
 
 proxy-groups:
-  - name: "🚀 Transport"
-    type: select
-
   - name: "🙋 Select"
     type: select
     proxies:
