@@ -11,6 +11,7 @@
     "rules"            : [
       {"clash_mode": "Direct", "server": "dns-cn"},
       { "query_type": ["HTTPS", "SVCB"], "action": "reject" },
+      {"rule_set": "@geosite-direct", "server": "dns-cn"},
       {"clash_mode": "Global", "server": "dns-remote"},
       {"rule_set": "@geosite-block", "action": "reject"},
       {"rule_set": "geosite-private", "server": "dns-local"},
@@ -20,7 +21,10 @@
       {
         "type"  : "logical",
         "mode"  : "and",
-        "rules" : [ {"rule_set": "geosite-geolocation-!cn", "invert": true}, {"rule_set": "geoip-cn"} ],
+        "rules" : [
+          { "rule_set": "geosite-geolocation-!cn",     "invert": true },
+          { "rule_set": ["geoip-cn", "@geoip-direct"]                 }
+        ],
         "server": "dns-cn"
       },
       {
@@ -60,10 +64,12 @@
       { "port": [80, 443], "network": "udp", "action": "reject" },
       {"clash_mode": "Global", "action": "route", "outbound": "🙋 Select"},
       {"rule_set": "geoip-cn", "action": "route", "outbound": "Direct"},
+      {"rule_set": "@geoip-direct", "action": "route", "outbound": "Direct"},
       {"rule_set": "@geoip-telegram@dc1", "outbound": "✈️ TelegramDC1(NA)"},
       {"rule_set": "@geoip-telegram@dc4", "outbound": "✈️ TelegramDC4(EU)"},
       {"rule_set": "@geoip-telegram@dc5", "outbound": "✈️ TelegramDC5(AP)"},
       { "action": "sniff", "sniffer": ["http", "tls", "quic", "ssh"], "timeout": "50ms" },
+      {"rule_set": "@geosite-direct", "action": "route", "outbound": "Direct"},
       {"rule_set": "@geosite-block", "action": "reject"},
       {"rule_set": "geosite-private", "outbound": "Direct"},
       {"rule_set": "geosite-telegram", "outbound": "✈️ TelegramDC4(EU)"},
@@ -299,7 +305,7 @@
         "type" : "inline",
         "tag"  : "@fakeip-filter",
         "rules": [
-          { "domain_suffix": ["lancache.steamcontent.com", "ducknet.work"] }
+          { "domain_suffix": ["lancache.steamcontent.com"] }
         ]
       },
       {

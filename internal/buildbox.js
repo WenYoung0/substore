@@ -94,6 +94,60 @@ const proxies = await produceArtifact({
       }
     });
     return proxies;
+  })
+  .then((proxies) => {
+    const placeHoldDomain = "__this_is_a_placehold_domain_._this_rule_is_generated_by_substore.example.com";
+    const placeHoldIP = "223.5.5.5";
+    const directIP = new Set();
+    const directSite = new Set();
+    for (const proxy of proxies) {
+      if (
+        (!"server") in proxy ||
+        ("dialer-proxy" in proxy && proxy["dialer-proxy"] !== "")
+      ) {
+        continue;
+      }
+      const serverAddr = proxy.server;
+      if (serverAddr.includes(":")) {
+        // IPv6
+        directIP.add(serverAddr);
+      } else {
+        const dots = serverAddr.split(".");
+        if (dots.length === 4 && Number.isInteger(Number(dots[3]))) {
+          directIP.add(serverAddr);
+        } else {
+          directSite.add(serverAddr);
+        }
+      }
+    }
+    if ((!"rule_set") in config.route) config.route["rule_set"] = [];
+    if (directIP.size === 0) directIP.add(placeHoldIP);
+    if (directSite.size === 0) directSite.add(placeHoldDomain);
+
+    config.route["rule_set"].push(
+      {
+        type: "inline",
+        tag: "@geoip-direct",
+        rules: [
+          {
+            ip_cidr: [...directIP].map((ip) =>
+              ip.includes(":") ? ip + "/128" : ip + "/32",
+            ),
+          },
+        ],
+      },
+      {
+        type: "inline",
+        tag: "@geosite-direct",
+        rules: [
+          {
+            domain: [...directSite],
+          },
+        ],
+      },
+    );
+
+    return proxies;
   });
 
 config.outbounds.push(
