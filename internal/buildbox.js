@@ -1,83 +1,92 @@
 const config = JSON.parse($files[0]);
 
-const propertiesHidden = "_hidden";
-
-const transportDetourSelector = "🚀 Transport";
-
-const featureProperties = context.young.features.properties;
 const featureTransport = context.young.features.transport;
 const featureLocation = context.young.features.location;
 
-const commons = context.young.commons;
+const productionPlatform = "sing-box";
 
-const productionPlatform = commons.const.platformSingbox;
-
-await produceArtifact({
+const proxies = await produceArtifact({
   type: context.productionType,
   name: context.productionTarget,
-  platform: productionPlatform,
+  platform: "json",
   produceType: "internal",
 })
   .then((proxies) =>
-    proxies.map((p) =>
-      featureProperties.func.bindProxy({
-        proxy: p,
-        platform: productionPlatform,
-      }),
-    ),
-  )
-  .then((proxies) =>
-    featureTransport.func.apply({
-      config: config,
-      proxies: proxies,
-      transportDetourSelector: transportDetourSelector,
-      platform: productionPlatform,
+    proxies.map((p) => {
+      p.name = p.name.trim();
+      return p;
     }),
   )
   .then((proxies) => {
-    config.outbounds
-      .filter((p) => p.type === "selector" || p.type === "urltest")
-      .map((selector) => {
-        const out = proxies
-          .filter(
-            (p) =>
-              !featureProperties.func
-                .getPropertiesFromProxy({
-                  proxy: p,
-                  platform: productionPlatform,
-                })
-                .includes(propertiesHidden),
-          )
-          .filter((p) => !p.tag.includes("_shadowtls"))
-          .map((p) => p.tag.trim())
-          .filter((p) => p && p.length > 0);
+    const transportGroups = featureTransport.func.completeTransport({
+      proxies: proxies,
+    });
 
+    Object.keys(transportGroups).map((selectorName) => {
+      if (transportGroups[selectorName].length > 1) {
+        config.outbounds = [
+          {
+            type: "selector",
+            tag: selectorName,
+            outbounds: [...transportGroups[selectorName]],
+          },
+          ...config.outbounds,
+        ];
+      } 
+      else {
+        for (proxy of proxies) {
+          if (
+            "dialer-proxy" in proxy &&
+            proxy["dialer-proxy"] === selectorName
+          ) {
+            proxy["dialer-proxy"] = transportGroups[selectorName][0];
+          }
+        }
+      }
+    });
+
+    return proxies.filter(
+      (proxy) =>
+        !featureTransport.func.isDestionation({ proxy }) ||
+        "dialer-proxy" in proxy,
+    );
+  })
+  .then((proxies) => {
+    const notHidden = ({ proxy }) => {
+      return proxy.properties === undefined || !proxy.properties.hidden;
+    };
+    const out = proxies
+      .filter((proxy) => notHidden({ proxy }))
+      .filter((proxy) => proxy.name && proxy.name.length > 0)
+      .map((proxy) => proxy.name);
+
+    config.outbounds
+      .filter((p) => ["selector", "urltest"].includes(p.type))
+      .map((selector) => {
         if (
           [
             "🙋 Select",
             "🔍 Google",
+            "💻 Dev",
             "🪟 Microsoft",
             "📺 Media-Social",
-            "💻 Dev",
+            "🤖 AI-Service",
           ].includes(selector.tag)
         ) {
           selector.outbounds.push(...out);
-        } else if (["🤖 AI-Service"].includes(selector.tag)) {
-          selector.outbounds.push(
-            ...out.filter(
-              (o) => featureLocation.func.getLocation({ name: o }) !== "HK",
-            ),
-          );
         } else if (["✈️ TelegramDC1(NA)"].includes(selector.tag)) {
           selector.outbounds.push(
             ...out.filter(
-              (o) => featureLocation.func.getArea({ name: o }) === "AREA_NA",
+              (o) =>
+                featureLocation.func.getArea({ name: o }) ===
+                "AREA_NORTH_AMERICA",
             ),
           );
         } else if (["✈️ TelegramDC4(EU)"].includes(selector.tag)) {
           selector.outbounds.push(
             ...out.filter(
-              (o) => featureLocation.func.getArea({ name: o }) === "AREA_EU",
+              (o) =>
+                featureLocation.func.getArea({ name: o }) === "AREA_EUROPE",
             ),
           );
         } else if (["✈️ TelegramDC5(AP)"].includes(selector.tag)) {
@@ -102,42 +111,69 @@ await produceArtifact({
             featureLocation.func.getOrder({ name: b });
           if (locationDiff !== 0) return locationDiff;
 
-          const propertiesA = featureProperties.func.getPropertiesFromName({
-            name: a,
-          });
-          const propertiesB = featureProperties.func.getPropertiesFromName({
-            name: b,
-          });
-
-          const getPropertyPriority = (properties) => {
-            const hasDestination = featureProperties.func.hasProperties({
-              properties: properties,
-              target: featureTransport.const.propertiesDestination,
-            });
-
-            const hasTransport = featureProperties.func.hasProperties({
-              properties: properties,
-              target: featureTransport.const.propertiesTransport,
-            });
-            if (hasDestination) return -1; // front
-            if (hasTransport) return 1; // last
-            return 0; // middle
-          };
-
-          const priorityDiff =
-            getPropertyPriority(propertiesA) - getPropertyPriority(propertiesB);
-          if (priorityDiff !== 0) return priorityDiff;
-
           return a.localeCompare(b);
         });
       });
     return proxies;
   })
   .then((proxies) => {
-    config.outbounds.push(
-      ...proxies.map((p) => featureProperties.func.unbindProxy({ proxy: p })),
+    const placeHoldDomain =
+      "__this_is_a_placehold_domain_._this_rule_is_generated_by_substore.example.com";
+    const placeHoldIP = "223.5.5.5";
+    const directIP = new Set();
+    const directSite = new Set();
+    for (const proxy of proxies) {
+      if (
+        (!"server") in proxy ||
+        ("dialer-proxy" in proxy && proxy["dialer-proxy"] !== "")
+      ) {
+        continue;
+      }
+      const serverAddr = proxy.server;
+      if (serverAddr.includes(":")) {
+        // IPv6
+        directIP.add(serverAddr);
+      } else {
+        const dots = serverAddr.split(".");
+        if (dots.length === 4 && Number.isInteger(Number(dots[3]))) {
+          directIP.add(serverAddr);
+        } else {
+          directSite.add(serverAddr);
+        }
+      }
+    }
+    if (!("rule_set" in config.route)) config.route["rule_set"] = [];
+    if (directIP.size === 0) directIP.add(placeHoldIP);
+    if (directSite.size === 0) directSite.add(placeHoldDomain);
+
+    config.route["rule_set"].push(
+      {
+        type: "inline",
+        tag: "@geoip-direct",
+        rules: [
+          {
+            ip_cidr: [...directIP].map((ip) =>
+              ip.includes(":") ? ip + "/128" : ip + "/32",
+            ),
+          },
+        ],
+      },
+      {
+        type: "inline",
+        tag: "@geosite-direct",
+        rules: [
+          {
+            domain: [...directSite],
+          },
+        ],
+      },
     );
+
     return proxies;
   });
+
+config.outbounds.push(
+  ...JSON.parse(ProxyUtils.produce([...proxies], productionPlatform)).outbounds,
+);
 
 $content = JSON.stringify(config, null, 2);

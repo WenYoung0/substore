@@ -366,6 +366,8 @@ rules:
   - AND,((NETWORK,udp),(DST-PORT,67/68/123)),DIRECT
   - AND,((NETWORK,udp),(SRC-PORT,67/68/123)),DIRECT
   - RULE-SET,_geosite-block,REJECT,no-resolve
+  - RULE-SET,_geoip-direct,DIRECT,no-resolve
+  - RULE-SET,_geosite-direct,DIRECT
   - RULE-SET,geoip-cn,DIRECT,no-resolve
   - RULE-SET,_geoip-telegram@dc1,✈️ TelegramDC1(NA),no-resolve
   - RULE-SET,_geoip-telegram@dc4,✈️ TelegramDC4(EU),no-resolve
@@ -401,9 +403,6 @@ rules:
   - MATCH,🙋 Select
 
 proxy-groups:
-  - name: "🚀 Transport"
-    type: select
-
   - name: "🙋 Select"
     type: select
     proxies:
@@ -460,10 +459,11 @@ dns:
     - "rule-set:geosite-private"
     - "rule-set:geosite-connectivity-check"
     - "rule-set:geosite-netflix"
+    - "rule-set:_geosite-direct"
   nameserver-policy:
     "rule-set:geosite-private": ["system"]
     "rule-set:geosite-connectivity-check": ["system"]
-    "rule-set:geosite-netflix": ["https://1.1.1.1/dns-query#📺 SocialMedia"]
+    "rule-set:geosite-netflix": ["https://1.1.1.1/dns-query#📺 Media-Social"]
   default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
