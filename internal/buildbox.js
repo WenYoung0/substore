@@ -41,10 +41,8 @@ const proxies = await produceArtifact({
       return proxy.properties === undefined || !proxy.properties.hidden;
     };
     const destinationHasTransport = ({ proxy }) => {
-      return (
-        featureTransport.func.isDestionation({ proxy }) &&
-        proxy["dialer-proxy"] !== undefined
-      );
+      const is = featureTransport.func.isDestionation({ proxy });
+      return !is || (is && proxy["dialer-proxy"] !== undefined);
     };
     const out = proxies
       .filter(
