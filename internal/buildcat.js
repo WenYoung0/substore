@@ -32,6 +32,15 @@ const proxies = await produceArtifact({
           },
           ...config["proxy-groups"],
         ];
+      } else {
+        for (proxy of proxies) {
+          if (
+            "dialer-proxy" in proxy &&
+            proxy["dialer-proxy"] === selectorName
+          ) {
+            proxy["dialer-proxy"] = transportGroups[selectorName][0];
+          }
+        }
       }
     });
     return proxies;
@@ -40,14 +49,8 @@ const proxies = await produceArtifact({
     const notHidden = ({ proxy }) => {
       return proxy.properties === undefined || !proxy.properties.hidden;
     };
-    const destinationHasTransport = ({ proxy }) => {
-      const is = featureTransport.func.isDestionation({ proxy });
-      return !is || (is && proxy["dialer-proxy"] !== undefined);
-    };
     const out = proxies
-      .filter(
-        (proxy) => notHidden({ proxy }) && destinationHasTransport({ proxy }),
-      )
+      .filter((proxy) => notHidden({ proxy }))
       .filter((proxy) => proxy.name && proxy.name.length > 0)
       .map((proxy) => proxy.name);
 

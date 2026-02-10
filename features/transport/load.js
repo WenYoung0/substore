@@ -40,11 +40,10 @@ const completeTransport = ({ proxies, detourName }) => {
     );
   }
 
-  const transportProxies = proxies.filter(isTransport);
-  const destinationProxies = proxies.filter(isDestionation);
-
-  if (destinationProxies.length === 0 || transportProxies.length === 0)
-    return {};
+  const transportProxies = proxies.filter((proxy) => isTransport({ proxy }));
+  const destinationProxies = proxies.filter((proxy) =>
+    isDestionation({ proxy }),
+  );
 
   const transportGroups = {};
   for (const tp of transportProxies) {
@@ -87,29 +86,22 @@ const completeTransport = ({ proxies, detourName }) => {
 
     for (const drt of destinationRequiredTransport) {
       const drtName = detourName(drt);
-      if (drtName in transportGroups) {
-        const selectedGroup = transportGroups[drtName];
+      if ([drtName] in transportGroups) {
         dp["dialer-proxy"] = drtName;
-        if (selectedGroup.length === 1) {
-          dp["dialer-proxy"] = selectedGroup[0].name;
-        }
         break;
       }
     }
 
     // Fallback
     if (
-      (!"dialer-proxy") in dp &&
+      !("dialer-proxy" in dp) &&
       typeof dp.properties.destination != "boolean" &&
       dp.properties.destination.require === undefined
     ) {
       for (const loc of ["HK", "JP", "SG", "US"]) {
         const dname = detourName("HK");
-        if (dname in transportGroups) {
+        if ([dname] in transportGroups) {
           dp["dialer-proxy"] = dname;
-          if (transportGroups[dname].length === 1) {
-            dp["dialer-proxy"] = transportGroups[dname][0].name;
-          }
           break;
         }
       }
