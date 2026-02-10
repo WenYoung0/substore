@@ -1,26 +1,28 @@
 const featureLocation = context.young.features.location;
 
-const completeTransport = ({ proxies, detourName }) => {
-  const transportProxies = proxies.filter(
-    (p) =>
-      p.properties !== undefined &&
-      p.properties.transport !== undefined &&
-      ((typeof p.properties.transport === "boolean" &&
-        p.properties.transport) ||
-        p.properties.transport.is),
+const isTransport = ({ proxy }) => {
+  return (
+    proxy !== undefined &&
+    proxy.properties !== undefined &&
+    proxy.properties.transport !== undefined &&
+    ((typeof proxy.properties.transport === "boolean" &&
+      proxy.properties.transport) ||
+      proxy.properties.transport.is)
   );
-  const destinationProxies = proxies.filter(
-    (p) =>
-      p.properties !== undefined &&
-      p.properties.destination !== undefined &&
-      ((typeof p.properties.destination === "boolean" &&
-        p.properties.destination) ||
-        p.properties.destination.is),
-  );
-  if (destinationProxies.length === 0) {
-    return {};
-  }
+};
 
+const isDestionation = ({ proxy }) => {
+  return (
+    proxy !== undefined &&
+    proxy.properties !== undefined &&
+    proxy.properties.destination !== undefined &&
+    ((typeof proxy.properties.destination === "boolean" &&
+      proxy.properties.destination) ||
+      proxy.properties.destination.is)
+  );
+};
+
+const completeTransport = ({ proxies, detourName }) => {
   if (detourName === undefined) {
     detourName = (cca2) => {
       if (cca2 === "") {
@@ -38,14 +40,11 @@ const completeTransport = ({ proxies, detourName }) => {
     );
   }
 
-  if (transportProxies.length === 1) {
-    destinationProxies.map(
-      (p) => (p["dialer-proxy"] = transportProxies[0].name),
-    );
+  const transportProxies = proxies.filter(isTransport);
+  const destinationProxies = proxies.filter(isDestionation);
+
+  if (destinationProxies.length === 0 || transportProxies.length === 0)
     return {};
-  } else if (transportProxies.length === 0) {
-    return {};
-  }
 
   const transportGroups = {};
   for (const tp of transportProxies) {
@@ -123,6 +122,8 @@ const completeTransport = ({ proxies, detourName }) => {
 const transportObj = { load: true, func: {}, const: {} };
 
 transportObj.func.completeTransport = completeTransport;
+transportObj.func.isTransport = isTransport;
+transportObj.func.isDestionation = isDestionation;
 
 context.young = {
   ...(context.young || {}),

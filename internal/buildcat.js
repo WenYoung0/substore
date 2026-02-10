@@ -18,23 +18,57 @@ const proxies = await produceArtifact({
     }),
   )
   .then((proxies) => {
+    const transportGroups = featureTransport.func.completeTransport({
+      proxies: proxies,
+    });
+
+    Object.keys(transportGroups).map((selectorName) => {
+      if (transportGroups[selectorName].length > 1) {
+        config["proxy-groups"] = [
+          {
+            type: "select",
+            name: selectorName,
+            proxies: [...transportGroups[selectorName]],
+          },
+          ...config["proxy-groups"],
+        ];
+      }
+    });
+    return proxies;
+  })
+  .then((proxies) => {
+    const notHidden = ({ proxy }) => {
+      return proxy.properties === undefined || !proxy.properties.hidden;
+    };
+    const destinationHasTransport = ({ proxy }) => {
+      return (
+        featureTransport.func.isDestionation({ proxy }) &&
+        proxy["dialer-proxy"] !== undefined
+      );
+    };
     const out = proxies
-      .filter((p) => p.properties === undefined || !p.properties.hidden)
-      .map((p) => p.name)
-      .filter((p) => p && p.length > 0);
+      .filter(
+        (proxy) => notHidden({ proxy }) && destinationHasTransport({ proxy }),
+      )
+      .filter((proxy) => proxy.name && proxy.name.length > 0)
+      .map((proxy) => proxy.name);
 
     config["proxy-groups"]
       .filter((pg) =>
         ["select", "urltest", "fallback", "load-balance"].includes(pg.type),
       )
-
       .map((selector) => {
-        if (["🤖 AI-Service"].includes(selector.name)) {
-          selector.proxies.push(
-            ...out.filter(
-              (o) => featureLocation.func.getLocation({ name: o }) !== "HK",
-            ),
-          );
+        if (
+          [
+            "🙋 Select",
+            "🔍 Google",
+            "💻 Dev",
+            "🪟 Microsoft",
+            "📺 Media-Social",
+            "🤖 AI-Service",
+          ].includes(selector.tag)
+        ) {
+          selector.proxies.push(...out);
         } else if (["✈️ TelegramDC1(NA)"].includes(selector.name)) {
           selector.proxies.push(
             ...out.filter(
@@ -56,8 +90,6 @@ const proxies = await produceArtifact({
               (o) => featureLocation.func.getArea({ name: o }) === "AREA_ASIA",
             ),
           );
-        } else {
-          selector.proxies.push(...out);
         }
 
         selector.proxies.sort((a, b) => {
@@ -80,22 +112,49 @@ const proxies = await produceArtifact({
     return proxies;
   })
   .then((proxies) => {
-    const transportGroups = featureTransport.func.completeTransport({
-      proxies: proxies,
-    });
-
-    Object.keys(transportGroups).map((selectorName) => {
-      if (transportGroups[selectorName].length > 1) {
-        config["proxy-groups"] = [
-          {
-            type: "select",
-            name: selectorName,
-            proxies: [...transportGroups[selectorName]],
-          },
-          ...config["proxy-groups"],
-        ];
+    const placeHoldDomain =
+      "__this_is_a_placehold_domain_._this_rule_is_generated_by_substore.example.com";
+    const placeHoldIP = "223.5.5.5";
+    const directIP = new Set();
+    const directSite = new Set();
+    for (const proxy of proxies) {
+      if (
+        (!"server") in proxy ||
+        ("dialer-proxy" in proxy && proxy["dialer-proxy"] !== "")
+      ) {
+        continue;
       }
-    });
+      const serverAddr = proxy.server;
+      if (serverAddr.includes(":")) {
+        // IPv6
+        directIP.add(serverAddr);
+      } else {
+        const dots = serverAddr.split(".");
+        if (dots.length === 4 && Number.isInteger(Number(dots[3]))) {
+          directIP.add(serverAddr);
+        } else {
+          directSite.add(serverAddr);
+        }
+      }
+    }
+
+    if (!("rule-providers" in config)) config["rule-providers"] = {};
+    if (directIP.size === 0) directIP.add(placeHoldIP);
+    if (directSite.size === 0) directSite.add(placeHoldDomain);
+
+    config["rule-providers"]["_geoip-direct"] = {
+      type: "inline",
+      behavior: "ipcdir",
+      payload: directIP.map((ip) =>
+        ip.includes(":") ? ip + "/128" : ip + "/32",
+      ),
+    };
+    config["rule-providers"]["_geosite-direct"] = {
+      type: "inline",
+      behavior: "classic",
+      payload: directSite.map((site) => ["DOMAIN", site].join(",")),
+    };
+
     return proxies;
   });
 
@@ -115,5 +174,3 @@ config.proxies = [
 ];
 
 $content = ProxyUtils.yaml.dump(config);
-
-// $content = ProxyUtils.produce([...proxies], productionPlatform)

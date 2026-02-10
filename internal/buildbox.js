@@ -18,20 +18,55 @@ const proxies = await produceArtifact({
     }),
   )
   .then((proxies) => {
+    const transportGroups = featureTransport.func.completeTransport({
+      proxies: proxies,
+    });
+
+    Object.keys(transportGroups).map((selectorName) => {
+      if (transportGroups[selectorName].length > 1) {
+        config.outbounds = [
+          {
+            type: "selector",
+            tag: selectorName,
+            outbounds: [...transportGroups[selectorName]],
+          },
+          ...config.outbounds,
+        ];
+      }
+    });
+    return proxies;
+  })
+  .then((proxies) => {
+    const notHidden = ({ proxy }) => {
+      return proxy.properties === undefined || !proxy.properties.hidden;
+    };
+    const destinationHasTransport = ({ proxy }) => {
+      return (
+        featureTransport.func.isDestionation({ proxy }) &&
+        proxy["dialer-proxy"] !== undefined
+      );
+    };
     const out = proxies
-      .filter((p) => p.properties === undefined || !p.properties.hidden)
-      .map((p) => p.name)
-      .filter((p) => p && p.length > 0);
+      .filter(
+        (proxy) => notHidden({ proxy }) && destinationHasTransport({ proxy }),
+      )
+      .filter((proxy) => proxy.name && proxy.name.length > 0)
+      .map((proxy) => proxy.name);
 
     config.outbounds
       .filter((p) => ["selector", "urltest"].includes(p.type))
       .map((selector) => {
-        if (["🤖 AI-Service"].includes(selector.tag)) {
-          selector.outbounds.push(
-            ...out.filter(
-              (o) => featureLocation.func.getLocation({ name: o }) !== "HK",
-            ),
-          );
+        if (
+          [
+            "🙋 Select",
+            "🔍 Google",
+            "💻 Dev",
+            "🪟 Microsoft",
+            "📺 Media-Social",
+            "🤖 AI-Service",
+          ].includes(selector.tag)
+        ) {
+          selector.outbounds.push(...out);
         } else if (["✈️ TelegramDC1(NA)"].includes(selector.tag)) {
           selector.outbounds.push(
             ...out.filter(
@@ -53,8 +88,6 @@ const proxies = await produceArtifact({
               (o) => featureLocation.func.getArea({ name: o }) === "AREA_ASIA",
             ),
           );
-        } else {
-          selector.outbounds.push(...out);
         }
 
         selector.outbounds.sort((a, b) => {
@@ -77,26 +110,8 @@ const proxies = await produceArtifact({
     return proxies;
   })
   .then((proxies) => {
-    const transportGroups = featureTransport.func.completeTransport({
-      proxies: proxies,
-    });
-
-    Object.keys(transportGroups).map((selectorName) => {
-      if (transportGroups[selectorName].length > 1) {
-        config.outbounds = [
-          {
-            type: "selector",
-            tag: selectorName,
-            outbounds: [...transportGroups[selectorName]],
-          },
-          ...config.outbounds,
-        ];
-      }
-    });
-    return proxies;
-  })
-  .then((proxies) => {
-    const placeHoldDomain = "__this_is_a_placehold_domain_._this_rule_is_generated_by_substore.example.com";
+    const placeHoldDomain =
+      "__this_is_a_placehold_domain_._this_rule_is_generated_by_substore.example.com";
     const placeHoldIP = "223.5.5.5";
     const directIP = new Set();
     const directSite = new Set();
@@ -120,7 +135,7 @@ const proxies = await produceArtifact({
         }
       }
     }
-    if ((!"rule_set") in config.route) config.route["rule_set"] = [];
+    if (!("rule_set" in config.route)) config.route["rule_set"] = [];
     if (directIP.size === 0) directIP.add(placeHoldIP);
     if (directSite.size === 0) directSite.add(placeHoldDomain);
 
@@ -130,7 +145,7 @@ const proxies = await produceArtifact({
         tag: "@geoip-direct",
         rules: [
           {
-            ip_cidr: [...directIP].map((ip) =>
+            ip_cidr: directIP.map((ip) =>
               ip.includes(":") ? ip + "/128" : ip + "/32",
             ),
           },
@@ -141,7 +156,7 @@ const proxies = await produceArtifact({
         tag: "@geosite-direct",
         rules: [
           {
-            domain: [...directSite],
+            domain: directSite,
           },
         ],
       },
