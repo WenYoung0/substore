@@ -145,14 +145,14 @@ const proxies = await produceArtifact({
     config["rule-providers"]["_geoip-direct"] = {
       type: "inline",
       behavior: "ipcdir",
-      payload: directIP.map((ip) =>
+      payload: [...directIP].map((ip) =>
         ip.includes(":") ? ip + "/128" : ip + "/32",
       ),
     };
     config["rule-providers"]["_geosite-direct"] = {
       type: "inline",
       behavior: "classic",
-      payload: directSite.map((site) => ["DOMAIN", site].join(",")),
+      payload: [...directSite].map((site) => ["DOMAIN", site].join(",")),
     };
 
     return proxies;

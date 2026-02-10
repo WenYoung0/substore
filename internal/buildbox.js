@@ -145,7 +145,7 @@ const proxies = await produceArtifact({
         tag: "@geoip-direct",
         rules: [
           {
-            ip_cidr: directIP.map((ip) =>
+            ip_cidr: [...directIP].map((ip) =>
               ip.includes(":") ? ip + "/128" : ip + "/32",
             ),
           },
@@ -156,7 +156,7 @@ const proxies = await produceArtifact({
         tag: "@geosite-direct",
         rules: [
           {
-            domain: directSite,
+            domain: [...directSite],
           },
         ],
       },
