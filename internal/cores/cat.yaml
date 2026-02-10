@@ -366,9 +366,9 @@ rules:
   - AND,((NETWORK,udp),(DST-PORT,67/68/123)),DIRECT
   - AND,((NETWORK,udp),(SRC-PORT,67/68/123)),DIRECT
   - RULE-SET,_geosite-block,REJECT,no-resolve
-  - RULE-SET,_geoip-direct,no-resolve
-  - RULE-SET,geoip-cn,DIRECT,no-resolve
+  - RULE-SET,_geoip-direct,DIRECT,no-resolve
   - RULE-SET,_geosite-direct,DIRECT
+  - RULE-SET,geoip-cn,DIRECT,no-resolve
   - RULE-SET,_geoip-telegram@dc1,✈️ TelegramDC1(NA),no-resolve
   - RULE-SET,_geoip-telegram@dc4,✈️ TelegramDC4(EU),no-resolve
   - RULE-SET,_geoip-telegram@dc5,✈️ TelegramDC5(AP),no-resolve

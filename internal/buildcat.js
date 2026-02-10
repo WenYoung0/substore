@@ -67,7 +67,7 @@ const proxies = await produceArtifact({
             "🪟 Microsoft",
             "📺 Media-Social",
             "🤖 AI-Service",
-          ].includes(selector.tag)
+          ].includes(selector.name)
         ) {
           selector.proxies.push(...out);
         } else if (["✈️ TelegramDC1(NA)"].includes(selector.name)) {
@@ -145,14 +145,14 @@ const proxies = await produceArtifact({
 
     config["rule-providers"]["_geoip-direct"] = {
       type: "inline",
-      behavior: "ipcdir",
+      behavior: "ipcidr",
       payload: [...directIP].map((ip) =>
         ip.includes(":") ? ip + "/128" : ip + "/32",
       ),
     };
     config["rule-providers"]["_geosite-direct"] = {
       type: "inline",
-      behavior: "classic",
+      behavior: "classical",
       payload: [...directSite].map((site) => ["DOMAIN", site].join(",")),
     };
 
