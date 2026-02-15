@@ -22,7 +22,7 @@ const isDestionation = ({ proxy }) => {
   );
 };
 
-const completeTransport = ({ proxies, detourName }) => {
+const completeTransport = ({ proxies, detourName, fallback }) => {
   if (detourName === undefined) {
     detourName = (cca2) => {
       if (cca2 === "") {
@@ -50,59 +50,50 @@ const completeTransport = ({ proxies, detourName }) => {
     const transportLocation = featureLocation.func.getLocation({
       name: tp.name,
     });
-    const generatedDetourName = detourName(transportLocation);
-    if (!Array.isArray(transportGroups[generatedDetourName])) {
-      transportGroups[generatedDetourName] = [];
+
+    if (!Array.isArray(transportGroups[transportLocation])) {
+      const generatedDetourName = detourName(transportLocation);
+      transportGroups[transportLocation] = {
+        use: false,
+        name: generatedDetourName,
+        proxies: [],
+      };
     }
-    transportGroups[generatedDetourName].push(tp.name);
+    transportGroups[transportLocation].proxies.push(tp.name);
   }
 
   for (const dp of destinationProxies) {
-    const destinationRequiredTransport = [];
-    if (typeof dp.properties.destination !== "boolean") {
+    const destinationRequiredLocation = [];
+    if (
+      typeof dp.properties.destination !== "boolean" &&
+      dp.properties.destination.require !== undefined
+    ) {
       if (typeof dp.properties.destination.require === "string")
-        destinationRequiredTransport.push(dp.properties.destination.require);
+        destinationRequiredLocation.push(dp.properties.destination.require);
       else if (Array.isArray(dp.properties.destination.require))
-        destinationRequiredTransport.push(...dp.properties.destination.require);
-
-      if (typeof dp.properties.destination.suits === "string")
-          destinationRequiredTransport.push(dp.properties.destination.suits);
-        else if (Array.isArray(dp.properties.destination.suits))
-          destinationRequiredTransport.push(...dp.properties.destination.suits);
-
-        const destinationLocation = featureLocation.func.getLocation({
-          name: dp.name,
-        });
-        if (destinationLocation !== "")
-          destinationRequiredTransport.push(destinationLocation);
+        destinationRequiredLocation.push(...dp.properties.destination.require);
     } else {
       const destinationLocation = featureLocation.func.getLocation({
         name: dp.name,
       });
       if (destinationLocation !== "")
-        destinationRequiredTransport.push(destinationLocation);
+        destinationRequiredLocation.push(destinationLocation);
+
+      if (typeof dp.properties.destination.suits === "string")
+        destinationRequiredLocation.push(dp.properties.destination.suits);
+      else if (Array.isArray(dp.properties.destination.suits))
+        destinationRequiredLocation.push(...dp.properties.destination.suits);
+      if (Array.isArray(fallback))
+        destinationRequiredLocation.push(...fallback);
     }
 
-    for (const drt of destinationRequiredTransport) {
-      const drtName = detourName(drt);
-      if ([drtName] in transportGroups) {
-        dp["dialer-proxy"] = drtName;
+    for (const loc of destinationRequiredLocation) {
+      if ([loc] in transportGroups) {
+        const selected = transportGroups[loc];
+        selected.use = true;
+        dp["dialer-proxy"] =
+          selected.proxies.length > 1 ? selected.name : selected.proxies[0];
         break;
-      }
-    }
-
-    // Fallback
-    if (
-      !("dialer-proxy" in dp) &&
-      typeof dp.properties.destination != "boolean" &&
-      dp.properties.destination.require === undefined
-    ) {
-      for (const loc of ["HK", "JP", "SG", "US"]) {
-        const dname = detourName("HK");
-        if ([dname] in transportGroups) {
-          dp["dialer-proxy"] = dname;
-          break;
-        }
       }
     }
   }
@@ -110,9 +101,16 @@ const completeTransport = ({ proxies, detourName }) => {
   return transportGroups;
 };
 
+const removeInvalidDestination = ({ proxies }) => {
+  return proxies.filter(
+    (proxy) => !isDestionation({ proxy }) || "dialer-proxy" in proxy,
+  );
+};
+
 const transportObj = { load: true, func: {}, const: {} };
 
 transportObj.func.completeTransport = completeTransport;
+transportObj.func.removeInvalidDestination = removeInvalidDestination;
 transportObj.func.isTransport = isTransport;
 transportObj.func.isDestionation = isDestionation;
 

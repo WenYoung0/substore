@@ -23,34 +23,23 @@ const proxies = await produceArtifact({
   .then((proxies) => {
     const transportGroups = featureTransport.func.completeTransport({
       proxies: proxies,
+      fallback: ["HK", "JP", "SG", "US"],
     });
 
     Object.keys(transportGroups).map((selectorName) => {
-      if (transportGroups[selectorName].length > 1) {
+      const selected = transportGroups[selectorName];
+      if (selected.use && selected.proxies.length > 1) {
         config["proxy-groups"] = [
           {
             type: "select",
-            name: selectorName,
-            proxies: [...transportGroups[selectorName]],
+            name: selected.name,
+            proxies: [...selected.proxies],
           },
           ...config["proxy-groups"],
         ];
-      } else {
-        for (proxy of proxies) {
-          if (
-            "dialer-proxy" in proxy &&
-            proxy["dialer-proxy"] === selectorName
-          ) {
-            proxy["dialer-proxy"] = transportGroups[selectorName][0];
-          }
-        }
       }
     });
-    return proxies.filter(
-      (proxy) =>
-        !featureTransport.func.isDestionation({ proxy }) ||
-        "dialer-proxy" in proxy,
-    );
+    return featureTransport.func.removeInvalidDestination({ proxies });
   })
   .then((proxies) => {
     const notHidden = ({ proxy }) => {
