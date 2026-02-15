@@ -1,8 +1,7 @@
-const config = ProxyUtils.yaml.safeLoad($files[0]);
-
 const featureTransport = context.young.features.transport;
 const featureLocation = context.young.features.location;
 
+const config = ProxyUtils.yaml.safeLoad($files[0]);
 const productionPlatform = "mihomo";
 
 const proxies = await produceArtifact({
@@ -11,15 +10,7 @@ const proxies = await produceArtifact({
   platform: "json",
   produceType: "internal",
 })
-  .then((proxies) =>
-    proxies.map((p) => {
-      if (p.properties !== undefined && p.properties.provider !== undefined) {
-        p.name = [p.properties.provider, p.name].join("/");
-      }
-      p.name = p.name.trim();
-      return p;
-    }),
-  )
+  .then((proxies) => featureBeautify.func.sortProxies({ proxies }))
   .then((proxies) => {
     const transportGroups = featureTransport.func.completeTransport({
       proxies: proxies,
@@ -88,23 +79,6 @@ const proxies = await produceArtifact({
             ),
           );
         }
-
-        selector.proxies.sort((a, b) => {
-          const special = ["DIRECT", "🙋 Select"];
-          if (special.includes(a) && !special.includes(b)) {
-            return -1;
-          }
-          if (!special.includes(a) && special.includes(b)) {
-            return 1;
-          }
-
-          const locationDiff =
-            featureLocation.func.getOrder({ name: a }) -
-            featureLocation.func.getOrder({ name: b });
-          if (locationDiff !== 0) return locationDiff;
-
-          return a.localeCompare(b);
-        });
       });
     return proxies;
   })
