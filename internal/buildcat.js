@@ -1,5 +1,6 @@
 const featureTransport = context.young.features.transport;
 const featureLocation = context.young.features.location;
+const featureBeautify = context.young.features.beautify;
 
 const config = ProxyUtils.yaml.safeLoad($files[0]);
 const productionPlatform = "mihomo";
