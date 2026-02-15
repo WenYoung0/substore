@@ -13,6 +13,9 @@ const proxies = await produceArtifact({
 })
   .then((proxies) =>
     proxies.map((p) => {
+      if (p.properties !== undefined && p.properties.provider !== undefined) {
+        p.name = [p.properties.provider, p.name].join("/");
+      }
       p.name = p.name.trim();
       return p;
     }),

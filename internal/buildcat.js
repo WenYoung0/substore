@@ -13,6 +13,9 @@ const proxies = await produceArtifact({
 })
   .then((proxies) =>
     proxies.map((p) => {
+      if (p.properties !== undefined && p.properties.provider !== undefined) {
+        p.name = [p.properties.provider, p.name].join("/");
+      }
       p.name = p.name.trim();
       return p;
     }),
@@ -43,7 +46,11 @@ const proxies = await produceArtifact({
         }
       }
     });
-    return proxies;
+    return proxies.filter(
+      (proxy) =>
+        !featureTransport.func.isDestionation({ proxy }) ||
+        "dialer-proxy" in proxy,
+    );
   })
   .then((proxies) => {
     const notHidden = ({ proxy }) => {

@@ -65,17 +65,16 @@ const completeTransport = ({ proxies, detourName }) => {
       else if (Array.isArray(dp.properties.destination.require))
         destinationRequiredTransport.push(...dp.properties.destination.require);
 
-      if (dp.properties.destination.require === undefined) {
+      if (typeof dp.properties.destination.suits === "string")
+          destinationRequiredTransport.push(dp.properties.destination.suits);
+        else if (Array.isArray(dp.properties.destination.suits))
+          destinationRequiredTransport.push(...dp.properties.destination.suits);
+
         const destinationLocation = featureLocation.func.getLocation({
           name: dp.name,
         });
         if (destinationLocation !== "")
           destinationRequiredTransport.push(destinationLocation);
-        if (typeof dp.properties.destination.suits === "string")
-          destinationRequiredTransport.push(dp.properties.destination.suits);
-        else if (Array.isArray(dp.properties.destination.suits))
-          destinationRequiredTransport.push(...dp.properties.destination.suits);
-      }
     } else {
       const destinationLocation = featureLocation.func.getLocation({
         name: dp.name,
