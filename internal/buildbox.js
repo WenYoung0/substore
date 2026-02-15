@@ -11,15 +11,46 @@ const proxies = await produceArtifact({
   platform: "json",
   produceType: "internal",
 })
-  .then((proxies) =>
-    proxies.map((p) => {
-      if (p.properties !== undefined && p.properties.provider !== undefined) {
-        p.name = [p.properties.provider, p.name].join("/");
+  .then((proxies) => {
+    const emptyProviderKey = "_empty";
+    const providerList = {};
+    const finalProxies = [];
+    for (const proxy of proxies) {
+      let providerName = emptyProviderKey;
+      if (
+        proxy.properties !== undefined &&
+        proxy.properties.provider !== undefined
+      ) {
+        providerName = proxy.properties.provider;
+        proxy.name = [providerName, proxy.name].join("/");
       }
-      p.name = p.name.trim();
-      return p;
-    }),
-  )
+      if (!Array.isArray(providerList[providerName]))
+        providerList[providerName] = [];
+      providerList[providerName].push(proxy);
+      proxy.name = proxy.name.trim();
+    }
+    Object.keys(providerList)
+      .sort((a, b) => {
+        return a.localeCompare(b);
+      })
+      .map((providerName) => {
+        const providerSet = providerList[providerName];
+        providerSet.sort((a, b) => {
+          const locationDiff =
+            featureLocation.func.getOrder({ name: a.name }) -
+            featureLocation.func.getOrder({ name: b.name });
+          if (locationDiff !== 0) return locationDiff;
+
+          return a.name.localeCompare(b.name);
+        });
+        return providerSet;
+      })
+      .map((providerSet) => {
+        finalProxies.push(...providerSet);
+      });
+
+    return finalProxies;
+  })
   .then((proxies) => {
     const transportGroups = featureTransport.func.completeTransport({
       proxies: proxies,
@@ -88,23 +119,6 @@ const proxies = await produceArtifact({
             ),
           );
         }
-
-        selector.outbounds.sort((a, b) => {
-          const special = ["Direct", "🙋 Select"];
-          if (special.includes(a) && !special.includes(b)) {
-            return -1;
-          }
-          if (!special.includes(a) && special.includes(b)) {
-            return 1;
-          }
-
-          const locationDiff =
-            featureLocation.func.getOrder({ name: a }) -
-            featureLocation.func.getOrder({ name: b });
-          if (locationDiff !== 0) return locationDiff;
-
-          return a.localeCompare(b);
-        });
       });
     return proxies;
   })

@@ -51,11 +51,10 @@ const completeTransport = ({ proxies, detourName, fallback }) => {
       name: tp.name,
     });
 
-    if (!Array.isArray(transportGroups[transportLocation])) {
-      const generatedDetourName = detourName(transportLocation);
+    if (transportGroups[transportLocation] === undefined) {
       transportGroups[transportLocation] = {
         use: false,
-        name: generatedDetourName,
+        name: detourName(transportLocation),
         proxies: [],
       };
     }
