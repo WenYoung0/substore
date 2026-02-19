@@ -1,6 +1,7 @@
 const featureTransport = context.young.features.transport;
 const featureLocation = context.young.features.location;
 const featureBeautify = context.young.features.beautify;
+const secretPatch = context.secret?.patch;
 
 const config = JSON.parse($files[0]);
 const productionPlatform = "sing-box";
@@ -84,9 +85,6 @@ const proxies = await produceArtifact({
     return proxies;
   })
   .then((proxies) => {
-    const placeHoldDomain =
-      "__this_is_a_placehold_domain_._this_rule_is_generated_by_substore.example.com";
-    const placeHoldIP = "223.5.5.5";
     const directIP = new Set();
     const directSite = new Set();
     for (const proxy of proxies) {
@@ -100,47 +98,48 @@ const proxies = await produceArtifact({
       if (serverAddr.includes(":")) {
         // IPv6
         directIP.add(serverAddr);
-      } else {
-        const dots = serverAddr.split(".");
-        if (dots.length === 4 && Number.isInteger(Number(dots[3]))) {
-          directIP.add(serverAddr);
-        } else {
-          directSite.add(serverAddr);
-        }
+        continue;
       }
-    }
-    if (!("rule_set" in config.route)) config.route["rule_set"] = [];
-    if (directIP.size === 0) directIP.add(placeHoldIP);
-    if (directSite.size === 0) directSite.add(placeHoldDomain);
 
-    config.route["rule_set"].push(
-      {
-        type: "inline",
-        tag: "@geoip-direct",
-        rules: [
-          {
-            ip_cidr: [...directIP].map((ip) =>
-              ip.includes(":") ? ip + "/128" : ip + "/32",
-            ),
-          },
-        ],
-      },
-      {
-        type: "inline",
-        tag: "@geosite-direct",
-        rules: [
-          {
-            domain: [...directSite],
-          },
-        ],
-      },
-    );
+      const dots = serverAddr.split(".");
+      if (dots.length === 4 && Number.isInteger(Number(dots[3])))
+        directIP.add(serverAddr); // IPv4
+      else directSite.add(serverAddr); // Domain
+    }
+
+    config.route?.rule_set?.map((rs) => {
+      if (rs.tag === "@geosite-direct" && directSite.size > 0) {
+        rs.rules[0].domain = [
+          ...(rs.rules[0].domain ?? []),
+          ...[...directSite],
+        ];
+      }
+
+      if (rs.tag === "@geoip-direct" && directIP.size > 0) {
+        rs.rules[0].ip_cidr = [
+          ...(rs.rules[0].ip_cidr ?? []),
+          ...[...directIP].map((ip) =>
+            ip.includes(":") ? ip + "/128" : ip + "/32",
+          ),
+        ];
+      }
+    });
 
     return proxies;
   });
 
-config.outbounds.push(
+config.outbounds = [
+  ...(config.outbounds ?? []),
   ...JSON.parse(ProxyUtils.produce([...proxies], productionPlatform)).outbounds,
-);
+];
+featureBeautify.func.completeRemoteRuleSetBox({
+  config: config,
+  downloadDetour: "direct-bootstrap",
+  geoipURL: (ruleSetName) =>
+    "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/srs/" +
+    ruleSetName.slice(ruleSetName.indexOf("-") + 1, ruleSetName.length) +
+    ".srs",
+});
 
+if (typeof secretPatch === "function") secretPatch({ config, proxies });
 $content = JSON.stringify(config, null, 2);
