@@ -54,7 +54,7 @@ const proxies = await produceArtifact({
             "🔍 Google",
             "💻 Dev",
             "🪟 Microsoft",
-            "📺 Media-Social",
+            "📺 Entertainment",
             "🤖 AI-Service",
           ].includes(selector.tag)
         ) {
