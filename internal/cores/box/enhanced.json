@@ -24,7 +24,10 @@
       { "clash_mode": "Global", "server": "dns-remote" },
       { "rule_set": "@geosite-block", "action": "reject" },
       { "rule_set": "geosite-private", "server": "dns-local" },
-      { "rule_set": "geosite-netflix", "server": "dns-remote" },
+      {
+        "rule_set": ["geosite-netflix", "@geosite-netflix-detect"],
+        "server": "dns-remote"
+      },
       {
         "domain_suffix": "cn",
         "rule_set": [
@@ -114,6 +117,7 @@
         "rule_set": ["geosite-private", "@geosite-direct"],
         "outbound": "Direct"
       },
+      { "rule_set": "@geosite-netflix-detect", "outbound": "🙋 Select" },
       { "rule_set": "geosite-telegram", "outbound": "✈️ TelegramDC4(EU)" },
       {
         "rule_set": ["@geosite-category-ai-!cn", "geosite-category-ai-!cn"],
@@ -170,7 +174,16 @@
     "rule_set": [
       {
         "type": "inline",
-        "tag": "@geosite-stream",
+        "tag": "@geosite-geolocation-eu",
+        "rules": [
+          {
+            "domain_suffix": ["iwara.tv"]
+          }
+        ]
+      },
+      {
+        "type": "inline",
+        "tag": "@geosite-netflix-detect",
         "rules": [
           {
             "domain": [

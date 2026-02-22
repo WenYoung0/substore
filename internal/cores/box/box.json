@@ -30,7 +30,19 @@
         "detour": "🪟 Microsoft"
       },
       {
-        "tag": "dns-telegram",
+        "tag": "dns-asia",
+        "type": "https",
+        "server": "1.1.1.1",
+        "detour": "✈️ TelegramDC5(AS)"
+      },
+      {
+        "tag": "dns-north_america",
+        "type": "https",
+        "server": "1.1.1.1",
+        "detour": "✈️ TelegramDC1(NA)"
+      },
+      {
+        "tag": "dns-europe",
         "type": "https",
         "server": "1.1.1.1",
         "detour": "✈️ TelegramDC4(EU)"
@@ -56,6 +68,7 @@
       { "rule_set": "@geosite-block", "action": "reject" },
       { "rule_set": "geosite-private", "server": "dns-local" },
       { "rule_set": "geosite-microsoft@cn", "server": "dns-cn" },
+      { "rule_set": "@geosite-netflix-detect", "server": "dns-final" },
       {
         "rule_set": ["@geosite-category-ai-!cn", "geosite-category-ai-!cn"],
         "action": "route",
@@ -104,9 +117,9 @@
         "server": "dns-cn"
       },
       {
-        "rule_set": "geosite-telegram",
+        "rule_set": ["geosite-telegram", "@geosite-geolocation-eu"],
         "action": "route",
-        "server": "dns-telegram"
+        "server": "dns-europe"
       },
       {
         "rule_set": [
@@ -141,7 +154,12 @@
         "action": "route",
         "outbound": "Direct"
       },
-      { "port": 53, "action": "hijack-dns" },
+      {
+        "type": "logical",
+        "mode": "or",
+        "rules": [{ "inbound": ["dns-in"] }, { "port": 53 }],
+        "action": "hijack-dns"
+      },
       { "clash_mode": "Global", "action": "route", "outbound": "🙋 Select" },
       { "ip_is_private": true, "action": "route", "outbound": "Direct" },
       {
@@ -154,16 +172,28 @@
       { "rule_set": "@geoip-telegram@dc4", "outbound": "✈️ TelegramDC4(EU)" },
       { "rule_set": "@geoip-telegram@dc5", "outbound": "✈️ TelegramDC5(AP)" },
       {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "inbound": ["mixed-in"],
+            "invert": true
+          }
+        ],
         "action": "sniff",
         "sniffer": ["http", "tls", "quic", "ssh"],
         "timeout": "50ms"
       },
       { "rule_set": "@geosite-block", "action": "reject" },
+      { "rule_set": "@geosite-netflix-detect", "outbound": "🙋 Select" },
       {
         "rule_set": ["geosite-private", "@geosite-direct"],
         "outbound": "Direct"
       },
-      { "rule_set": "geosite-telegram", "outbound": "✈️ TelegramDC4(EU)" },
+      {
+        "rule_set": ["geosite-telegram", "@geosite-geolocation-eu"],
+        "outbound": "✈️ TelegramDC4(EU)"
+      },
       {
         "rule_set": ["@geosite-category-ai-!cn", "geosite-category-ai-!cn"],
         "outbound": "🤖 AI-Service"
@@ -219,7 +249,7 @@
     "rule_set": [
       {
         "type": "inline",
-        "tag": "@geosite-stream",
+        "tag": "@geosite-netflix-detect",
         "rules": [
           {
             "domain": [
@@ -231,8 +261,12 @@
       },
       {
         "type": "inline",
-        "tag": "@fakeip-filter",
-        "rules": [{ "domain_suffix": ["lancache.steamcontent.com"] }]
+        "tag": "@geosite-geolocation-eu",
+        "rules": [
+          {
+            "domain_suffix": ["iwara.tv"]
+          }
+        ]
       },
       {
         "type": "inline",
