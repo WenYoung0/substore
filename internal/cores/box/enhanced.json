@@ -47,7 +47,8 @@
           "@geosite-steam@cn",
           "@geosite-direct",
           "@geosite-duolingo@cn",
-          "@geosite-jetbrains@cn"
+          "@geosite-jetbrains@cn",
+          "@geosite-google-play@cn"
         ],
         "server": "dns-cn"
       },
@@ -95,7 +96,12 @@
         "action": "route",
         "outbound": "Direct"
       },
-      { "port": 53, "action": "hijack-dns" },
+      {
+        "type": "logical",
+        "mode": "or",
+        "rules": [{ "inbound": ["dns-in"] }, { "port": 53 }],
+        "action": "hijack-dns"
+      },
       { "clash_mode": "Global", "action": "route", "outbound": "🙋 Select" },
       { "ip_is_private": true, "action": "route", "outbound": "Direct" },
       {
@@ -108,17 +114,32 @@
       { "rule_set": "@geoip-telegram@dc4", "outbound": "✈️ TelegramDC4(EU)" },
       { "rule_set": "@geoip-telegram@dc5", "outbound": "✈️ TelegramDC5(AP)" },
       {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "inbound": ["mixed-in"],
+            "invert": true
+          }
+        ],
         "action": "sniff",
         "sniffer": ["http", "tls", "quic", "ssh"],
         "timeout": "50ms"
       },
       { "rule_set": "@geosite-block", "action": "reject" },
+      { "rule_set": "@geosite-netflix-detect", "outbound": "🙋 Select" },
       {
-        "rule_set": ["geosite-private", "@geosite-direct"],
+        "rule_set": [
+          "geosite-private",
+          "@geosite-direct",
+          "@geosite-google-play@cn"
+        ],
         "outbound": "Direct"
       },
-      { "rule_set": "@geosite-netflix-detect", "outbound": "🙋 Select" },
-      { "rule_set": "geosite-telegram", "outbound": "✈️ TelegramDC4(EU)" },
+      {
+        "rule_set": ["geosite-telegram", "@geosite-geolocation-eu"],
+        "outbound": "✈️ TelegramDC4(EU)"
+      },
       {
         "rule_set": ["@geosite-category-ai-!cn", "geosite-category-ai-!cn"],
         "outbound": "🤖 AI-Service"
@@ -189,6 +210,18 @@
             "domain": [
               "android.ngp.prod.cloud.netflix.com",
               "ios.ngp.prod.cloud.netflix.com"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "inline",
+        "tag": "@geosite-google-play@cn",
+        "rules": [
+          {
+            "domain": "redirector.c.play.google.com",
+            "domain_regex": [
+              "^r+[0-9]+(---|\\.)sn-(2x3|ni5|j5o)\\w{5}\\.xn--ngstr-lra8j\\.com$"
             ]
           }
         ]

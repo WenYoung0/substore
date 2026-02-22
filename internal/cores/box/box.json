@@ -84,6 +84,11 @@
         "server": "dns-dev"
       },
       {
+        "rule_set": "@geosite-google-play@cn",
+        "action": "route",
+        "server": "dns-cn"
+      },
+      {
         "rule_set": ["geosite-google"],
         "action": "route",
         "server": "dns-google"
@@ -187,7 +192,11 @@
       { "rule_set": "@geosite-block", "action": "reject" },
       { "rule_set": "@geosite-netflix-detect", "outbound": "🙋 Select" },
       {
-        "rule_set": ["geosite-private", "@geosite-direct"],
+        "rule_set": [
+          "geosite-private",
+          "@geosite-direct",
+          "@geosite-google-play@cn"
+        ],
         "outbound": "Direct"
       },
       {
@@ -372,6 +381,18 @@
         "rules": [
           {
             "domain_suffix": ["duolingo.cn"]
+          }
+        ]
+      },
+      {
+        "type": "inline",
+        "tag": "@geosite-google-play@cn",
+        "rules": [
+          {
+            "domain": "redirector.c.play.google.com",
+            "domain_regex": [
+              "^r+[0-9]+(---|\\.)sn-(2x3|ni5|j5o)\\w{5}\\.xn--ngstr-lra8j\\.com$"
+            ]
           }
         ]
       },
