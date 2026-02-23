@@ -52,7 +52,7 @@ const proxies = await produceArtifact({
           [
             "🙋 Select",
             "🔍 Google",
-            "🐈 Git,SSH",
+            "🐈 Git",
             "🪟 Microsoft",
             "📺 Entertainment",
             "🤖 AI-Service",
