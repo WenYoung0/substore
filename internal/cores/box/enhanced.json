@@ -110,9 +110,9 @@
         "outbound": "Direct"
       },
       { "port": [80, 443], "network": "udp", "action": "reject" },
+      { "rule_set": "@geoip-telegram@dc5", "outbound": "✈️ TelegramDC5(AP)" },
       { "rule_set": "@geoip-telegram@dc1", "outbound": "✈️ TelegramDC1(NA)" },
       { "rule_set": "@geoip-telegram@dc4", "outbound": "✈️ TelegramDC4(EU)" },
-      { "rule_set": "@geoip-telegram@dc5", "outbound": "✈️ TelegramDC5(AP)" },
       {
         "type": "logical",
         "mode": "and",
@@ -145,12 +145,20 @@
         "outbound": "🤖 AI-Service"
       },
       {
-        "rule_set": [
-          "@geosite-category-dev",
-          "geosite-category-dev",
-          "geosite-category-tech-media"
+        "type": "logical",
+        "mode": "or",
+        "rules": [
+          {
+            "rule_set": [
+              "@geosite-category-dev",
+              "geosite-github",
+              "geosite-gitlab",
+              "geosite-category-tech-media"
+            ]
+          },
+          { "protocol": "ssh" }
         ],
-        "outbound": "💻 Dev"
+        "outbound": "🐈 Git,SSH"
       },
       { "rule_set": "geosite-google", "outbound": "🔍 Google" },
       { "rule_set": "geosite-microsoft@cn", "outbound": "Direct" },
@@ -195,12 +203,8 @@
     "rule_set": [
       {
         "type": "inline",
-        "tag": "@geosite-geolocation-eu",
-        "rules": [
-          {
-            "domain_suffix": ["iwara.tv"]
-          }
-        ]
+        "tag": "@fakeip-filter",
+        "rules": [{ "domain_suffix": ["lancache.steamcontent.com"] }]
       },
       {
         "type": "inline",
@@ -216,20 +220,12 @@
       },
       {
         "type": "inline",
-        "tag": "@geosite-google-play@cn",
+        "tag": "@geosite-geolocation-eu",
         "rules": [
           {
-            "domain": "redirector.c.play.google.com",
-            "domain_regex": [
-              "^r+[0-9]+(---|\\.)sn-(2x3|ni5|j5o)\\w{5}\\.xn--ngstr-lra8j\\.com$"
-            ]
+            "domain_suffix": ["iwara.tv"]
           }
         ]
-      },
-      {
-        "type": "inline",
-        "tag": "@fakeip-filter",
-        "rules": [{ "domain_suffix": ["lancache.steamcontent.com"] }]
       },
       {
         "type": "inline",
@@ -237,78 +233,51 @@
         "rules": [
           {
             "domain_suffix": [
-              "bitbucket.org",
-              "api.bitbucket.org",
               "dev.azure.com",
-              "visualstudio.com",
               "codecommit.amazonaws.com",
               "source.developers.google.com",
               "sourcerepo.googleapis.com",
-              "codeberg.org",
               "gitlab.freedesktop.org",
               "git.kernel.org",
-              "savannah.gnu.org",
               "git.savannah.gnu.org",
-              "pagure.io",
-              "src.fedoraproject.org",
-              "sourceforge.net",
               "git.code.sf.net",
-              "repo.or.cz",
-              "launchpad.net",
-              "assembla.com",
-              "beanstalkapp.com",
-              "codebase.io",
-              "plan.io",
-              "rhodecode.com",
               "git.sr.ht",
-              "sr.ht",
-              "notabug.org",
-              "framagit.org",
-              "proxy.golang.org",
-              "pkg.go.dev",
-              "services.gradle.org",
-              "plugins.gradle.org",
-              "registry.npmjs.org",
-              "pypi.org",
-              "files.pythonhosted.org",
-              "repo.maven.apache.org",
-              "central.sonatype.com",
-              "search.maven.org",
-              "hub.docker.com",
-              "registry.hub.docker.com",
-              "crates.io",
-              "static.crates.io",
-              "rubygems.org",
-              "packagist.org",
-              "nuget.org",
-              "api.nuget.org",
-              "developer.mozilla.org",
-              "learn.microsoft.com",
-              "docs.python.org",
-              "docs.rust-lang.org",
               "godoc.org",
               "gitea.io",
               "gittea.com",
               "cgit.freedesktop.org",
-              "invent.kde.org",
               "salsa.debian.org",
               "gitlab.gnome.org",
               "gitlab.alpinelinux.org",
-              "code.qt.io",
-              "hg.sr.ht",
-              "maven.org",
-              "jcenter.bintray.com",
-              "jitpack.io",
-              "bintray.com",
-              "oss.sonatype.org",
-              "clojars.org",
-              "hex.pm",
-              "pub.dev",
-              "cocoapods.org",
-              "cdn.jsdelivr.net",
-              "cdnjs.cloudflare.com",
-              "unpkg.com",
-              "yarnpkg.com"
+              "bitbucket.org",
+              "pagure.io",
+              "codeberg.org",
+              "android.googlesource.com",
+              "chromium.googlesource.com",
+              "git.postgresql.org",
+              "git.php.net",
+              "git.eclipse.org",
+              "git.webkit.org",
+              "git.freebsd.org",
+              "git.openbsd.org",
+              "git.apache.org",
+              "git.torproject.org",
+              "repo.or.cz",
+              "framagit.org",
+              "notabug.org",
+              "gitgud.io",
+              "gerrit.googlesource.com",
+              "git.blender.org",
+              "git.drupal.org",
+              "git.ruby-lang.org",
+              "git.python.org",
+              "git.zx2c4.com",
+              "git.busybox.net",
+              "git.samba.org",
+              "repo.gentoo.org",
+              "invent.kde.org",
+              "git.ozlabs.org",
+              "git.infradead.org"
             ]
           }
         ]
@@ -335,6 +304,18 @@
         "rules": [
           {
             "domain_suffix": ["duolingo.cn"]
+          }
+        ]
+      },
+      {
+        "type": "inline",
+        "tag": "@geosite-google-play@cn",
+        "rules": [
+          {
+            "domain": "redirector.c.play.google.com",
+            "domain_regex": [
+              "^r+[0-9]+(---|\\.)sn-(2x3|ni5|j5o)\\w{5}\\.xn--ngstr-lra8j\\.com$"
+            ]
           }
         ]
       },
@@ -379,15 +360,15 @@
         "rules": [
           {
             "ip_cidr": [
-              "5.28.192.0/18",
               "91.105.192.0/23",
               "91.108.4.0/22",
               "91.108.8.0/22",
               "91.108.56.0/22",
               "95.161.64.0/20",
-              "109.239.140.0/24",
               "149.154.160.0/21",
               "185.76.151.0/24",
+              "5.28.192.0/18",
+              "109.239.140.0/24",
               "2001:67c:4e8::/48",
               "2a0a:f280:203::/48"
             ]
@@ -452,10 +433,7 @@
     "clash_api": {
       "external_controller": "127.0.0.1:19091",
       "default_mode": "Enhanced",
-      "secret": "20002000",
-      "external_ui": "zashboard",
-      "external_ui_download_url": "https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip",
-      "external_ui_download_detour": "direct-bootstrap"
+      "secret": "20002000"
     }
   },
   "inbounds": [
@@ -509,7 +487,7 @@
     },
     {
       "type": "selector",
-      "tag": "💻 Dev",
+      "tag": "🐈 Git,SSH",
       "outbounds": ["🙋 Select"],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
