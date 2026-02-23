@@ -145,20 +145,13 @@
         "outbound": "🤖 AI-Service"
       },
       {
-        "type": "logical",
-        "mode": "or",
-        "rules": [
-          {
-            "rule_set": [
-              "@geosite-category-dev",
-              "geosite-github",
-              "geosite-gitlab",
-              "geosite-category-tech-media"
-            ]
-          },
-          { "protocol": "ssh" }
+        "rule_set": [
+          "@geosite-category-dev",
+          "geosite-github",
+          "geosite-gitlab",
+          "geosite-category-tech-media"
         ],
-        "outbound": "🐈 Git,SSH"
+        "outbound": "🐈 Git"
       },
       { "rule_set": "geosite-google", "outbound": "🔍 Google" },
       { "rule_set": "geosite-microsoft@cn", "outbound": "Direct" },
@@ -487,7 +480,7 @@
     },
     {
       "type": "selector",
-      "tag": "🐈 Git,SSH",
+      "tag": "🐈 Git",
       "outbounds": ["🙋 Select"],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
