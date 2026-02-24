@@ -161,7 +161,7 @@
       { "clash_mode": "Global", "action": "route", "outbound": "🙋 Select" },
       {
         "inbound": ["mixed-in"],
-        "action": "resolv",
+        "action": "resolve",
         "strategy": "prefer_ipv4"
       },
       { "ip_is_private": true, "action": "route", "outbound": "Direct" },
