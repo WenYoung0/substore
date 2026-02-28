@@ -61,6 +61,20 @@
       }
     ],
     "rules": [
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "default_interface_address": ["2000::/3"],
+            "invert": true
+          },
+          {
+            "ip_version": 6
+          }
+        ],
+        "action": "reject"
+      },
       { "clash_mode": "Direct", "server": "dns-cn" },
       { "query_type": ["HTTPS", "SVCB"], "action": "reject" },
       { "clash_mode": "Global", "server": "dns-final" },
@@ -142,6 +156,22 @@
   },
   "route": {
     "rules": [
+      { "network": "icmp", "outbound": "Direct" },
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "ip_is_private": true,
+            "default_interface_address": ["2000::/3"],
+            "invert": true
+          },
+          {
+            "ip_version": 6
+          }
+        ],
+        "action": "reject"
+      },
       {
         "type": "logical",
         "mode": "or",
@@ -327,7 +357,13 @@
         "type": "inline",
         "tag": "@geosite-block",
         "rules": [
-          { "domain": ["dns.weixin.qq.com", "api.installer.xiaomi.com"] }
+          {
+            "domain": [
+              "dns.weixin.qq.com",
+              "api.installer.xiaomi.com",
+              "userlocation.googleapis.com"
+            ]
+          }
         ]
       },
       {

@@ -12,13 +12,33 @@
         "detour": "🙋 Select"
       },
       {
+        "tag": "dns-entertainment",
+        "type": "https",
+        "server": "8.8.8.8",
+        "detour": "📺 Entertainment"
+      },
+      {
         "tag": "dns-fake",
         "type": "fakeip",
-        "inet4_range": "32.81.0.0/16",
-        "inet6_range": "5f00:7a61:b56:2170::/92"
+        "inet4_range": "11.45.14.0/22",
+        "inet6_range": "c19:19:8:10::/92"
       }
     ],
     "rules": [
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "default_interface_address": ["2000::/3"],
+            "invert": true
+          },
+          {
+            "query_type": "AAAA"
+          }
+        ],
+        "action": "reject"
+      },
       { "clash_mode": "Direct", "server": "dns-cn" },
       { "query_type": ["HTTPS", "SVCB"], "action": "reject" },
       { "clash_mode": "Global", "server": "dns-remote" },
@@ -26,7 +46,7 @@
       { "rule_set": "geosite-private", "server": "dns-local" },
       {
         "rule_set": ["geosite-netflix", "@geosite-netflix-detect"],
-        "server": "dns-remote"
+        "server": "dns-entertainment"
       },
       {
         "rule_set": [
@@ -58,7 +78,11 @@
         "mode": "and",
         "rules": [
           { "rule_set": "geosite-geolocation-!cn", "invert": true },
-          { "rule_set": ["geoip-cn", "@geoip-direct"] }
+          {
+            "rule_set": ["geoip-cn", "@geoip-direct"],
+            "rule_set_ip_cidr_accept_empty": true,
+            "ip_is_private": true
+          }
         ],
         "server": "dns-cn"
       },
@@ -80,6 +104,22 @@
   },
   "route": {
     "rules": [
+      { "network": "icmp", "outbound": "Direct" },
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "ip_is_private": true,
+            "default_interface_address": ["2000::/3"],
+            "invert": true
+          },
+          {
+            "ip_version": 6
+          }
+        ],
+        "action": "reject"
+      },
       {
         "type": "logical",
         "mode": "or",
@@ -202,7 +242,7 @@
         "tag": "@geosite-geolocation-eu",
         "rules": [
           {
-            "domain_suffix": ["iwara.tv"]
+            "domain_suffix": ["iwara.tv", "nodeseek.com"]
           }
         ]
       },
@@ -265,7 +305,13 @@
         "type": "inline",
         "tag": "@geosite-block",
         "rules": [
-          { "domain": ["dns.weixin.qq.com", "api.installer.xiaomi.com"] }
+          {
+            "domain": [
+              "dns.weixin.qq.com",
+              "api.installer.xiaomi.com",
+              "userlocation.googleapis.com"
+            ]
+          }
         ]
       },
       {
