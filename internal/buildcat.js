@@ -11,7 +11,15 @@ const proxies = await produceArtifact({
   platform: "json",
   produceType: "internal",
 })
-  .then((proxies) => featureBeautify.func.sortProxies({ proxies }))
+  .then((proxies) => {
+    const sortedProxies = featureBeautify.func.sortProxies({ proxies });
+    const producedProxies = ProxyUtils.produce(
+      [...proxies],
+      productionPlatform,
+    ).map((p) => p.name);
+
+    return sortedProxies.filter((sp) => producedProxies.includes(sp.name));
+  })
   .then((proxies) => {
     const transportGroups = featureTransport.func.completeTransport({
       proxies: proxies,

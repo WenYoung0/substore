@@ -1,25 +1,11 @@
 const featureLocation = context.young.features.location;
 
 const isTransport = ({ proxy }) => {
-  return (
-    proxy !== undefined &&
-    proxy.properties !== undefined &&
-    proxy.properties.transport !== undefined &&
-    ((typeof proxy.properties.transport === "boolean" &&
-      proxy.properties.transport) ||
-      proxy.properties.transport.is)
-  );
+  return proxy?.properties?.transport || proxy?.properties?.transport?.is;
 };
 
 const isDestionation = ({ proxy }) => {
-  return (
-    proxy !== undefined &&
-    proxy.properties !== undefined &&
-    proxy.properties.destination !== undefined &&
-    ((typeof proxy.properties.destination === "boolean" &&
-      proxy.properties.destination) ||
-      proxy.properties.destination.is)
-  );
+  return proxy?.properties?.destination || proxy?.properties?.destination?.is;
 };
 
 const completeTransport = ({ proxies, detourName, fallback }) => {
@@ -100,16 +86,10 @@ const completeTransport = ({ proxies, detourName, fallback }) => {
   return transportGroups;
 };
 
-const removeInvalidDestination = ({ proxies }) => {
-  return proxies.filter(
-    (proxy) => !isDestionation({ proxy }) || "dialer-proxy" in proxy,
-  );
-};
 
 const transportObj = { load: true, func: {}, const: {} };
 
 transportObj.func.completeTransport = completeTransport;
-transportObj.func.removeInvalidDestination = removeInvalidDestination;
 transportObj.func.isTransport = isTransport;
 transportObj.func.isDestionation = isDestionation;
 
