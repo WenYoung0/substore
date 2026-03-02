@@ -2,9 +2,6 @@ package main
 
 import (
 	"flag"
-	"unicode/utf8"
-
-	"github.com/sagernet/sing/common/domain"
 )
 
 const (
@@ -24,16 +21,4 @@ var (
 )
 
 func main() {
-	domain.NewMatcher()
-}
-
-func reverseDomain(domain string) string {
-	l := len(domain)
-	b := make([]byte, l)
-	for i := 0; i < l; {
-		r, n := utf8.DecodeRuneInString(domain[i:])
-		i += n
-		utf8.EncodeRune(b[l-i:], r)
-	}
-	return string(b)
 }

@@ -39,7 +39,11 @@ const proxies = await produceArtifact({
         ];
       }
     });
-    return featureTransport.func.removeInvalidDestination({ proxies });
+    return proxies.filter(
+      (proxy) =>
+        !featureTransport.func.isDestionation({ proxy }) ||
+        "dialer-proxy" in proxy,
+    );
   })
   .then((proxies) => {
     const notHidden = ({ proxy }) => {

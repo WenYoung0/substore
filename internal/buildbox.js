@@ -28,7 +28,7 @@ const applyTransport = ({ proxies = [], config = {}, ...rest }) => {
 
   Object.keys(transportGroups).map((selectorName) => {
     const selected = transportGroups[selectorName];
-    if (selected.use || selected.proxies.length > 1) {
+    if (selected.use && selected.proxies.length > 1) {
       config.outbounds = [
         {
           type: "selector",
