@@ -222,6 +222,214 @@
     "rule_set": [
       {
         "type": "inline",
+        "tag": "@fakeip-filter",
+        "rules": [{ "domain_suffix": ["lancache.steamcontent.com"] }]
+      },
+      {
+        "type": "inline",
+        "tag": "@geosite-netflix-detect",
+        "rules": [
+          {
+            "domain": [
+              "android.ngp.prod.cloud.netflix.com",
+              "ios.ngp.prod.cloud.netflix.com"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "inline",
+        "tag": "@geosite-geolocation-eu",
+        "rules": [
+          {
+            "domain_suffix": ["iwara.tv", "nodeseek.com"]
+          }
+        ]
+      },
+      {
+        "type": "inline",
+        "tag": "@geosite-category-dev",
+        "rules": [
+          {
+            "domain_suffix": [
+              "dev.azure.com",
+              "codecommit.amazonaws.com",
+              "source.developers.google.com",
+              "sourcerepo.googleapis.com",
+              "gitlab.freedesktop.org",
+              "git.kernel.org",
+              "git.savannah.gnu.org",
+              "git.code.sf.net",
+              "git.sr.ht",
+              "godoc.org",
+              "gitea.io",
+              "gittea.com",
+              "cgit.freedesktop.org",
+              "salsa.debian.org",
+              "gitlab.gnome.org",
+              "gitlab.alpinelinux.org",
+              "bitbucket.org",
+              "pagure.io",
+              "codeberg.org",
+              "android.googlesource.com",
+              "chromium.googlesource.com",
+              "git.postgresql.org",
+              "git.php.net",
+              "git.eclipse.org",
+              "git.webkit.org",
+              "git.freebsd.org",
+              "git.openbsd.org",
+              "git.apache.org",
+              "git.torproject.org",
+              "repo.or.cz",
+              "framagit.org",
+              "notabug.org",
+              "gitgud.io",
+              "gerrit.googlesource.com",
+              "git.blender.org",
+              "git.drupal.org",
+              "git.ruby-lang.org",
+              "git.python.org",
+              "git.zx2c4.com",
+              "git.busybox.net",
+              "git.samba.org",
+              "repo.gentoo.org",
+              "invent.kde.org",
+              "git.ozlabs.org",
+              "git.infradead.org"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "inline",
+        "tag": "@geosite-block",
+        "rules": [
+          {
+            "domain": [
+              "dns.weixin.qq.com",
+              "api.installer.xiaomi.com",
+              "userlocation.googleapis.com"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "inline",
+        "tag": "@geosite-steam@cn",
+        "rules": [
+          {
+            "domain_suffix": ["steamserver.net"]
+          }
+        ]
+      },
+      {
+        "type": "inline",
+        "tag": "@geosite-duolingo@cn",
+        "rules": [
+          {
+            "domain_suffix": ["duolingo.cn"]
+          }
+        ]
+      },
+      {
+        "type": "inline",
+        "tag": "@geosite-google-play@cn",
+        "rules": [
+          {
+            "domain": "redirector.c.play.google.com",
+            "domain_regex": [
+              "^r+[0-9]+(---|\\.)sn-(2x3|ni5|j5o)\\w{5}\\.xn--ngstr-lra8j\\.com$"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "inline",
+        "tag": "@geosite-jetbrains@cn",
+        "rules": [
+          {
+            "domain_suffix": ["cdn.jetbrains.com", "download-cdn.jetbrains.com"]
+          }
+        ]
+      },
+      {
+        "type": "inline",
+        "tag": "@geosite-category-ai-!cn",
+        "rules": [
+          {
+            "domain_suffix": [
+              "gateway-copilot.bingviz.microsoftapp.net",
+              "mobile.events.data.microsoft.com",
+              "graph.microsoft.com",
+              "analytics.adjust.com",
+              "analytics.adjust.net.in",
+              "api.revenuecat.com",
+              "t-msedge.net",
+              "cloudapp.azure.com",
+              "browser-intake-datadoghq.com",
+              "in.appcenter.ms",
+              "guzzoni.apple.com",
+              "smoot.apple.com",
+              "apple-relay.cloudflare.com",
+              "apple-relay.fastly-edge.com",
+              "cp4.cloudflare.com",
+              "apple-relay.apple.com"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "inline",
+        "tag": "@geoip-telegram@dc4",
+        "rules": [
+          {
+            "ip_cidr": [
+              "91.105.192.0/23",
+              "91.108.4.0/22",
+              "91.108.8.0/22",
+              "91.108.56.0/22",
+              "95.161.64.0/20",
+              "149.154.160.0/21",
+              "185.76.151.0/24",
+              "5.28.192.0/18",
+              "109.239.140.0/24",
+              "2001:67c:4e8::/48",
+              "2a0a:f280:203::/48"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "inline",
+        "tag": "@geoip-telegram@dc1",
+        "rules": [
+          {
+            "ip_cidr": [
+              "91.108.12.0/22",
+              "149.154.172.0/22",
+              "2001:b28:f23d::/48"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "inline",
+        "tag": "@geoip-telegram@dc5",
+        "rules": [
+          {
+            "ip_cidr": [
+              "91.108.16.0/21",
+              "91.108.56.0/23",
+              "149.154.168.0/22",
+              "2001:b28:f23c::/48",
+              "2001:b28:f23f::/48"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "inline",
         "tag": "@geosite-direct",
         "rules": [
           {
