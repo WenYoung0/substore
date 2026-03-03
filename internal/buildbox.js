@@ -13,6 +13,7 @@ const produce = (proxies = []) => {
 const applySortAndCompability = ({ proxies = [], ...rest }) => {
   const sortedProxies = featureBeautify.func.sortProxies({ proxies });
 
+  // Notice heer , different platform has different name selector (tag or name)
   const names = produce(proxies).map((pp) => pp.tag);
   return {
     proxies: sortedProxies.filter((sp) => names.includes(sp.name)),
@@ -38,7 +39,6 @@ const applyTransport = ({ proxies = [], config = {}, ...rest }) => {
         ...config.outbounds,
       ];
     }
-    return;
   });
   return {
     proxies: proxies.filter(
@@ -53,7 +53,10 @@ const applyTransport = ({ proxies = [], config = {}, ...rest }) => {
 
 const applyPushGroup = ({ proxies = [], config = {}, ...rest }) => {
   const out = proxies
-    .filter((proxy) => !proxy?.properties?.hideen)
+    .filter(
+      (proxy) =>
+        proxy?.properties?.hidden === undefined || !proxy.properties.hidden,
+    )
     .map((proxy) => proxy.name)
     .filter((pn) => !!pn);
 
@@ -100,7 +103,7 @@ const applyGeoSiteGeoIP = ({ proxies = [], config = {}, ...rest }) => {
   const directIP = new Set();
   const directSite = new Set();
   for (const proxy of proxies) {
-    if (!(proxy.server && proxy["dialer-proxy"])) {
+    if (proxy.server === undefined || proxy["dialer-proxy"]) {
       continue;
     }
     const serverAddr = proxy.server;
