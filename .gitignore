@@ -1,5 +1,7 @@
 .idea/
 .test/
+testdata
+testoutput
 
 secrets
 
