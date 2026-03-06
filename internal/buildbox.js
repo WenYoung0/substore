@@ -160,9 +160,10 @@ const applyClientSubnet = ({ config = {}, ...rest }) => {
       headers["x-real-ip"] ||
       headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
       req?.socket?.remoteAddress;
+    return ip === undefined ? "" : ip.trim();
   };
 
-  let ip = getClientIP().trim();
+  let ip = getClientIP();
   if (ip === "") ip = "114.114.114.114";
   for (const dnsRule of [...(config?.dns?.rules ?? [])]) {
     if (
