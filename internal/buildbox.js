@@ -149,6 +149,34 @@ const applyRuleSet = ({ config = {}, ...rest }) => {
   return { config, ...rest };
 };
 
+const applyClientSubnet = ({ config = {}, ...rest }) => {
+  const getClientIP = () => {
+    const req = $options?._req;
+    const headers = req?.headers ?? {};
+
+    const ip =
+      headers["cf-connecting-ip"] ||
+      headers["true-client-ip"] ||
+      headers["x-real-ip"] ||
+      headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
+      req?.socket?.remoteAddress;
+  };
+
+  let ip = getClientIP().trim();
+  if (ip === "") ip = "114.114.114.114";
+  for (const dnsRule of [...(config?.dns?.rules ?? [])]) {
+    if (
+      dnsRule.client_subnet === "0.0.0.0/0" ||
+      dnsRule.client_subnet === "::/0" ||
+      dnsRule.client_subnet === ""
+    ) {
+      dnsRule.client_subnet = ip + (ip.includes(":") ? "/128" : "/32");
+    }
+  }
+
+  return { config, ...rest };
+};
+
 let config = JSON.parse($files[0]);
 
 let proxies = await produceArtifact({
@@ -166,7 +194,8 @@ let proxies = await produceArtifact({
   .then(applyTransport)
   .then(applyGeoSiteGeoIP)
   .then(applyPushGroup)
-  .then(applyRuleSet));
+  .then(applyRuleSet)
+  .then(applyClientSubnet));
 
 if (typeof secretPatch === "function") secretPatch({ proxies, config });
 $content = JSON.stringify(
