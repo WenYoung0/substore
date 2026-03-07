@@ -78,7 +78,7 @@
       },
       { "clash_mode": "Direct", "server": "dns-cn" },
       { "query_type": ["HTTPS", "SVCB"], "action": "reject" },
-      { "clash_mode": "Global", "server": "dns-remote" },
+      { "clash_mode": "Global", "server": "dns-final" },
       { "rule_set": "@geosite-block", "action": "reject" },
       { "rule_set": "geosite-private", "server": "dns-local" },
       {
@@ -121,7 +121,7 @@
             "ip_is_private": true
           }
         ],
-        "server": "dns-remote",
+        "server": "dns-final",
         "client_subnet": "0.0.0.0/0"
       },
       {
@@ -164,7 +164,7 @@
         "server": "dns-entertainment"
       }
     ],
-    "final": "dns-cn",
+    "final": "dns-final",
     "independent_cache": true,
     "reverse_mapping": true
   },
