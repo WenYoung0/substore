@@ -19,7 +19,7 @@
         "detour": "🔍 Google"
       },
       {
-        "tag": "dns-dev",
+        "tag": "dns-git",
         "type": "https",
         "server": "1.1.1.1",
         "detour": "🐈 Git"
@@ -71,26 +71,58 @@
             "invert": true
           },
           {
-            "ip_version": 6
+            "query_type": "AAAA"
           }
         ],
         "action": "reject"
       },
       { "clash_mode": "Direct", "server": "dns-cn" },
       { "query_type": ["HTTPS", "SVCB"], "action": "reject" },
-      { "clash_mode": "Global", "server": "dns-final" },
-      { "rule_set": "@geosite-direct", "server": "dns-cn" },
+      { "clash_mode": "Global", "server": "dns-remote" },
       { "rule_set": "@geosite-block", "action": "reject" },
       { "rule_set": "geosite-private", "server": "dns-local" },
       {
-        "rule_set": ["geosite-microsoft@cn", "@geosite-google-play@cn"],
+        "rule_set": ["geosite-netflix", "@geosite-netflix-detect"],
+        "server": "dns-entertainment"
+      },
+      {
+        "rule_set": [
+          "geosite-tld-cn",
+          "geosite-category-game-platforms-download@cn",
+          "geosite-connectivity-check",
+          "geosite-microsoft@cn",
+          "geosite-apple@cn",
+          "geosite-steam@cn",
+          "geosite-epicgames@cn",
+          "geosite-aws-cn",
+          "geosite-azure@cn",
+          "geosite-nvidia@cn",
+          "geosite-itunes@cn",
+          "geosite-paypal@cn",
+          "geosite-akamai@cn",
+          "geosite-linkedin@cn",
+          "geosite-category-ntp",
+          "@geosite-steam@cn",
+          "@geosite-direct",
+          "@geosite-duolingo@cn",
+          "@geosite-jetbrains@cn",
+          "@geosite-google-play@cn"
+        ],
         "server": "dns-cn"
       },
-      { "rule_set": "@geosite-netflix-detect", "server": "dns-final" },
       {
-        "rule_set": ["@geosite-category-ai-!cn", "geosite-category-ai-!cn"],
-        "action": "route",
-        "server": "dns-ai"
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          { "rule_set": "geosite-geolocation-!cn", "invert": true },
+          {
+            "rule_set": ["geoip-cn", "@geoip-direct"],
+            "rule_set_ip_cidr_accept_empty": true,
+            "ip_is_private": true
+          }
+        ],
+        "server": "dns-remote",
+        "client_subnet": "0.0.0.0/0"
       },
       {
         "rule_set": [
@@ -100,7 +132,17 @@
           "geosite-category-tech-media"
         ],
         "action": "route",
-        "server": "dns-dev"
+        "server": "dns-git"
+      },
+      {
+        "rule_set": ["geosite-microsoft"],
+        "action": "route",
+        "server": "dns-microsoft"
+      },
+      {
+        "rule_set": ["@geosite-category-ai-!cn", "geosite-category-ai-!cn"],
+        "action": "route",
+        "server": "dns-ai"
       },
       {
         "rule_set": ["geosite-google"],
@@ -114,42 +156,13 @@
       },
       {
         "rule_set": [
-          "geosite-tld-cn",
-          "geosite-category-game-platforms-download@cn",
-          "geosite-connectivity-check",
-          "geosite-apple@cn",
-          "geosite-steam@cn",
-          "geosite-epicgames@cn",
-          "geosite-aws-cn",
-          "geosite-azure@cn",
-          "geosite-nvidia@cn",
-          "geosite-itunes@cn",
-          "geosite-paypal@cn",
-          "geosite-akamai@cn",
-          "geosite-linkedin@cn",
-          "@geosite-steam@cn",
-          "@geosite-direct",
-          "@geosite-duolingo@cn",
-          "@geosite-jetbrains@cn"
-        ],
-        "action": "route",
-        "server": "dns-cn"
-      },
-      {
-        "rule_set": ["geosite-telegram", "@geosite-geolocation-eu"],
-        "action": "route",
-        "server": "dns-europe"
-      },
-      {
-        "rule_set": [
           "geosite-category-entertainment",
           "geosite-category-social-media-!cn",
           "geosite-reddit"
         ],
         "action": "route",
         "server": "dns-entertainment"
-      },
-      { "rule_set": "geosite-geolocation-!cn", "server": "dns-final" }
+      }
     ],
     "final": "dns-cn",
     "independent_cache": true,
@@ -157,7 +170,6 @@
   },
   "route": {
     "rules": [
-      { "network": "icmp", "outbound": "Direct" },
       {
         "type": "logical",
         "mode": "and",
@@ -173,6 +185,7 @@
         ],
         "action": "reject"
       },
+      { "network": "icmp", "outbound": "Direct" },
       {
         "type": "logical",
         "mode": "or",
@@ -295,7 +308,7 @@
         "tag": "@geosite-geolocation-eu",
         "rules": [
           {
-            "domain_suffix": ["iwara.tv"]
+            "domain_suffix": ["iwara.tv", "nodeseek.com"]
           }
         ]
       },
@@ -526,6 +539,7 @@
         "192.168.0.0/16",
         "fc00::/7"
       ],
+      "endpoint_independent_nat": true,
       "platform": {
         "http_proxy": {
           "enabled": true,

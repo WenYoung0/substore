@@ -106,7 +106,6 @@
   },
   "route": {
     "rules": [
-      { "network": "icmp", "outbound": "Direct" },
       {
         "type": "logical",
         "mode": "and",
@@ -122,6 +121,7 @@
         ],
         "action": "reject"
       },
+      { "network": "icmp", "outbound": "Direct" },
       {
         "type": "logical",
         "mode": "or",
@@ -475,6 +475,7 @@
         "192.168.0.0/16",
         "fc00::/7"
       ],
+      "endpoint_independent_nat": true,
       "platform": {
         "http_proxy": {
           "enabled": false,
