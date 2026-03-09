@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/binary"
 	"errors"
@@ -21,8 +20,8 @@ import (
 var MRSMagicBytes = [4]byte{'M', 'R', 'S', 1} // MRSv1
 
 var (
-	ErrNotSupportKeyword = errors.New("format doesn't support keyword type")
-	ErrNotSupportRegexp  = errors.New("format doesn't support regexp type")
+	ErrDomainNotSupport          = errors.New("behavior `domain` only support `suffix` and `full` match, use `classical` instead")
+	ErrClassicalNotSupportBinary = errors.New("behavior `classical` doesn't support MRS format")
 )
 
 const (
@@ -30,47 +29,70 @@ const (
 	MRSRuleBehaviorIP        int = 1
 	MRSRuleBehaviorClassical int = 2
 
-	MRSPlainFormatYAML = "yaml"
-	MRSPlainFormatText = "text"
-
-	MRSSuffix               = ".mrs"
-	MRSPlainSuffixClassical = ".classical"
-	MRSPlainSuffixText      = ".list"
-	MRSPlainSuffixYaml      = ".yaml"
+	MRSFormatYAML   = "yaml"
+	MRSFormatText   = "text"
+	MRSFormatBinary = "mrs"
 )
 
-type MrsPlainTextRuleset struct {
-	Domain        []string
-	DomainSuffix  []string
-	DomainKeyword []string
-	DomainRegexp  []string
-	IPCidr        []string
+func MRSFormatToSuffix(format string, behavior int) string {
+	if format == MRSFormatBinary && behavior == MRSRuleBehaviorClassical {
+		panic("unsupported")
+	}
 
-	Behavior int
-
-	Payload []string
+	switch {
+	case format == MRSFormatYAML:
+		return ".yaml"
+	case format == MRSFormatText:
+		if behavior == MRSRuleBehaviorClassical {
+			return ".classical"
+		}
+		return ".list"
+	case format == MRSFormatBinary:
+		return ".mrs"
+	}
+	panic("unexcepted format: " + format)
 }
 
-func (m *MrsPlainTextRuleset) MarshalText() ([]byte, error) {
-	if err := m.fill(); err != nil {
+type MrsGenerator struct {
+	Domain *DomainRuleset
+	IP     *IPRuleset
+
+	Behavior int
+	Payload  []string
+}
+
+func (generator *MrsGenerator) Marshal(format string) ([]byte, error) {
+	switch format {
+	case MRSFormatYAML:
+		return generator.MarshalYAML()
+	case MRSFormatText:
+		return generator.MarshalText()
+	case MRSFormatBinary:
+		return generator.MarshalBinary()
+	}
+	return nil, fmt.Errorf("unsupported format: %s", format)
+}
+
+func (generator *MrsGenerator) MarshalText() ([]byte, error) {
+	if err := generator.fill(); err != nil {
 		return nil, err
 	}
 	length := 0
-	for i := 0; i < len(m.Payload); i++ {
-		length += len(m.Payload[i]) + 1
+	for i := 0; i < len(generator.Payload); i++ {
+		length += len(generator.Payload[i]) + 1
 	}
 	buffer := bytes.NewBuffer(make([]byte, length))
 	buffer.Reset()
-	for i := 0; i < len(m.Payload); i++ {
+	for i := 0; i < len(generator.Payload); i++ {
 		const LF = '\n'
-		buffer.WriteString(m.Payload[i])
+		buffer.WriteString(generator.Payload[i])
 		buffer.WriteByte(LF)
 	}
 	return buffer.Bytes(), nil
 }
 
-func (m *MrsPlainTextRuleset) MarshalYAML() ([]byte, error) {
-	if err := m.fill(); err != nil {
+func (generator *MrsGenerator) MarshalYAML() ([]byte, error) {
+	if err := generator.fill(); err != nil {
 		return nil, err
 	}
 
@@ -78,212 +100,186 @@ func (m *MrsPlainTextRuleset) MarshalYAML() ([]byte, error) {
 		Payload []string `yaml:"payload"`
 	}
 
-	return yaml.Marshal(&schema{m.Payload})
+	return yaml.Marshal(&schema{generator.Payload})
 }
 
-func (m *MrsPlainTextRuleset) fill() error {
-	switch m.Behavior {
-	case MRSRuleBehaviorDomain:
-		return m.fillDomainPayload()
+func (generator *MrsGenerator) MarshalBinary() (data []byte, err error) {
+	buffer := bytes.NewBuffer(nil)
+
+	count := int64(0)
+	switch generator.Behavior {
 	case MRSRuleBehaviorIP:
-		m.fillIPPayload()
-	case MRSRuleBehaviorClassical:
-		m.fillClassical()
-	}
-	return fmt.Errorf("unexcepted behavior: %d", m.Behavior)
-}
-
-func (m *MrsPlainTextRuleset) fillDomainPayload() error {
-	switch {
-	case len(m.DomainKeyword) > 0 && len(m.DomainRegexp) > 0:
-		return fmt.Errorf("behavior `domain` only support `suffix` and `full` match, use classical instead: (%w, %w)", ErrNotSupportRegexp, ErrNotSupportKeyword)
-	case len(m.DomainKeyword) > 0:
-		return fmt.Errorf("behavior `domain` only support `suffix` and `full` match, use classical instead: %w", ErrNotSupportKeyword)
-	case len(m.DomainRegexp) > 0:
-		return fmt.Errorf("behavior `domain` only support `suffix` and `full` match, use classical instead: %w", ErrNotSupportRegexp)
-	}
-	m.Payload = make([]string, 0, len(m.Domain)+len(m.DomainSuffix))
-	for i := 0; i < len(m.Domain); i++ {
-		m.Payload = append(m.Payload, m.Domain[i])
-	}
-	for i := 0; i < len(m.DomainSuffix); i++ {
-		suffix := m.DomainSuffix[i]
-		if !strings.HasPrefix(suffix, ".") {
-			suffix = "+." + suffix
-		}
-		m.Payload = append(m.Payload, suffix)
-	}
-
-	return nil
-}
-
-func (m *MrsPlainTextRuleset) fillClassical() {
-	m.Payload = make([]string, 0, len(m.Domain)+len(m.DomainSuffix)+len(m.DomainKeyword)+len(m.DomainRegexp)+len(m.IPCidr))
-
-	for i := 0; i < len(m.IPCidr); i++ {
-		m.Payload = append(m.Payload, "IP-CIDR,"+m.IPCidr[i])
-	}
-	for i := 0; i < len(m.Domain); i++ {
-		m.Payload = append(m.Payload, "DOMAIN,"+m.Domain[i])
-	}
-	for i := 0; i < len(m.DomainSuffix); i++ {
-		m.Payload = append(m.Payload, "DOMAIN-SUFFIX,"+m.DomainSuffix[i])
-	}
-	for i := 0; i < len(m.DomainKeyword); i++ {
-		m.Payload = append(m.Payload, "DOMAIN-KEYWORD,"+m.DomainKeyword[i])
-	}
-	for i := 0; i < len(m.DomainRegexp); i++ {
-		m.Payload = append(m.Payload, "DOMAIN-REGEX,"+m.DomainRegexp[i])
-	}
-}
-func (m *MrsPlainTextRuleset) fillIPPayload() {
-	m.Payload = make([]string, 0, len(m.IPCidr))
-	copy(m.Payload[:len(m.IPCidr)], m.IPCidr)
-}
-
-func (rule *DomainRuleset) WriteMRS(w io.Writer) error {
-	if rule.Count() == 0 {
-		return ErrEmpty
-	}
-	switch {
-	case len(rule.KeyWord) != 0:
-		return fmt.Errorf("%s %w", "MRS", ErrNotSupportKeyword)
-	case len(rule.Regexp) != 0:
-		return fmt.Errorf("%s %w", "MRS", ErrNotSupportRegexp)
-	}
-	zstdWriter, err := prepareMRS(w, MRSRuleBehaviorDomain, rule.Count())
-	if err != nil {
-		return err
-	}
-	domainTrie := new(trie.DomainTrie[struct{}])
-	for i := 0; i < len(rule.Domain); i++ {
-		domain := rule.Domain[i]
-		err := domainTrie.Insert(domain, struct{}{})
-		if err != nil {
-			return err
-		}
-	}
-	for i := 0; i < len(rule.Suffix); i++ {
-		domainSuffix := rule.Domain[i]
-		err := domainTrie.Insert("+."+domainSuffix, struct{}{})
-		if err != nil {
-			return err
-		}
-	}
-	set := domainTrie.NewDomainSet()
-	bufWriter := bufio.NewWriter(w)
-	err = set.WriteBin(bufWriter)
-	if err != nil {
-		return err
-	}
-	err = bufWriter.Flush()
-	if err != nil {
-		return err
-	}
-
-	return zstdWriter.Close()
-}
-
-func (rule *DomainRuleset) WritePlainTextMRS(w io.Writer, format string, behavior int) error {
-	if rule.Count() == 0 {
-		return ErrEmpty
-	}
-
-	var (
-		ruleset = &MrsPlainTextRuleset{
-			Domain:        rule.Domain,
-			DomainSuffix:  rule.Suffix,
-			DomainKeyword: rule.KeyWord,
-			DomainRegexp:  rule.Regexp,
-			Behavior:      behavior,
-		}
-		text []byte
-		err  error
-	)
-	switch format {
-	case MRSPlainFormatText:
-		text, err = ruleset.MarshalText()
-	case MRSPlainFormatYAML:
-		text, err = ruleset.MarshalYAML()
+		count = generator.IP.Count()
+	case MRSRuleBehaviorDomain:
+		count = int64(len(generator.Domain.Domain) + len(generator.Domain.Suffix))
 	default:
-		return fmt.Errorf("unexcepted format: %s", format)
-	}
-	if err != nil {
-		return err
-	}
-	_, err = w.Write(text)
-	return err
-}
-
-func (rule *IPRuleset) WriteMRS(w io.Writer) error {
-	if rule.Set == nil {
-		return fmt.Errorf("empty")
-	}
-	trieIPCidr := (*cidr.IpCidrSet)(unsafe.Pointer(rule.Set))
-	myIPSetv := (*myIPSet)(unsafe.Pointer(rule.Set))
-
-	zstdEncoder, err := prepareMRS(w, MRSRuleBehaviorIP, int64(len(myIPSetv.rr)))
-	if err != nil {
-		return err
-	}
-	bufWriter := bufio.NewWriter(zstdEncoder)
-	err = trieIPCidr.WriteBin(bufWriter)
-	if err != nil {
-		return err
-	}
-	err = bufWriter.Flush()
-	if err != nil {
-		return err
+		return nil, fmt.Errorf("unexcepted behavior: %d", generator.Behavior)
 	}
 
-	return zstdEncoder.Close()
-}
-
-func (rule *IPRuleset) WritePlainTextMRS(w io.Writer, format string, behavior int) error {
-	if rule.Set == nil {
-		return ErrEmpty
-	}
-
-	var (
-		ruleset = &MrsPlainTextRuleset{
-			IPCidr:   common.Map(rule.Set.Prefixes(), netip.Prefix.String),
-			Behavior: behavior,
-		}
-		text []byte
-		err  error
-	)
-	switch format {
-	case MRSPlainFormatText:
-		text, err = ruleset.MarshalText()
-	case MRSPlainFormatYAML:
-		text, err = ruleset.MarshalYAML()
-	default:
-		return fmt.Errorf("unexcepted format: %s", format)
-	}
-	if err != nil {
-		return err
-	}
-	_, err = w.Write(text)
-	return err
-}
-
-func prepareMRS(w io.Writer, behavior int, count int64) (*zstd.Encoder, error) {
-	zstdEncoder, err := zstd.NewWriter(w)
+	var zstdEncoder *zstd.Encoder
+	zstdEncoder, err = zstd.NewWriter(buffer)
 	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		cErr := zstdEncoder.Close()
+		if err == nil {
+			err = cErr
+		}
+	}()
+
 	var extra []byte
 	err = writeGuard(zstdEncoder,
 		writeBinaryOperation{Bytes: MRSMagicBytes[:]},
-		writeBinaryOperation{Bytes: []byte{behaviorToByte(behavior)}},
+		writeBinaryOperation{Bytes: []byte{behaviorToByte(generator.Behavior)}},
 		writeBinaryOperation{Binary: int64(count), Ending: binary.BigEndian},
 		writeBinaryOperation{Binary: int64(len(extra)), Ending: binary.BigEndian, Bytes: extra},
 	)
 	if err != nil {
 		return nil, err
 	}
+	switch generator.Behavior {
+	case MRSRuleBehaviorDomain:
+		domainTrie := new(trie.DomainTrie[struct{}])
+		supportedDomain := &MrsGenerator{
+			Domain: &DomainRuleset{
+				Domain: generator.Domain.Domain,
+				Suffix: generator.Domain.Suffix,
+			},
+			Behavior: generator.Behavior,
+		}
+		err = supportedDomain.fillDomainPayload()
+		if err != nil {
+			return nil, err
+		}
+		for i := 0; i < len(supportedDomain.Payload); i++ {
+			err = domainTrie.Insert(supportedDomain.Payload[i], struct{}{})
+			if err != nil {
+				return nil, err
+			}
+		}
 
-	return zstdEncoder, nil
+		set := domainTrie.NewDomainSet()
+		err = set.WriteBin(zstdEncoder)
+		if err != nil {
+			return nil, err
+		}
+	case MRSRuleBehaviorIP:
+		cidrIPSet := (*cidr.IpCidrSet)(unsafe.Pointer(generator.IP.Set))
+
+		err := cidrIPSet.WriteBin(zstdEncoder)
+		if err != nil {
+			return nil, err
+		}
+	default:
+		panic("unexcepted")
+	}
+
+	return buffer.Bytes(), nil
+}
+
+func (generator *MrsGenerator) fill() error {
+	switch generator.Behavior {
+	case MRSRuleBehaviorDomain:
+		return generator.fillDomainPayload()
+	case MRSRuleBehaviorIP:
+		generator.fillIPPayload()
+	case MRSRuleBehaviorClassical:
+		generator.fillClassical()
+	}
+	return fmt.Errorf("unexcepted behavior: %d", generator.Behavior)
+}
+
+func (generator *MrsGenerator) fillDomainPayload() error {
+	if len(generator.Domain.KeyWord) > 0 || len(generator.Domain.Regexp) > 0 {
+		return ErrDomainNotSupport
+	}
+	generator.Payload = make([]string, 0, len(generator.Domain.Domain)+len(generator.Domain.Suffix))
+	for i := 0; i < len(generator.Domain.Domain); i++ {
+		generator.Payload = append(generator.Payload, generator.Domain.Domain[i])
+	}
+	for i := 0; i < len(generator.Domain.Suffix); i++ {
+		suffix := generator.Domain.Suffix[i]
+		if !strings.HasPrefix(suffix, ".") {
+			suffix = "+." + suffix
+		}
+		generator.Payload = append(generator.Payload, suffix)
+	}
+
+	return nil
+}
+
+func (generator *MrsGenerator) fillClassical() {
+	generator.Payload = make([]string, 0, generator.Domain.Count())
+
+	if generator.IP != nil && generator.IP.Set != nil {
+		for _, prefix := range common.Map(generator.IP.Set.Prefixes(), netip.Prefix.String) {
+			generator.Payload = append(generator.Payload, "IP-CIDR,"+prefix)
+		}
+	}
+	for i := 0; generator.Domain != nil && i < len(generator.Domain.Domain); i++ {
+		generator.Payload = append(generator.Payload, "DOMAIN,"+generator.Domain.Domain[i])
+	}
+	for i := 0; generator.Domain != nil && i < len(generator.Domain.Suffix); i++ {
+		generator.Payload = append(generator.Payload, "DOMAIN-SUFFIX,"+generator.Domain.Suffix[i])
+	}
+	for i := 0; generator.Domain != nil && i < len(generator.Domain.KeyWord); i++ {
+		generator.Payload = append(generator.Payload, "DOMAIN-KEYWORD,"+generator.Domain.KeyWord[i])
+	}
+	for i := 0; generator.Domain != nil && i < len(generator.Domain.Regexp); i++ {
+		generator.Payload = append(generator.Payload, "DOMAIN-REGEX,"+generator.Domain.Regexp[i])
+	}
+}
+func (generator *MrsGenerator) fillIPPayload() {
+	count := generator.IP.Count()
+	if count == 0 {
+		generator.Payload = []string{}
+		return
+	}
+	generator.Payload = make([]string, count)
+	copy(generator.Payload[:count], common.Map(generator.IP.Set.Prefixes(), netip.Prefix.String))
+}
+
+func (rule *DomainRuleset) WriteMRS(w io.Writer, format string, behavior int) error {
+	switch {
+	case rule.Count() == 0:
+		return ErrEmpty
+	case behavior != MRSRuleBehaviorDomain && behavior != MRSRuleBehaviorClassical:
+		return fmt.Errorf("unexcepted behavior: %d", behavior)
+	case (len(rule.KeyWord) != 0 || len(rule.Regexp) != 0) && behavior != MRSRuleBehaviorClassical:
+		return ErrDomainNotSupport
+	}
+	generator := &MrsGenerator{
+		Domain:   rule,
+		Behavior: behavior,
+	}
+	gen, err := generator.Marshal(format)
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(gen)
+	return err
+}
+
+func (rule *IPRuleset) WriteMRS(w io.Writer, format string, behavior int) error {
+	switch {
+	case rule.Count() == 0:
+		return ErrEmpty
+	case behavior != MRSRuleBehaviorIP && behavior != MRSRuleBehaviorClassical:
+		return fmt.Errorf("unexcepted behavior: %d", behavior)
+	case behavior == MRSRuleBehaviorClassical && format == MRSFormatBinary:
+		return ErrClassicalNotSupportBinary
+	}
+	generator := &MrsGenerator{
+		IP:       rule,
+		Behavior: behavior,
+	}
+	gen, err := generator.Marshal(format)
+	if err != nil {
+		return fmt.Errorf("marshal: %w", err)
+	}
+	_, err = w.Write(gen)
+	return err
 }
 
 func behaviorToByte(b int) byte {

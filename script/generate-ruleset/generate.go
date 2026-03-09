@@ -29,7 +29,7 @@ func main() {
 
 	flag.Parse()
 	if !generateSRS && !generateMRS {
-		return
+
 	}
 	var (
 		domainErr error
@@ -49,7 +49,7 @@ func main() {
 
 		if generateSRS {
 			err := openWrite(filepath.Join(outputPath, "geosite", "srs", name+SRSSuffix), func(file *os.File) error {
-				return ruleFile.WriteSRS(file)
+				return ruleFile.WriteSRS(file, "")
 			})
 			if err != nil {
 				return err
@@ -87,7 +87,7 @@ func main() {
 
 		if generateSRS {
 			err := openWrite(filepath.Join(outputPath, "geoip", "srs", name+SRSSuffix), func(file *os.File) error {
-				return ruleFile.WriteSRS(file)
+				return ruleFile.WriteSRS(file, "")
 			})
 			if err != nil {
 				return err
@@ -104,7 +104,7 @@ func main() {
 		}
 		if !generateMRS {
 			err := openWrite(filepath.Join(outputPath, "geoip", "mrs", name+MRSSuffix), func(file *os.File) error {
-				return ruleFile.WriteMRS(file)
+				return ruleFile.WriteMRS(file, "", 0)
 			})
 			if err != nil {
 				return err

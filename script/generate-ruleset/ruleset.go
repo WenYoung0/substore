@@ -7,6 +7,7 @@ import (
 	"net/netip"
 	"os"
 	"strings"
+	"unsafe"
 
 	"go4.org/netipx"
 )
@@ -16,19 +17,14 @@ var (
 )
 
 type RuleSet interface {
-	WriteSRS(w io.Writer) error
-	WriteMRS(w io.Writer) error
-}
-
-type PlainRuleset interface {
-	RuleSet
-	WritePlainTextSRS(w io.Writer) error
-	WritePlainTextMRS(w io.Writer, format string, behavior int) error
+	Count() int64
+	WriteSRS(w io.Writer, format string) error
+	WriteMRS(w io.Writer, format string, behavior int) error
 }
 
 var (
-	_ PlainRuleset = (*DomainRuleset)(nil)
-	_ PlainRuleset = (*IPRuleset)(nil)
+	_ RuleSet = (*DomainRuleset)(nil)
+	_ RuleSet = (*IPRuleset)(nil)
 )
 
 type FileError struct {
@@ -104,6 +100,14 @@ type IPRuleset struct {
 	FD   *os.File
 
 	Set *netipx.IPSet
+}
+
+func (rule *IPRuleset) Count() int64 {
+	if rule == nil || rule.Set == nil {
+		return 0
+	}
+	mips := (*myIPSet)(unsafe.Pointer(rule.Set))
+	return int64(len(mips.rr))
 }
 
 func NewIPFile(path string) (*IPRuleset, error) {

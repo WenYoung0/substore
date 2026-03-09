@@ -29,10 +29,15 @@ var (
 	SRSMagicBytes = [3]byte{0x53, 0x52, 0x53}
 )
 
-const (
-	SRSSuffix      = ".srs"
-	SRSPlainSuffix = ".json"
-)
+func SRSFormatToSuffix(format string) string {
+	switch format {
+	case SRSFormatJSON:
+		return ".json"
+	case SRSFormatBinary:
+		return ".srs"
+	}
+	panic("unexcepted format: " + format)
+}
 
 const (
 	SRSRuleItemDomain uint8 = 2 + iota
@@ -45,7 +50,12 @@ const (
 	SRSCurrentVersion uint8 = 4
 )
 
-func (rule *DomainRuleset) WriteSRS(w io.Writer) error {
+const (
+	SRSFormatBinary = "binary"
+	SRSFormatJSON   = "json"
+)
+
+func (rule *DomainRuleset) WriteSRS(w io.Writer, format string) error {
 	if rule.Count() == 0 {
 		return ErrEmpty
 	}
@@ -119,7 +129,7 @@ func (rule *DomainRuleset) writeSRSRule(w varbin.Writer) error {
 	return binary.Write(w, binary.BigEndian, false)
 }
 
-func (rule *IPRuleset) WriteSRS(w io.Writer) error {
+func (rule *IPRuleset) WriteSRS(w io.Writer, format string) error {
 	if rule.Set == nil {
 		return ErrEmpty
 	}
