@@ -38,8 +38,6 @@ func (fe *FileError) Error() string {
 }
 
 type DomainRuleset struct {
-	FD *os.File
-
 	Domain  []string
 	Suffix  []string
 	KeyWord []string
@@ -47,6 +45,9 @@ type DomainRuleset struct {
 }
 
 func (rule *DomainRuleset) Count() int64 {
+	if rule == nil {
+		return 0
+	}
 	return int64(len(rule.Domain) + len(rule.Suffix) + len(rule.KeyWord) + len(rule.Regexp))
 }
 

@@ -2,12 +2,11 @@ package main
 
 import (
 	"encoding/binary"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"io/fs"
-	"log"
-	"net/netip"
 	"os"
 	"path/filepath"
 )
@@ -15,118 +14,148 @@ import (
 var (
 	generateSRS  bool
 	generateMRS  bool
-	plainText    bool
+	generateAll  bool
 	providerPath string
 	outputPath   string
 )
 
+type Entry struct {
+	Ruleset RuleSet
+	Name    string
+	Type    string
+}
+
 func main() {
 	flag.BoolVar(&generateSRS, "srs", false, "Generate SRS")
 	flag.BoolVar(&generateMRS, "mrs", false, "Generate MRS")
-	flag.BoolVar(&plainText, "plain", false, "Generate PlainText type SRS/MRS")
+	flag.BoolVar(&generateAll, "all", false, "Generate all format SRS/MRS")
 	flag.StringVar(&providerPath, "from", "./data/", "Setup datasource")
 	flag.StringVar(&outputPath, "output", "./output/", "Setup output")
-
+	flag.Usage = func() {
+		_, _ = fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", "ruleset-generator")
+		flag.PrintDefaults()
+	}
 	flag.Parse()
 	if !generateSRS && !generateMRS {
-
-	}
-	var (
-		domainErr error
-		ipErr     error
-	)
-	domainErr = filepath.WalkDir(filepath.Join(providerPath, "domain"), func(path string, dirEntry fs.DirEntry, err error) error {
-		if err != nil || dirEntry.IsDir() || !dirEntry.Type().IsRegular() {
-			return err
-		}
-		name := dirEntry.Name()
-
-		ruleFile, err := NewDomainFile(path)
-		if err != nil {
-			return fmt.Errorf("open: %s: %w", path, err)
-		}
-		defer ruleFile.FD.Close()
-
-		if generateSRS {
-			err := openWrite(filepath.Join(outputPath, "geosite", "srs", name+SRSSuffix), func(file *os.File) error {
-				return ruleFile.WriteSRS(file, "")
-			})
-			if err != nil {
-				return err
-			}
-			if plainText {
-				err := openWrite(filepath.Join(outputPath, "geosite", "srs", name+SRSPlainSuffix), func(file *os.File) error {
-					return openWrite(filepath.Join(outputPath, "geosite", "srs", name+SRSPlainSuffix), func(file *os.File) error {
-						return ruleFile.WritePlainTextSRS(file)
-					})
-				})
-				if err != nil {
-					return err
-				}
-			}
-		}
-		if generateMRS {
-			fmt.Println("todo")
-		}
-		return nil
-	})
-	if domainErr != nil {
-		log.Fatalln(domainErr.Error())
+		flag.Usage()
 		return
 	}
-	ipErr = filepath.WalkDir(filepath.Join(providerPath, "ip"), func(path string, dirEntry fs.DirEntry, err error) error {
-		if err != nil || dirEntry.IsDir() || !dirEntry.Type().IsRegular() {
+	var entries []Entry
+	err := filepath.WalkDir(providerPath, func(path string, entry fs.DirEntry, err error) error {
+		if err != nil || entry.IsDir() || !entry.Type().IsRegular() {
 			return err
 		}
-		name := dirEntry.Name()
-		ruleFile, err := NewIPFile(path)
-		if err != nil {
-			return fmt.Errorf("open: %s: %w", path, err)
-		}
-		defer ruleFile.FD.Close()
-
-		if generateSRS {
-			err := openWrite(filepath.Join(outputPath, "geoip", "srs", name+SRSSuffix), func(file *os.File) error {
-				return ruleFile.WriteSRS(file, "")
-			})
+		var (
+			ruleset RuleSet
+			typ     string
+		)
+		switch filepath.Base(filepath.Dir(path)) {
+		case "domain":
+			typ = "domain"
+			ruleset, err = NewDomainFile(path)
 			if err != nil {
 				return err
 			}
-			if plainText {
-
-				if err := openWrite(filepath.Join(outputPath, "geoip", "srs", name+SRSPlainSuffix), func(file *os.File) error {
-					return ruleFile.WritePlainTextSRS(file)
-				}); err != nil {
-					return err
-				}
-
-			}
-		}
-		if !generateMRS {
-			err := openWrite(filepath.Join(outputPath, "geoip", "mrs", name+MRSSuffix), func(file *os.File) error {
-				return ruleFile.WriteMRS(file, "", 0)
-			})
+		case "ip":
+			typ = "ip"
+			ruleset, err = NewIPFile(path)
 			if err != nil {
 				return err
 			}
-			if plainText {
-				if err := openWrite(filepath.Join(outputPath, "geoip", "srs", name+MRSPlainSuffix), func(file *os.File) error {
-					return ruleFile.WritePlainTextMRS(file)
-				}); err != nil {
-					return err
-				}
-
-			}
+		default:
+			_, _ = fmt.Fprintf(os.Stderr, "[WARN] unable to determined rule type for %s\n", path)
+			return nil
 		}
+		entries = append(entries, Entry{Ruleset: ruleset, Name: entry.Name(), Type: typ})
+
 		return nil
 	})
-	if ipErr != nil {
-		log.Fatalln(ipErr.Error())
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "[ERROR] %s\n", err.Error())
 		return
 	}
+	if generateSRS {
+		err := generateSRSFunc(entries)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "[ERROR] %s\n", err.Error())
+			return
+		}
+	}
+	if generateMRS {
+		err := generateMRSFunc(entries)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "[ERROR] %s\n", err.Error())
+			return
+		}
+	}
+
 }
 
-func openWrite(path string, do func(file *os.File) error) error {
+func generateSRSFunc(entries []Entry) error {
+	formatList := []string{SRSFormatBinary}
+	if generateAll {
+		formatList = append(formatList, SRSFormatJSON)
+	}
+	for _, E := range entries {
+		for _, F := range formatList {
+			path := filepath.Join(outputPath, E.Type, "srs", E.Name+SRSFormatToSuffix(F))
+
+			if err := openWrite(path, func(w io.Writer) error {
+				return E.Ruleset.WriteSRS(w, F)
+			}); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func generateMRSFunc(entries []Entry) error {
+	for _, E := range entries {
+		var (
+			behaviors []int
+
+			formats = []string{MRSFormatBinary}
+		)
+
+		switch E.Type {
+		case "ip":
+			behaviors = []int{MRSRuleBehaviorIP}
+		case "domain":
+			behaviors = []int{MRSRuleBehaviorDomain}
+		}
+		if generateAll {
+			behaviors = append(behaviors, MRSRuleBehaviorClassical)
+			formats = append(formats, MRSFormatText, MRSFormatYAML)
+		}
+		for _, B := range behaviors {
+			for _, F := range formats {
+				if B == MRSRuleBehaviorClassical && F == MRSFormatBinary {
+					//_ ,_ = fmt.Fprintf(os.Stderr,
+					//	"[WARN] MRSFormatBinary doesn't support MRSRuleBehaviorClassical behavior: type=%s name=%s\n",
+					//	E.Type,E.Name)
+					continue
+				}
+				path := filepath.Join(outputPath, E.Type, "mrs", E.Name+MRSFormatToSuffix(F, B))
+
+				if err := openWrite(path, func(w io.Writer) error {
+					return E.Ruleset.WriteMRS(w, F, B)
+				}); err != nil {
+					if errors.Is(err, ErrDomainNotSupport) {
+						_, _ = fmt.Fprintf(os.Stderr,
+							"[WARN] %s, so %s/%s will only generate behavior-classical file: generate %s\n",
+							err.Error(), E.Type, E.Name, path)
+						continue
+					}
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func openWrite(path string, then func(w io.Writer) error) error {
 	err := os.MkdirAll(filepath.Dir(path), 0777)
 	if err != nil {
 		return fmt.Errorf("mkdir: %w", err)
@@ -136,7 +165,8 @@ func openWrite(path string, do func(file *os.File) error) error {
 		return err
 	}
 	defer output.Close()
-	return do(output)
+
+	return then(output)
 }
 
 type writeBinaryOperation struct {
@@ -160,12 +190,4 @@ func writeGuard(w io.Writer, wbos ...writeBinaryOperation) error {
 		}
 	}
 	return err
-}
-
-type myIPRange struct {
-	from netip.Addr
-	to   netip.Addr
-}
-type myIPSet struct {
-	rr []myIPRange
 }

@@ -103,7 +103,7 @@ func (generator *MrsGenerator) MarshalYAML() ([]byte, error) {
 	return yaml.Marshal(&schema{generator.Payload})
 }
 
-func (generator *MrsGenerator) MarshalBinary() (data []byte, err error) {
+func (generator *MrsGenerator) MarshalBinary() (_ []byte, err error) {
 	buffer := bytes.NewBuffer(nil)
 
 	count := int64(0)
@@ -121,9 +121,6 @@ func (generator *MrsGenerator) MarshalBinary() (data []byte, err error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = errors.Join(err, zstdEncoder.Close())
-	}()
 
 	var extra []byte
 	err = writeGuard(zstdEncoder,
@@ -137,7 +134,8 @@ func (generator *MrsGenerator) MarshalBinary() (data []byte, err error) {
 	}
 	switch generator.Behavior {
 	case MRSRuleBehaviorDomain:
-		domainTrie := new(trie.DomainTrie[struct{}])
+		domainTrie := trie.New[struct{}]()
+
 		supportedDomain := &MrsGenerator{
 			Domain: &DomainRuleset{
 				Domain: generator.Domain.Domain,
@@ -171,6 +169,12 @@ func (generator *MrsGenerator) MarshalBinary() (data []byte, err error) {
 	default:
 		panic("unexcepted")
 	}
+	if err := zstdEncoder.Flush(); err != nil {
+		return nil, err
+	}
+	if err := zstdEncoder.Close(); err != nil {
+		return nil, err
+	}
 
 	return buffer.Bytes(), nil
 }
@@ -183,8 +187,10 @@ func (generator *MrsGenerator) fill() error {
 		generator.fillIPPayload()
 	case MRSRuleBehaviorClassical:
 		generator.fillClassical()
+	default:
+		return fmt.Errorf("unexcepted behavior: %d", generator.Behavior)
 	}
-	return fmt.Errorf("unexcepted behavior: %d", generator.Behavior)
+	return nil
 }
 
 func (generator *MrsGenerator) fillDomainPayload() error {
@@ -207,7 +213,7 @@ func (generator *MrsGenerator) fillDomainPayload() error {
 }
 
 func (generator *MrsGenerator) fillClassical() {
-	generator.Payload = make([]string, 0, generator.Domain.Count())
+	generator.Payload = make([]string, 0, generator.Domain.Count()+generator.IP.Count())
 
 	if generator.IP != nil && generator.IP.Set != nil {
 		for _, prefix := range common.Map(generator.IP.Set.Prefixes(), netip.Prefix.String) {

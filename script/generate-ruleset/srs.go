@@ -6,7 +6,6 @@ import (
 	"compress/zlib"
 	"encoding/binary"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/netip"
@@ -33,10 +32,6 @@ func SRSFormatToSuffix(format string) string {
 }
 
 const (
-	// binary data only
-
-	_ = 0 // use this line to disable goland warning hint....
-
 	SRSRuleItemDomain uint8 = 2 + iota
 	SRSRuleItemDomainKeyword
 	SRSRuleItemDomainRegex
@@ -53,7 +48,6 @@ const (
 )
 
 type SrsJSONRuleset struct {
-	Version       uint8    `json:"version"`
 	Domain        []string `json:"domain,omitempty"`
 	DomainSuffix  []string `json:"domain_suffix,omitempty"`
 	DomainKeyword []string `json:"domain_keyword,omitempty"`
@@ -79,31 +73,35 @@ func (generator *SrsGenerator) Marshal(format string) ([]byte, error) {
 }
 
 func (generator *SrsGenerator) MarshalJSON() ([]byte, error) {
-	var J SrsJSONRuleset
-	J.Version = generator.Version
+	type schema struct {
+		Version uint8            `json:"version,omitempty"`
+		Rules   []SrsJSONRuleset `json:"rules,omitempty"`
+	}
+	J := schema{}
+	R := SrsJSONRuleset{}
+
 	if generator.Domain != nil {
-		J.Domain = generator.Domain.Domain
-		J.DomainSuffix = generator.Domain.Suffix
-		J.DomainKeyword = generator.Domain.KeyWord
-		J.DomainRegexp = generator.Domain.Regexp
+		R.Domain = generator.Domain.Domain
+		R.DomainSuffix = generator.Domain.Suffix
+		R.DomainKeyword = generator.Domain.KeyWord
+		R.DomainRegexp = generator.Domain.Regexp
 	}
 	if generator.IP != nil && generator.IP.Count() > 0 {
-		J.IPCidr = common.Map(generator.IP.Set.Prefixes(), netip.Prefix.String)
+		R.IPCidr = common.Map(generator.IP.Set.Prefixes(), netip.Prefix.String)
 	}
+	J.Version = generator.Version
+	J.Rules = append(J.Rules, R)
 	return json.MarshalIndent(J, "", "  ")
 }
 
 func (generator *SrsGenerator) MarshalBinary() ([]byte, error) {
 	buffer := bytes.NewBuffer(nil)
 	buffer.Write(SRSMagicBytes[:])
-	buffer.WriteByte(generator.Version)
+	_ = binary.Write(buffer, binary.BigEndian, generator.Version)
 	zlibWriter, err := zlib.NewWriterLevel(buffer, zlib.BestCompression)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = errors.Join(zlibWriter.Close(), err)
-	}()
 	count := uint64(0)
 	if generator.Domain != nil && generator.Domain.Count() > 0 {
 		count++
@@ -136,7 +134,9 @@ func (generator *SrsGenerator) MarshalBinary() ([]byte, error) {
 	if err := bufWriter.Flush(); err != nil {
 		return nil, err
 	}
-
+	if err := zlibWriter.Close(); err != nil {
+		return nil, err
+	}
 	return buffer.Bytes(), nil
 }
 
