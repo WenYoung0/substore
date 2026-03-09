@@ -7,4 +7,8 @@ require (
 	go4.org/netipx v0.0.0-20231129151722-fdeea329fbba
 )
 
-require golang.org/x/sys v0.21.0 // indirect
+require (
+	github.com/goccy/go-yaml v1.19.2 // indirect
+	github.com/klauspost/compress v1.18.4 // indirect
+	golang.org/x/sys v0.21.0 // indirect
+)

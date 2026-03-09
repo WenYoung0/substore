@@ -5,18 +5,18 @@ import (
 	"compress/zlib"
 	"encoding/binary"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/netip"
 	"strings"
 	"unsafe"
 
+	"github.com/sagernet/sing/common"
 	"github.com/sagernet/sing/common/domain"
 	"github.com/sagernet/sing/common/varbin"
 	"go4.org/netipx"
 )
 
-type PlainTextSrs struct {
+type SrsPlainTextRuleset struct {
 	Version       uint8    `json:"version"`
 	Domain        []string `json:"domain,omitempty"`
 	DomainSuffix  []string `json:"domain_suffix,omitempty"`
@@ -46,8 +46,8 @@ const (
 )
 
 func (rule *DomainRuleset) WriteSRS(w io.Writer) error {
-	if len(rule.Domain) == 0 && len(rule.Suffix) == 0 && len(rule.KeyWord) == 0 && len(rule.Regexp) == 0 {
-		return fmt.Errorf("empty")
+	if rule.Count() == 0 {
+		return ErrEmpty
 	}
 	gzipWriter, err := prepareSRS(w, 1, SRSCurrentVersion)
 	if err != nil {
@@ -70,8 +70,8 @@ func (rule *DomainRuleset) WriteSRS(w io.Writer) error {
 func (rule *DomainRuleset) WritePlainTextSRS(w io.Writer) error {
 	var buffer = bufio.NewWriter(w)
 	encoder := json.NewEncoder(buffer)
-	encoder.SetIndent("", strings.Repeat(" ",2))
-	err := encoder.Encode(&PlainTextSrs{
+	encoder.SetIndent("", strings.Repeat(" ", 2))
+	err := encoder.Encode(&SrsPlainTextRuleset{
 		Version:       SRSCurrentVersion,
 		Domain:        rule.Domain,
 		DomainSuffix:  rule.Suffix,
@@ -120,27 +120,15 @@ func (rule *DomainRuleset) writeSRSRule(w varbin.Writer) error {
 }
 
 func (rule *IPRuleset) WriteSRS(w io.Writer) error {
-	if len(rule.CIDR) == 0 && len(rule.IP) == 0 {
-		return fmt.Errorf("empty")
+	if rule.Set == nil {
+		return ErrEmpty
 	}
-	var ipxset netipx.IPSetBuilder
-	for _, ip := range rule.CIDR {
-		ipxset.AddPrefix(ip)
-	}
-	for _, ip := range rule.IP {
-		ipxset.Add(ip)
-	}
-	ipset, err := ipxset.IPSet()
-	if err != nil {
-		return err
-	}
-
 	gzipWriter, err := prepareSRS(w, 1, SRSCurrentVersion)
 	if err != nil {
 		return err
 	}
 	bufWriter := bufio.NewWriter(gzipWriter)
-	err = rule.writeSrs(bufWriter, ipset)
+	err = rule.writeSrs(bufWriter, rule.Set)
 	if err != nil {
 		return err
 	}
@@ -153,15 +141,12 @@ func (rule *IPRuleset) WriteSRS(w io.Writer) error {
 }
 
 func (rule *IPRuleset) WritePlainTextSRS(w io.Writer) error {
-	cidrs := make([]string,len(rule.IP) + len(rule.CIDR))
-
-
 	buffer := bufio.NewWriter(w)
 	encoder := json.NewEncoder(buffer)
-	encoder.SetIndent("", strings.Repeat(" ",2))
-	err := encoder.Encode(&PlainTextSrs{
-		Version:       SRSCurrentVersion,
-		IPCidr: rule.CIDR
+	encoder.SetIndent("", strings.Repeat(" ", 2))
+	err := encoder.Encode(&SrsPlainTextRuleset{
+		Version: SRSCurrentVersion,
+		IPCidr:  common.Map(rule.Set.Prefixes(), netip.Prefix.String),
 	})
 	if err != nil {
 		return err
@@ -178,7 +163,7 @@ func (rule *IPRuleset) writeSrs(w varbin.Writer, set *netipx.IPSet) error {
 	if err != nil {
 		return err
 	}
-	err = writeIPSet(w, set)
+	err = srsWriteIPSet(w, set)
 	if err != nil {
 		return err
 	}
@@ -212,15 +197,7 @@ func srsWriteRuleItemString(writer varbin.Writer, itemType uint8, value []string
 	return nil
 }
 
-func writeIPSet(w varbin.Writer, set *netipx.IPSet) error {
-	type myIPRange struct {
-		from netip.Addr
-		to   netip.Addr
-	}
-	type myIPSet struct {
-		rr []myIPRange
-	}
-
+func srsWriteIPSet(w varbin.Writer, set *netipx.IPSet) error {
 	err := w.WriteByte(1)
 	if err != nil {
 		return err

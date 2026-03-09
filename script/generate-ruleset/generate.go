@@ -1,10 +1,13 @@
 package main
 
 import (
+	"encoding/binary"
 	"flag"
 	"fmt"
+	"io"
 	"io/fs"
 	"log"
+	"net/netip"
 	"os"
 	"path/filepath"
 )
@@ -37,30 +40,29 @@ func main() {
 			return err
 		}
 		name := dirEntry.Name()
-		var (
-			df     *DomainRuleset
-			output *os.File
-		)
-		df, err = NewDomainFile(path)
+
+		ruleFile, err := NewDomainFile(path)
 		if err != nil {
 			return fmt.Errorf("open: %s: %w", path, err)
 		}
-		defer df.FD.Close()
+		defer ruleFile.FD.Close()
 
 		if generateSRS {
-			outputFilePath := filepath.Join(outputPath, "geosite", "srs", name+".srs")
-			err = os.MkdirAll(filepath.Dir(outputFilePath), 0777)
-			if err != nil {
-				return fmt.Errorf("mkdir: %w", err)
-			}
-			output, err = os.OpenFile(outputFilePath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
+			err := openWrite(filepath.Join(outputPath, "geosite", "srs", name+SRSSuffix), func(file *os.File) error {
+				return ruleFile.WriteSRS(file)
+			})
 			if err != nil {
 				return err
 			}
-			defer output.Close()
-			err = df.WriteSRS(output)
-			if err != nil {
-				return fmt.Errorf("handle: %s: %w", name, err)
+			if plainText {
+				err := openWrite(filepath.Join(outputPath, "geosite", "srs", name+SRSPlainSuffix), func(file *os.File) error {
+					return openWrite(filepath.Join(outputPath, "geosite", "srs", name+SRSPlainSuffix), func(file *os.File) error {
+						return ruleFile.WritePlainTextSRS(file)
+					})
+				})
+				if err != nil {
+					return err
+				}
 			}
 		}
 		if generateMRS {
@@ -77,61 +79,40 @@ func main() {
 			return err
 		}
 		name := dirEntry.Name()
-		var (
-			df     *IPRuleset
-			output *os.File
-		)
-		df, err = NewIPFile(path)
+		ruleFile, err := NewIPFile(path)
 		if err != nil {
 			return fmt.Errorf("open: %s: %w", path, err)
 		}
-		defer df.FD.Close()
+		defer ruleFile.FD.Close()
 
 		if generateSRS {
 			err := openWrite(filepath.Join(outputPath, "geoip", "srs", name+SRSSuffix), func(file *os.File) error {
-				err := df.WriteSRS(output)
-				if err != nil {
-					return fmt.Errorf("write: %s: %w", file.Name(), err)
-				}
-				return nil
+				return ruleFile.WriteSRS(file)
 			})
 			if err != nil {
 				return err
 			}
 			if plainText {
-				err := openWrite(filepath.Join(outputPath, "geoip", "srs", name+SRSPlainSuffix), func(file *os.File) error {
-					err := df.WritePlainTextSRS(file)
-					if err != nil {
-						return fmt.Errorf("write_plain: %s: %w", file.Name(), err)
-					}
-					return nil
-				})
-				if err != nil {
+
+				if err := openWrite(filepath.Join(outputPath, "geoip", "srs", name+SRSPlainSuffix), func(file *os.File) error {
+					return ruleFile.WritePlainTextSRS(file)
+				}); err != nil {
 					return err
 				}
 
 			}
 		}
-		if generateMRS {
+		if !generateMRS {
 			err := openWrite(filepath.Join(outputPath, "geoip", "mrs", name+MRSSuffix), func(file *os.File) error {
-				err := df.WriteMRS(output)
-				if err != nil {
-					return fmt.Errorf("write: %s: %w", file.Name(), err)
-				}
-				return nil
+				return ruleFile.WriteMRS(file)
 			})
 			if err != nil {
 				return err
 			}
 			if plainText {
-				err := openWrite(filepath.Join(outputPath, "geoip", "srs", name+MRSPlainSuffix), func(file *os.File) error {
-					err := df.WritePlainTextMRS(file)
-					if err != nil {
-						return fmt.Errorf("write_plain: %s: %w", file.Name(), err)
-					}
-					return nil
-				})
-				if err != nil {
+				if err := openWrite(filepath.Join(outputPath, "geoip", "srs", name+MRSPlainSuffix), func(file *os.File) error {
+					return ruleFile.WritePlainTextMRS(file)
+				}); err != nil {
 					return err
 				}
 
@@ -156,4 +137,35 @@ func openWrite(path string, do func(file *os.File) error) error {
 	}
 	defer output.Close()
 	return do(output)
+}
+
+type writeBinaryOperation struct {
+	Bytes  []byte
+	Binary any
+	Ending binary.ByteOrder
+}
+
+func writeGuard(w io.Writer, wbos ...writeBinaryOperation) error {
+	var err error
+	for i := 0; i < len(wbos) && err == nil; i++ {
+		op := wbos[i]
+		if op.Ending != nil {
+			err = binary.Write(w, op.Ending, op.Binary)
+		}
+		if err != nil {
+			break
+		}
+		if len(op.Bytes) != 0 {
+			_, err = w.Write(op.Bytes)
+		}
+	}
+	return err
+}
+
+type myIPRange struct {
+	from netip.Addr
+	to   netip.Addr
+}
+type myIPSet struct {
+	rr []myIPRange
 }

@@ -11,6 +11,10 @@ import (
 	"go4.org/netipx"
 )
 
+var (
+	ErrEmpty = fmt.Errorf("empty")
+)
+
 type RuleSet interface {
 	WriteSRS(w io.Writer) error
 	WriteMRS(w io.Writer) error
@@ -19,7 +23,22 @@ type RuleSet interface {
 type PlainRuleset interface {
 	RuleSet
 	WritePlainTextSRS(w io.Writer) error
-	WritePlainTextMRS(w io.Writer) error
+	WritePlainTextMRS(w io.Writer, format string, behavior int) error
+}
+
+var (
+	_ PlainRuleset = (*DomainRuleset)(nil)
+	_ PlainRuleset = (*IPRuleset)(nil)
+)
+
+type FileError struct {
+	Reason string
+	Line   int
+	Raw    string
+}
+
+func (fe *FileError) Error() string {
+	return fmt.Sprintf("syntax error: %s at line %d: %s", fe.Reason, fe.Line, fe.Raw)
 }
 
 type DomainRuleset struct {
@@ -31,21 +50,8 @@ type DomainRuleset struct {
 	Regexp  []string
 }
 
-type IPRuleset struct {
-	Name string
-	FD   *os.File
-
-	Set netipx.IPSet
-}
-
-type FileError struct {
-	Reason string
-	Line   int
-	Raw    string
-}
-
-func (fe *FileError) Error() string {
-	return fmt.Sprintf("syntax error: %s at line %d: %s", fe.Reason, fe.Line, fe.Raw)
+func (rule *DomainRuleset) Count() int64 {
+	return int64(len(rule.Domain) + len(rule.Suffix) + len(rule.KeyWord) + len(rule.Regexp))
 }
 
 func NewDomainFile(path string) (*DomainRuleset, error) {
@@ -93,6 +99,13 @@ func NewDomainFile(path string) (*DomainRuleset, error) {
 	return domainFile, nil
 }
 
+type IPRuleset struct {
+	Name string
+	FD   *os.File
+
+	Set *netipx.IPSet
+}
+
 func NewIPFile(path string) (*IPRuleset, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -102,6 +115,7 @@ func NewIPFile(path string) (*IPRuleset, error) {
 	ipFile.FD = file
 	sc := bufio.NewScanner(file)
 	lineCount := -1
+	var ipsetbuild netipx.IPSetBuilder
 	for sc.Scan() {
 		lineCount += 1
 		text := sc.Text()
@@ -113,19 +127,18 @@ func NewIPFile(path string) (*IPRuleset, error) {
 		if text == "" {
 			// skip
 			continue
-		}
-
-		if prefix, err := netip.ParsePrefix(text); err == nil {
-			ipFile.CIDR = append(ipFile.CIDR, prefix)
+		} else if prefix, err := netip.ParsePrefix(text); err == nil {
+			ipsetbuild.AddPrefix(prefix)
 			continue
-		}
-		if ip, err := netip.ParseAddr(text); err == nil {
-			ipFile.IP = append(ipFile.IP, ip)
+		} else if ip, err := netip.ParseAddr(text); err == nil {
+			ipsetbuild.Add(ip)
 			continue
 		}
 
 		file.Close()
 		return nil, &FileError{Reason: "bad ip address or cidr", Line: lineCount, Raw: rawText}
 	}
-	return ipFile, nil
+	ipFile.Set, err = ipsetbuild.IPSet()
+
+	return ipFile, err
 }
