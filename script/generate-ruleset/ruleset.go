@@ -55,8 +55,8 @@ func NewDomainFile(path string) (*DomainRuleset, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 	domainFile := new(DomainRuleset)
-	domainFile.FD = file
 	sc := bufio.NewScanner(file)
 	lineCount := -1
 	for sc.Scan() {
@@ -82,10 +82,8 @@ func NewDomainFile(path string) (*DomainRuleset, error) {
 			case "regexp":
 				domainFile.Regexp = append(domainFile.Regexp, trimTail)
 			case "":
-				file.Close()
 				return nil, &FileError{Reason: "empty matcher", Line: lineCount, Raw: rawText}
 			default:
-				file.Close()
 				return nil, &FileError{Reason: "bad matcher", Line: lineCount, Raw: rawText}
 			}
 		} else if idx == -1 {
@@ -96,9 +94,6 @@ func NewDomainFile(path string) (*DomainRuleset, error) {
 }
 
 type IPRuleset struct {
-	Name string
-	FD   *os.File
-
 	Set *netipx.IPSet
 }
 
@@ -115,8 +110,8 @@ func NewIPFile(path string) (*IPRuleset, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 	ipFile := new(IPRuleset)
-	ipFile.FD = file
 	sc := bufio.NewScanner(file)
 	lineCount := -1
 	var ipsetbuild netipx.IPSetBuilder
@@ -139,7 +134,6 @@ func NewIPFile(path string) (*IPRuleset, error) {
 			continue
 		}
 
-		file.Close()
 		return nil, &FileError{Reason: "bad ip address or cidr", Line: lineCount, Raw: rawText}
 	}
 	ipFile.Set, err = ipsetbuild.IPSet()

@@ -122,10 +122,7 @@ func (generator *MrsGenerator) MarshalBinary() (data []byte, err error) {
 		return nil, err
 	}
 	defer func() {
-		cErr := zstdEncoder.Close()
-		if err == nil {
-			err = cErr
-		}
+		err = errors.Join(err, zstdEncoder.Close())
 	}()
 
 	var extra []byte

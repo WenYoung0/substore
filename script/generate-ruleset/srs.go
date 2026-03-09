@@ -2,12 +2,14 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"compress/zlib"
 	"encoding/binary"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"net/netip"
-	"strings"
 	"unsafe"
 
 	"github.com/sagernet/sing/common"
@@ -15,15 +17,6 @@ import (
 	"github.com/sagernet/sing/common/varbin"
 	"go4.org/netipx"
 )
-
-type SrsPlainTextRuleset struct {
-	Version       uint8    `json:"version"`
-	Domain        []string `json:"domain,omitempty"`
-	DomainSuffix  []string `json:"domain_suffix,omitempty"`
-	DomainKeyword []string `json:"domain_keyword,omitempty"`
-	DomainRegexp  []string `json:"domain_regexp,omitempty"`
-	IPCidr        []string `json:"ip_cidr,omitempty"`
-}
 
 var (
 	SRSMagicBytes = [3]byte{0x53, 0x52, 0x53}
@@ -40,6 +33,10 @@ func SRSFormatToSuffix(format string) string {
 }
 
 const (
+	// binary data only
+
+	_ = 0 // use this line to disable goland warning hint....
+
 	SRSRuleItemDomain uint8 = 2 + iota
 	SRSRuleItemDomainKeyword
 	SRSRuleItemDomainRegex
@@ -55,116 +52,95 @@ const (
 	SRSFormatJSON   = "json"
 )
 
-func (rule *DomainRuleset) WriteSRS(w io.Writer, format string) error {
-	if rule.Count() == 0 {
-		return ErrEmpty
-	}
-	gzipWriter, err := prepareSRS(w, 1, SRSCurrentVersion)
-	if err != nil {
-		return err
-	}
-	bufWriter := bufio.NewWriter(gzipWriter)
-	err = rule.writeSRSRule(bufWriter)
-	if err != nil {
-		gzipWriter.Close()
-		return err
-	}
-	err = bufWriter.Flush()
-	if err != nil {
-		gzipWriter.Close()
-		return err
-	}
-	return gzipWriter.Close()
+type SrsJSONRuleset struct {
+	Version       uint8    `json:"version"`
+	Domain        []string `json:"domain,omitempty"`
+	DomainSuffix  []string `json:"domain_suffix,omitempty"`
+	DomainKeyword []string `json:"domain_keyword,omitempty"`
+	DomainRegexp  []string `json:"domain_regexp,omitempty"`
+	IPCidr        []string `json:"ip_cidr,omitempty"`
 }
 
-func (rule *DomainRuleset) WritePlainTextSRS(w io.Writer) error {
-	var buffer = bufio.NewWriter(w)
-	encoder := json.NewEncoder(buffer)
-	encoder.SetIndent("", strings.Repeat(" ", 2))
-	err := encoder.Encode(&SrsPlainTextRuleset{
-		Version:       SRSCurrentVersion,
-		Domain:        rule.Domain,
-		DomainSuffix:  rule.Suffix,
-		DomainKeyword: rule.KeyWord,
-		DomainRegexp:  rule.Regexp,
-	})
-	if err != nil {
-		return err
-	}
-	return buffer.Flush()
+type SrsGenerator struct {
+	Domain *DomainRuleset
+	IP     *IPRuleset
+
+	Version uint8
 }
 
-func (rule *DomainRuleset) writeSRSRule(w varbin.Writer) error {
-	err := binary.Write(w, binary.BigEndian, uint8(0))
-	if err != nil {
-		return err
+func (generator *SrsGenerator) Marshal(format string) ([]byte, error) {
+	switch format {
+	case SRSFormatBinary:
+		return generator.MarshalBinary()
+	case SRSFormatJSON:
+		return generator.MarshalJSON()
 	}
-	if len(rule.Domain) > 0 || len(rule.Suffix) > 0 {
-		err = binary.Write(w, binary.BigEndian, SRSRuleItemDomain)
+	return nil, fmt.Errorf("unsupported format: %s", format)
+}
+
+func (generator *SrsGenerator) MarshalJSON() ([]byte, error) {
+	var J SrsJSONRuleset
+	J.Version = generator.Version
+	if generator.Domain != nil {
+		J.Domain = generator.Domain.Domain
+		J.DomainSuffix = generator.Domain.Suffix
+		J.DomainKeyword = generator.Domain.KeyWord
+		J.DomainRegexp = generator.Domain.Regexp
+	}
+	if generator.IP != nil && generator.IP.Count() > 0 {
+		J.IPCidr = common.Map(generator.IP.Set.Prefixes(), netip.Prefix.String)
+	}
+	return json.MarshalIndent(J, "", "  ")
+}
+
+func (generator *SrsGenerator) MarshalBinary() ([]byte, error) {
+	buffer := bytes.NewBuffer(nil)
+	buffer.Write(SRSMagicBytes[:])
+	buffer.WriteByte(generator.Version)
+	zlibWriter, err := zlib.NewWriterLevel(buffer, zlib.BestCompression)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		err = errors.Join(zlibWriter.Close(), err)
+	}()
+	count := uint64(0)
+	if generator.Domain != nil && generator.Domain.Count() > 0 {
+		count++
+	}
+	if generator.IP != nil && generator.IP.Count() > 0 {
+		count++
+	}
+	if count == 0 {
+		return nil, ErrEmpty
+	}
+
+	bufWriter := bufio.NewWriter(zlibWriter)
+	_, err = varbin.WriteUvarint(bufWriter, uint64(count))
+	if err != nil {
+		return nil, err
+	}
+	if generator.Domain != nil && generator.Domain.Count() > 0 {
+		err := generator.marshalSRSDomain(bufWriter)
 		if err != nil {
-			return err
+			return nil, fmt.Errorf("marshal domain: %w", err)
 		}
-		err = domain.NewMatcher(rule.Domain, rule.Suffix, false).Write(w)
+	}
+
+	if generator.IP != nil && generator.IP.Count() > 0 {
+		err := generator.marshalSRSIP(bufWriter)
 		if err != nil {
-			return err
+			return nil, fmt.Errorf("marshal ip: %w", err)
 		}
 	}
-	if len(rule.KeyWord) > 0 {
-		err = srsWriteRuleItemString(w, SRSRuleItemDomainKeyword, rule.KeyWord)
-		if err != nil {
-			return err
-		}
+	if err := bufWriter.Flush(); err != nil {
+		return nil, err
 	}
-	if len(rule.Regexp) > 0 {
-		err = srsWriteRuleItemString(w, SRSRuleItemDomainRegex, rule.Regexp)
-		if err != nil {
-			return err
-		}
-	}
-	err = binary.Write(w, binary.BigEndian, SRSRuleItemFinal)
-	if err != nil {
-		return err
-	}
-	// err = binary.Write(writer, binary.BigEndian, rule.Invert)
-	return binary.Write(w, binary.BigEndian, false)
+
+	return buffer.Bytes(), nil
 }
 
-func (rule *IPRuleset) WriteSRS(w io.Writer, format string) error {
-	if rule.Set == nil {
-		return ErrEmpty
-	}
-	gzipWriter, err := prepareSRS(w, 1, SRSCurrentVersion)
-	if err != nil {
-		return err
-	}
-	bufWriter := bufio.NewWriter(gzipWriter)
-	err = rule.writeSrs(bufWriter, rule.Set)
-	if err != nil {
-		return err
-	}
-	err = bufWriter.Flush()
-	if err != nil {
-		return err
-	}
-
-	return gzipWriter.Close()
-}
-
-func (rule *IPRuleset) WritePlainTextSRS(w io.Writer) error {
-	buffer := bufio.NewWriter(w)
-	encoder := json.NewEncoder(buffer)
-	encoder.SetIndent("", strings.Repeat(" ", 2))
-	err := encoder.Encode(&SrsPlainTextRuleset{
-		Version: SRSCurrentVersion,
-		IPCidr:  common.Map(rule.Set.Prefixes(), netip.Prefix.String),
-	})
-	if err != nil {
-		return err
-	}
-	return buffer.Flush()
-}
-
-func (rule *IPRuleset) writeSrs(w varbin.Writer, set *netipx.IPSet) error {
+func (generator *SrsGenerator) marshalSRSIP(w varbin.Writer) error {
 	err := binary.Write(w, binary.BigEndian, uint8(0))
 	if err != nil {
 		return err
@@ -173,7 +149,7 @@ func (rule *IPRuleset) writeSrs(w varbin.Writer, set *netipx.IPSet) error {
 	if err != nil {
 		return err
 	}
-	err = srsWriteIPSet(w, set)
+	err = srsWriteIPSet(w, generator.IP.Set)
 	if err != nil {
 		return err
 	}
@@ -183,6 +159,67 @@ func (rule *IPRuleset) writeSrs(w varbin.Writer, set *netipx.IPSet) error {
 	}
 	// err = binary.Write(writer, binary.BigEndian, rule.Invert)
 	return binary.Write(w, binary.BigEndian, false)
+}
+
+func (generator *SrsGenerator) marshalSRSDomain(w varbin.Writer) error {
+	err := binary.Write(w, binary.BigEndian, uint8(0))
+	if err != nil {
+		return err
+	}
+	if len(generator.Domain.Domain) > 0 || len(generator.Domain.Suffix) > 0 {
+		err = binary.Write(w, binary.BigEndian, SRSRuleItemDomain)
+		if err != nil {
+			return err
+		}
+		err = domain.NewMatcher(generator.Domain.Domain, generator.Domain.Suffix, false).Write(w)
+		if err != nil {
+			return err
+		}
+	}
+	if len(generator.Domain.KeyWord) > 0 {
+		err = srsWriteRuleItemString(w, SRSRuleItemDomainKeyword, generator.Domain.KeyWord)
+		if err != nil {
+			return err
+		}
+	}
+	if len(generator.Domain.Regexp) > 0 {
+		err = srsWriteRuleItemString(w, SRSRuleItemDomainRegex, generator.Domain.Regexp)
+		if err != nil {
+			return err
+		}
+	}
+	err = binary.Write(w, binary.BigEndian, SRSRuleItemFinal)
+	if err != nil {
+		return err
+	}
+	// err = binary.Write(writer, binary.BigEndian, rule.Invert)
+	return binary.Write(w, binary.BigEndian, false)
+}
+
+func (rule *DomainRuleset) WriteSRS(w io.Writer, format string) error {
+	if rule.Count() == 0 {
+		return ErrEmpty
+	}
+	generator := &SrsGenerator{Domain: rule, Version: SRSCurrentVersion}
+	gen, err := generator.Marshal(format)
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(gen)
+	return err
+}
+
+func (rule *IPRuleset) WriteSRS(w io.Writer, format string) error {
+	if rule.Count() == 0 {
+		return ErrEmpty
+	}
+	generator := &SrsGenerator{IP: rule, Version: SRSCurrentVersion}
+	gen, err := generator.Marshal(format)
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(gen)
+	return err
 }
 
 func srsWriteRuleItemString(writer varbin.Writer, itemType uint8, value []string) error {
@@ -248,24 +285,4 @@ type dummyVarbinWriter struct {
 func (d *dummyVarbinWriter) WriteByte(c byte) error {
 	_, err := d.Writer.Write([]byte{c})
 	return err
-}
-
-func prepareSRS(w io.Writer, itemCount uint64, ver uint8) (*zlib.Writer, error) {
-	_, err := w.Write(SRSMagicBytes[:])
-	if err != nil {
-		return nil, err
-	}
-	err = binary.Write(w, binary.BigEndian, ver)
-	if err != nil {
-		return nil, err
-	}
-	compressWriter, err := zlib.NewWriterLevel(w, zlib.BestCompression)
-	if err != nil {
-		return nil, err
-	}
-	_, err = varbin.WriteUvarint(&dummyVarbinWriter{Writer: compressWriter}, itemCount)
-	if err != nil {
-		return nil, err
-	}
-	return compressWriter, nil
 }
