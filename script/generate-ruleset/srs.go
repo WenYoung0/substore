@@ -39,7 +39,7 @@ const (
 
 	SRSRuleItemFinal uint8 = 0xFF
 
-	SRSCurrentVersion uint8 = 4
+	SRSCurrentVersion uint8 = 2
 )
 
 const (

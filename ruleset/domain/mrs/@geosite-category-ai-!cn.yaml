@@ -1,0 +1,17 @@
+payload:
+- DOMAIN-SUFFIX,gateway-copilot.bingviz.microsoftapp.net
+- DOMAIN-SUFFIX,mobile.events.data.microsoft.com
+- DOMAIN-SUFFIX,graph.microsoft.com
+- DOMAIN-SUFFIX,analytics.adjust.com
+- DOMAIN-SUFFIX,analytics.adjust.net.in
+- DOMAIN-SUFFIX,api.revenuecat.com
+- DOMAIN-SUFFIX,t-msedge.net
+- DOMAIN-SUFFIX,cloudapp.azure.com
+- DOMAIN-SUFFIX,browser-intake-datadoghq.com
+- DOMAIN-SUFFIX,in.appcenter.ms
+- DOMAIN-SUFFIX,guzzoni.apple.com
+- DOMAIN-SUFFIX,smoot.apple.com
+- DOMAIN-SUFFIX,apple-relay.cloudflare.com
+- DOMAIN-SUFFIX,apple-relay.fastly-edge.com
+- DOMAIN-SUFFIX,cp4.cloudflare.com
+- DOMAIN-SUFFIX,apple-relay.apple.com
