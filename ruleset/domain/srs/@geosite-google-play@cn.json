@@ -5,7 +5,7 @@
       "domain": [
         "redirector.c.play.google.com"
       ],
-      "domain_regexp": [
+      "domain_regex": [
         "^r+[0-9]+(---|\\.)sn-(2x3|ni5|j5o)\\w{5}\\.xn--ngstr-lra8j\\.com$"
       ]
     }

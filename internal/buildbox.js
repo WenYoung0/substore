@@ -1,7 +1,7 @@
 const featureTransport = context.young.features.transport;
 const featureLocation = context.young.features.location;
 const featureBeautify = context.young.features.beautify;
-const secretPatch = context.secret?.patch;
+const { ghproxy } = context.secret.metadata;
 
 const productionPlatform = "sing-box";
 
@@ -102,6 +102,7 @@ const applyPushGroup = ({ proxies = [], config = {}, ...rest }) => {
 const applyGeoSiteGeoIP = ({ proxies = [], config = {}, ...rest }) => {
   const directIP = new Set();
   const directSite = new Set();
+  if (ghproxy) directSite.add(ghproxy)
   for (const proxy of proxies) {
     if (proxy.server === undefined || proxy["dialer-proxy"]) {
       continue;
@@ -142,8 +143,14 @@ const applyRuleSet = ({ config = {}, ...rest }) => {
     config: config,
     downloadDetour: "direct-bootstrap",
     geoipURL: (ruleSetName) =>
+      (ghproxy ? "https://" + ghproxy : "") +
       "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/srs/" +
       ruleSetName.slice(ruleSetName.indexOf("-") + 1, ruleSetName.length) +
+      ".srs",
+    geositeURL: (ruleSetName) =>
+      (ghproxy ? "https://" + ghproxy : "") +
+      "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/" +
+      ruleSetName +
       ".srs",
   });
   return { config, ...rest };
@@ -198,7 +205,6 @@ let proxies = await produceArtifact({
   .then(applyRuleSet)
   .then(applyClientSubnet));
 
-if (typeof secretPatch === "function") secretPatch({ proxies, config });
 $content = JSON.stringify(
   {
     ...config,

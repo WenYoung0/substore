@@ -1,4 +1,5 @@
 payload:
+- DOMAIN,junie.jetbrains.com
 - DOMAIN-SUFFIX,gateway-copilot.bingviz.microsoftapp.net
 - DOMAIN-SUFFIX,mobile.events.data.microsoft.com
 - DOMAIN-SUFFIX,graph.microsoft.com

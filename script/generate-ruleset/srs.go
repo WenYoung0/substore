@@ -51,7 +51,7 @@ type SrsJSONRuleset struct {
 	Domain        []string `json:"domain,omitempty"`
 	DomainSuffix  []string `json:"domain_suffix,omitempty"`
 	DomainKeyword []string `json:"domain_keyword,omitempty"`
-	DomainRegexp  []string `json:"domain_regexp,omitempty"`
+	DomainRegexp  []string `json:"domain_regex,omitempty"`
 	IPCidr        []string `json:"ip_cidr,omitempty"`
 }
 

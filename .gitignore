@@ -1,7 +1,9 @@
 .idea/
 .test/
+*.ignored
 testdata
 testoutput
 
 secrets
+node_modules
 

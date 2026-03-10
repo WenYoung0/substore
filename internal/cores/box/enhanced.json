@@ -1,11 +1,25 @@
 {
   "$schema": "https://github.com/jiang-zhexin/typebox/releases/latest/download/schema.json",
-  "log": { "disabled": false, "level": "warn" },
+  "log": {
+    "disabled": false,
+    "level": "warn"
+  },
   "dns": {
     "servers": [
-      { "tag": "dns-bootstrap", "type": "udp", "server": "223.5.5.5" },
-      { "tag": "dns-local", "type": "local" },
-      { "tag": "dns-cn", "type": "https", "server": "223.5.5.5" },
+      {
+        "tag": "dns-bootstrap",
+        "type": "udp",
+        "server": "223.5.5.5"
+      },
+      {
+        "tag": "dns-local",
+        "type": "local"
+      },
+      {
+        "tag": "dns-cn",
+        "type": "https",
+        "server": "223.5.5.5"
+      },
       {
         "tag": "dns-remote",
         "type": "https",
@@ -31,7 +45,9 @@
         "mode": "and",
         "rules": [
           {
-            "default_interface_address": ["2000::/3"],
+            "default_interface_address": [
+              "2000::/3"
+            ],
             "invert": true
           },
           {
@@ -40,13 +56,34 @@
         ],
         "action": "reject"
       },
-      { "clash_mode": "Direct", "server": "dns-cn" },
-      { "query_type": ["HTTPS", "SVCB"], "action": "reject" },
-      { "clash_mode": "Global", "server": "dns-remote" },
-      { "rule_set": "@geosite-block", "action": "reject" },
-      { "rule_set": "geosite-private", "server": "dns-local" },
       {
-        "rule_set": ["geosite-netflix", "@geosite-netflix-detect"],
+        "clash_mode": "Direct",
+        "server": "dns-cn"
+      },
+      {
+        "query_type": [
+          "HTTPS",
+          "SVCB"
+        ],
+        "action": "reject"
+      },
+      {
+        "clash_mode": "Global",
+        "server": "dns-remote"
+      },
+      {
+        "rule_set": "@geosite-should-block",
+        "action": "reject"
+      },
+      {
+        "rule_set": "geosite-private",
+        "server": "dns-local"
+      },
+      {
+        "rule_set": [
+          "geosite-netflix",
+          "@geosite-netflix-detect"
+        ],
         "server": "dns-entertainment"
       },
       {
@@ -78,9 +115,15 @@
         "type": "logical",
         "mode": "and",
         "rules": [
-          { "rule_set": "geosite-geolocation-!cn", "invert": true },
           {
-            "rule_set": ["geoip-cn", "@geoip-direct"],
+            "rule_set": "geosite-geolocation-!cn",
+            "invert": true
+          },
+          {
+            "rule_set": [
+              "geoip-cn",
+              "@geoip-direct"
+            ],
             "rule_set_ip_cidr_accept_empty": true,
             "ip_is_private": true
           }
@@ -92,8 +135,18 @@
         "type": "logical",
         "mode": "and",
         "rules": [
-          { "rule_set": ["@fakeip-filter"], "invert": true },
-          { "query_type": ["A", "AAAA"] }
+          {
+            "rule_set": [
+              "@geosite-fakeip-filter"
+            ],
+            "invert": true
+          },
+          {
+            "query_type": [
+              "A",
+              "AAAA"
+            ]
+          }
         ],
         "action": "route",
         "server": "dns-fake",
@@ -112,7 +165,9 @@
         "rules": [
           {
             "ip_is_private": true,
-            "default_interface_address": ["2000::/3"],
+            "default_interface_address": [
+              "2000::/3"
+            ],
             "invert": true
           },
           {
@@ -121,13 +176,23 @@
         ],
         "action": "reject"
       },
-      { "network": "icmp", "outbound": "Direct" },
+      {
+        "network": "icmp",
+        "outbound": "Direct"
+      },
       {
         "type": "logical",
         "mode": "or",
         "rules": [
-          { "network": "udp", "port": [123] },
-          { "clash_mode": "Direct" }
+          {
+            "network": "udp",
+            "port": [
+              123
+            ]
+          },
+          {
+            "clash_mode": "Direct"
+          }
         ],
         "action": "route",
         "outbound": "Direct"
@@ -135,34 +200,80 @@
       {
         "type": "logical",
         "mode": "or",
-        "rules": [{ "inbound": ["dns-in"] }, { "port": 53 }],
+        "rules": [
+          {
+            "inbound": [
+              "dns-in"
+            ]
+          },
+          {
+            "port": 53
+          }
+        ],
         "action": "hijack-dns"
       },
-      { "clash_mode": "Global", "action": "route", "outbound": "🙋 Select" },
-      { "ip_is_private": true, "action": "route", "outbound": "Direct" },
       {
-        "rule_set": ["@geoip-direct", "geoip-cn"],
+        "clash_mode": "Global",
+        "action": "route",
+        "outbound": "🙋 Select"
+      },
+      {
+        "ip_is_private": true,
         "action": "route",
         "outbound": "Direct"
       },
-      { "port": [80, 443], "network": "udp", "action": "reject" },
-      { "rule_set": "@geoip-telegram@dc5", "outbound": "✈️ TelegramDC5(AP)" },
-      { "rule_set": "@geoip-telegram@dc1", "outbound": "✈️ TelegramDC1(NA)" },
-      { "rule_set": "@geoip-telegram@dc4", "outbound": "✈️ TelegramDC4(EU)" },
+      {
+        "rule_set": [
+          "@geoip-direct",
+          "geoip-cn"
+        ],
+        "action": "route",
+        "outbound": "Direct"
+      },
+      {
+        "port": [
+          80,
+          443
+        ],
+        "network": "udp",
+        "action": "reject"
+      },
+      {
+        "rule_set": "@geoip-telegram@dc5",
+        "outbound": "✈️ TelegramDC5(AP)"
+      },
+      {
+        "rule_set": "@geoip-telegram@dc1",
+        "outbound": "✈️ TelegramDC1(NA)"
+      },
+      {
+        "rule_set": "@geoip-telegram@dc4",
+        "outbound": "✈️ TelegramDC4(EU)"
+      },
       {
         "type": "logical",
         "mode": "and",
         "rules": [
           {
-            "inbound": ["mixed-in"],
+            "inbound": [
+              "mixed-in"
+            ],
             "invert": true
           }
         ],
         "action": "sniff",
-        "sniffer": ["http", "tls", "quic", "ssh"],
+        "sniffer": [
+          "http",
+          "tls",
+          "quic",
+          "ssh"
+        ],
         "timeout": "50ms"
       },
-      { "rule_set": "@geosite-block", "action": "reject" },
+      {
+        "rule_set": "@geosite-should-block",
+        "action": "reject"
+      },
       {
         "rule_set": [
           "geosite-private",
@@ -187,13 +298,22 @@
         ],
         "outbound": "Direct"
       },
-      { "rule_set": "@geosite-netflix-detect", "outbound": "🙋 Select" },
       {
-        "rule_set": ["geosite-telegram", "@geosite-geolocation-eu"],
+        "rule_set": "@geosite-netflix-detect",
+        "outbound": "🙋 Select"
+      },
+      {
+        "rule_set": [
+          "geosite-telegram",
+          "@geosite-geolocation-eu"
+        ],
         "outbound": "✈️ TelegramDC4(EU)"
       },
       {
-        "rule_set": ["@geosite-category-ai-!cn", "geosite-category-ai-!cn"],
+        "rule_set": [
+          "@geosite-category-ai-!cn",
+          "geosite-category-ai-!cn"
+        ],
         "outbound": "🤖 AI-Service"
       },
       {
@@ -205,9 +325,18 @@
         ],
         "outbound": "🐈 Git"
       },
-      { "rule_set": "geosite-google", "outbound": "🔍 Google" },
-      { "rule_set": "geosite-microsoft@cn", "outbound": "Direct" },
-      { "rule_set": "geosite-microsoft", "outbound": "🪟 Microsoft" },
+      {
+        "rule_set": "geosite-google",
+        "outbound": "🔍 Google"
+      },
+      {
+        "rule_set": "geosite-microsoft@cn",
+        "outbound": "Direct"
+      },
+      {
+        "rule_set": "geosite-microsoft",
+        "outbound": "🪟 Microsoft"
+      },
       {
         "rule_set": "geosite-geolocation-cn",
         "outbound": "Direct"
@@ -224,32 +353,101 @@
     "rule_set": [
       {
         "type": "inline",
-        "tag": "@fakeip-filter",
-        "rules": [{ "domain_suffix": ["lancache.steamcontent.com"] }]
-      },
-      {
-        "type": "inline",
-        "tag": "@geosite-netflix-detect",
+        "tag": "@geosite-direct",
         "rules": [
           {
             "domain": [
-              "android.ngp.prod.cloud.netflix.com",
-              "ios.ngp.prod.cloud.netflix.com"
+              "__this_is_a_placehold_domain_._this_rule_is_generated_by_substore.example.com"
             ]
           }
         ]
       },
       {
         "type": "inline",
-        "tag": "@geosite-geolocation-eu",
+        "tag": "@geoip-direct",
         "rules": [
           {
-            "domain_suffix": ["iwara.tv", "nodeseek.com"]
+            "ip_cidr": [
+              "114.114.114.114/32"
+            ]
           }
         ]
       },
       {
-        "type": "inline",
+        "tag": "@geoip-telegram@dc1",
+        "rules": [
+          {
+            "ip_cidr": [
+              "91.108.12.0/22",
+              "149.154.172.0/22",
+              "2001:b28:f23d::/48"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geoip-telegram@dc4",
+        "rules": [
+          {
+            "ip_cidr": [
+              "5.28.192.0/18",
+              "91.105.192.0/23",
+              "91.108.4.0/22",
+              "91.108.8.0/22",
+              "91.108.56.0/22",
+              "95.161.64.0/20",
+              "109.239.140.0/24",
+              "149.154.160.0/21",
+              "185.76.151.0/24",
+              "2001:67c:4e8::/48",
+              "2a0a:f280:203::/48"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geoip-telegram@dc5",
+        "rules": [
+          {
+            "ip_cidr": [
+              "91.108.16.0/21",
+              "91.108.56.0/23",
+              "149.154.168.0/22",
+              "2001:b28:f23c::/48",
+              "2001:b28:f23f::/48"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-category-ai-!cn",
+        "rules": [
+          {
+            "domain": [
+              "junie.jetbrains.com"
+            ],
+            "domain_suffix": [
+              "gateway-copilot.bingviz.microsoftapp.net",
+              "mobile.events.data.microsoft.com",
+              "graph.microsoft.com",
+              "analytics.adjust.com",
+              "analytics.adjust.net.in",
+              "api.revenuecat.com",
+              "t-msedge.net",
+              "cloudapp.azure.com",
+              "browser-intake-datadoghq.com",
+              "in.appcenter.ms",
+              "guzzoni.apple.com",
+              "smoot.apple.com",
+              "apple-relay.cloudflare.com",
+              "apple-relay.fastly-edge.com",
+              "cp4.cloudflare.com",
+              "apple-relay.apple.com"
+            ]
+          }
+        ]
+      },
+      {
         "tag": "@geosite-category-dev",
         "rules": [
           {
@@ -304,11 +502,99 @@
         ]
       },
       {
-        "type": "inline",
-        "tag": "@geosite-block",
+        "tag": "@geosite-duolingo@cn",
+        "rules": [
+          {
+            "domain_suffix": [
+              "duolingo.cn"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-fakeip-filter",
         "rules": [
           {
             "domain": [
+              "lancache.steamcontent.com",
+              "localhost.ptlogin2.qq.com",
+              "localhost.sec.qq.com",
+              "localhost.work.weixin.qq.com"
+            ],
+            "domain_suffix": [
+              "local",
+              "lan",
+              "connect.rom.miui.com",
+              "miwifi.com",
+              "weixin.qq.com",
+              "wechat.com",
+              "time.windows.com",
+              "ntp.org",
+              "u-tools.cn",
+              "mediatek.com",
+              "cfprefer1.xyz",
+              "wetab.link",
+              "tyasaka.xyz",
+              "msftconnecttest.com",
+              "msftncsi.com",
+              "wpsmail.net",
+              "henzanapp.com",
+              "pconline.com.cn"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-geolocation-eu",
+        "rules": [
+          {
+            "domain_suffix": [
+              "nodeseek.com",
+              "iwara.tv"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-google-play@cn",
+        "rules": [
+          {
+            "domain": [
+              "redirector.c.play.google.com"
+            ],
+            "domain_regex": [
+              "^r+[0-9]+(---|\\.)sn-(2x3|ni5|j5o)\\w{5}\\.xn--ngstr-lra8j\\.com$"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-jetbrains@cn",
+        "rules": [
+          {
+            "domain_suffix": [
+              "cdn.jetbrains.com",
+              "download-cdn.jetbrains.com"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-netflix-detect",
+        "rules": [
+          {
+            "domain": [
+              "android.ngp.prod.cloud.netflix.com",
+              "ios.ngp.prod.cloud.netflix.com"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-should-block",
+        "rules": [
+          {
+            "domain_suffix": [
               "dns.weixin.qq.com",
               "api.installer.xiaomi.com",
               "userlocation.googleapis.com"
@@ -317,49 +603,248 @@
         ]
       },
       {
-        "type": "inline",
         "tag": "@geosite-steam@cn",
         "rules": [
           {
-            "domain_suffix": ["steamserver.net"]
-          }
-        ]
-      },
-      {
-        "type": "inline",
-        "tag": "@geosite-duolingo@cn",
-        "rules": [
-          {
-            "domain_suffix": ["duolingo.cn"]
-          }
-        ]
-      },
-      {
-        "type": "inline",
-        "tag": "@geosite-google-play@cn",
-        "rules": [
-          {
-            "domain": "redirector.c.play.google.com",
-            "domain_regex": [
-              "^r+[0-9]+(---|\\.)sn-(2x3|ni5|j5o)\\w{5}\\.xn--ngstr-lra8j\\.com$"
+            "domain_suffix": [
+              "steamserver.net"
             ]
           }
         ]
       },
       {
-        "type": "inline",
-        "tag": "@geosite-jetbrains@cn",
+        "tag": "geoip-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/srs/cn.srs"
+      },
+      {
+        "tag": "geosite-akamai@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-akamai@cn.srs"
+      },
+      {
+        "tag": "geosite-apple@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-apple@cn.srs"
+      },
+      {
+        "tag": "geosite-aws-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-aws-cn.srs"
+      },
+      {
+        "tag": "geosite-azure@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-azure@cn.srs"
+      },
+      {
+        "tag": "geosite-category-ai-!cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ai-!cn.srs"
+      },
+      {
+        "tag": "geosite-category-entertainment",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-entertainment.srs"
+      },
+      {
+        "tag": "geosite-category-game-platforms-download@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-game-platforms-download@cn.srs"
+      },
+      {
+        "tag": "geosite-category-ntp",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ntp.srs"
+      },
+      {
+        "tag": "geosite-category-social-media-!cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-social-media-!cn.srs"
+      },
+      {
+        "tag": "geosite-category-tech-media",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-tech-media.srs"
+      },
+      {
+        "tag": "geosite-connectivity-check",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-connectivity-check.srs"
+      },
+      {
+        "tag": "geosite-epicgames@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-epicgames@cn.srs"
+      },
+      {
+        "tag": "geosite-geolocation-!cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs"
+      },
+      {
+        "tag": "geosite-geolocation-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-cn.srs"
+      },
+      {
+        "tag": "geosite-github",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-github.srs"
+      },
+      {
+        "tag": "geosite-gitlab",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-gitlab.srs"
+      },
+      {
+        "tag": "geosite-google",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-google.srs"
+      },
+      {
+        "tag": "geosite-itunes@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-itunes@cn.srs"
+      },
+      {
+        "tag": "geosite-linkedin@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-linkedin@cn.srs"
+      },
+      {
+        "tag": "geosite-microsoft",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-microsoft.srs"
+      },
+      {
+        "tag": "geosite-microsoft@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-microsoft@cn.srs"
+      },
+      {
+        "tag": "geosite-netflix",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-netflix.srs"
+      },
+      {
+        "tag": "geosite-nvidia@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-nvidia@cn.srs"
+      },
+      {
+        "tag": "geosite-paypal@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-paypal@cn.srs"
+      },
+      {
+        "tag": "geosite-private",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-private.srs"
+      },
+      {
+        "tag": "geosite-reddit",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-reddit.srs"
+      },
+      {
+        "tag": "geosite-steam@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-steam@cn.srs"
+      },
+      {
+        "tag": "geosite-telegram",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-telegram.srs"
+      },
+      {
+        "tag": "geosite-tld-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-tld-cn.srs"
+      },
+      {
+        "tag": "@geoip-telegram@dc1",
         "rules": [
           {
-            "domain_suffix": ["cdn.jetbrains.com", "download-cdn.jetbrains.com"]
+            "ip_cidr": [
+              "91.108.12.0/22",
+              "149.154.172.0/22",
+              "2001:b28:f23d::/48"
+            ]
           }
         ]
       },
       {
-        "type": "inline",
+        "tag": "@geoip-telegram@dc4",
+        "rules": [
+          {
+            "ip_cidr": [
+              "5.28.192.0/18",
+              "91.105.192.0/23",
+              "91.108.4.0/22",
+              "91.108.8.0/22",
+              "91.108.56.0/22",
+              "95.161.64.0/20",
+              "109.239.140.0/24",
+              "149.154.160.0/21",
+              "185.76.151.0/24",
+              "2001:67c:4e8::/48",
+              "2a0a:f280:203::/48"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geoip-telegram@dc5",
+        "rules": [
+          {
+            "ip_cidr": [
+              "91.108.16.0/21",
+              "91.108.56.0/23",
+              "149.154.168.0/22",
+              "2001:b28:f23c::/48",
+              "2001:b28:f23f::/48"
+            ]
+          }
+        ]
+      },
+      {
         "tag": "@geosite-category-ai-!cn",
         "rules": [
           {
+            "domain": [
+              "junie.jetbrains.com"
+            ],
             "domain_suffix": [
               "gateway-copilot.bingviz.microsoftapp.net",
               "mobile.events.data.microsoft.com",
@@ -382,28 +867,351 @@
         ]
       },
       {
-        "type": "inline",
-        "tag": "@geoip-telegram@dc4",
+        "tag": "@geosite-category-dev",
         "rules": [
           {
-            "ip_cidr": [
-              "91.105.192.0/23",
-              "91.108.4.0/22",
-              "91.108.8.0/22",
-              "91.108.56.0/22",
-              "95.161.64.0/20",
-              "149.154.160.0/21",
-              "185.76.151.0/24",
-              "5.28.192.0/18",
-              "109.239.140.0/24",
-              "2001:67c:4e8::/48",
-              "2a0a:f280:203::/48"
+            "domain_suffix": [
+              "dev.azure.com",
+              "codecommit.amazonaws.com",
+              "source.developers.google.com",
+              "sourcerepo.googleapis.com",
+              "gitlab.freedesktop.org",
+              "git.kernel.org",
+              "git.savannah.gnu.org",
+              "git.code.sf.net",
+              "git.sr.ht",
+              "godoc.org",
+              "gitea.io",
+              "gittea.com",
+              "cgit.freedesktop.org",
+              "salsa.debian.org",
+              "gitlab.gnome.org",
+              "gitlab.alpinelinux.org",
+              "bitbucket.org",
+              "pagure.io",
+              "codeberg.org",
+              "android.googlesource.com",
+              "chromium.googlesource.com",
+              "git.postgresql.org",
+              "git.php.net",
+              "git.eclipse.org",
+              "git.webkit.org",
+              "git.freebsd.org",
+              "git.openbsd.org",
+              "git.apache.org",
+              "git.torproject.org",
+              "repo.or.cz",
+              "framagit.org",
+              "notabug.org",
+              "gitgud.io",
+              "gerrit.googlesource.com",
+              "git.blender.org",
+              "git.drupal.org",
+              "git.ruby-lang.org",
+              "git.python.org",
+              "git.zx2c4.com",
+              "git.busybox.net",
+              "git.samba.org",
+              "repo.gentoo.org",
+              "invent.kde.org",
+              "git.ozlabs.org",
+              "git.infradead.org"
             ]
           }
         ]
       },
       {
-        "type": "inline",
+        "tag": "@geosite-duolingo@cn",
+        "rules": [
+          {
+            "domain_suffix": [
+              "duolingo.cn"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-fakeip-filter",
+        "rules": [
+          {
+            "domain": [
+              "lancache.steamcontent.com",
+              "localhost.ptlogin2.qq.com",
+              "localhost.sec.qq.com",
+              "localhost.work.weixin.qq.com"
+            ],
+            "domain_suffix": [
+              "local",
+              "lan",
+              "connect.rom.miui.com",
+              "miwifi.com",
+              "weixin.qq.com",
+              "wechat.com",
+              "time.windows.com",
+              "ntp.org",
+              "u-tools.cn",
+              "mediatek.com",
+              "cfprefer1.xyz",
+              "wetab.link",
+              "tyasaka.xyz",
+              "msftconnecttest.com",
+              "msftncsi.com",
+              "wpsmail.net",
+              "henzanapp.com",
+              "pconline.com.cn"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-geolocation-eu",
+        "rules": [
+          {
+            "domain_suffix": [
+              "nodeseek.com",
+              "iwara.tv"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-google-play@cn",
+        "rules": [
+          {
+            "domain": [
+              "redirector.c.play.google.com"
+            ],
+            "domain_regex": [
+              "^r+[0-9]+(---|\\.)sn-(2x3|ni5|j5o)\\w{5}\\.xn--ngstr-lra8j\\.com$"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-jetbrains@cn",
+        "rules": [
+          {
+            "domain_suffix": [
+              "cdn.jetbrains.com",
+              "download-cdn.jetbrains.com"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-netflix-detect",
+        "rules": [
+          {
+            "domain": [
+              "android.ngp.prod.cloud.netflix.com",
+              "ios.ngp.prod.cloud.netflix.com"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-should-block",
+        "rules": [
+          {
+            "domain_suffix": [
+              "dns.weixin.qq.com",
+              "api.installer.xiaomi.com",
+              "userlocation.googleapis.com"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-steam@cn",
+        "rules": [
+          {
+            "domain_suffix": [
+              "steamserver.net"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "geoip-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/srs/cn.srs"
+      },
+      {
+        "tag": "geosite-akamai@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-akamai@cn.srs"
+      },
+      {
+        "tag": "geosite-apple@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-apple@cn.srs"
+      },
+      {
+        "tag": "geosite-aws-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-aws-cn.srs"
+      },
+      {
+        "tag": "geosite-azure@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-azure@cn.srs"
+      },
+      {
+        "tag": "geosite-category-ai-!cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ai-!cn.srs"
+      },
+      {
+        "tag": "geosite-category-entertainment",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-entertainment.srs"
+      },
+      {
+        "tag": "geosite-category-game-platforms-download@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-game-platforms-download@cn.srs"
+      },
+      {
+        "tag": "geosite-category-ntp",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ntp.srs"
+      },
+      {
+        "tag": "geosite-category-social-media-!cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-social-media-!cn.srs"
+      },
+      {
+        "tag": "geosite-category-tech-media",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-tech-media.srs"
+      },
+      {
+        "tag": "geosite-connectivity-check",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-connectivity-check.srs"
+      },
+      {
+        "tag": "geosite-epicgames@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-epicgames@cn.srs"
+      },
+      {
+        "tag": "geosite-geolocation-!cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs"
+      },
+      {
+        "tag": "geosite-geolocation-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-cn.srs"
+      },
+      {
+        "tag": "geosite-github",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-github.srs"
+      },
+      {
+        "tag": "geosite-gitlab",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-gitlab.srs"
+      },
+      {
+        "tag": "geosite-google",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-google.srs"
+      },
+      {
+        "tag": "geosite-itunes@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-itunes@cn.srs"
+      },
+      {
+        "tag": "geosite-linkedin@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-linkedin@cn.srs"
+      },
+      {
+        "tag": "geosite-microsoft",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-microsoft.srs"
+      },
+      {
+        "tag": "geosite-microsoft@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-microsoft@cn.srs"
+      },
+      {
+        "tag": "geosite-netflix",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-netflix.srs"
+      },
+      {
+        "tag": "geosite-nvidia@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-nvidia@cn.srs"
+      },
+      {
+        "tag": "geosite-paypal@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-paypal@cn.srs"
+      },
+      {
+        "tag": "geosite-private",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-private.srs"
+      },
+      {
+        "tag": "geosite-reddit",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-reddit.srs"
+      },
+      {
+        "tag": "geosite-steam@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-steam@cn.srs"
+      },
+      {
+        "tag": "geosite-telegram",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-telegram.srs"
+      },
+      {
+        "tag": "geosite-tld-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-tld-cn.srs"
+      },
+      {
         "tag": "@geoip-telegram@dc1",
         "rules": [
           {
@@ -416,7 +1224,26 @@
         ]
       },
       {
-        "type": "inline",
+        "tag": "@geoip-telegram@dc4",
+        "rules": [
+          {
+            "ip_cidr": [
+              "5.28.192.0/18",
+              "91.105.192.0/23",
+              "91.108.4.0/22",
+              "91.108.8.0/22",
+              "91.108.56.0/22",
+              "95.161.64.0/20",
+              "109.239.140.0/24",
+              "149.154.160.0/21",
+              "185.76.151.0/24",
+              "2001:67c:4e8::/48",
+              "2a0a:f280:203::/48"
+            ]
+          }
+        ]
+      },
+      {
         "tag": "@geoip-telegram@dc5",
         "rules": [
           {
@@ -431,20 +1258,377 @@
         ]
       },
       {
-        "type": "inline",
-        "tag": "@geosite-direct",
+        "tag": "@geosite-category-ai-!cn",
         "rules": [
           {
             "domain": [
-              "__this_is_a_placehold_domain_._this_rule_is_generated_by_substore.example.com"
+              "junie.jetbrains.com"
+            ],
+            "domain_suffix": [
+              "gateway-copilot.bingviz.microsoftapp.net",
+              "mobile.events.data.microsoft.com",
+              "graph.microsoft.com",
+              "analytics.adjust.com",
+              "analytics.adjust.net.in",
+              "api.revenuecat.com",
+              "t-msedge.net",
+              "cloudapp.azure.com",
+              "browser-intake-datadoghq.com",
+              "in.appcenter.ms",
+              "guzzoni.apple.com",
+              "smoot.apple.com",
+              "apple-relay.cloudflare.com",
+              "apple-relay.fastly-edge.com",
+              "cp4.cloudflare.com",
+              "apple-relay.apple.com"
             ]
           }
         ]
       },
       {
-        "type": "inline",
-        "tag": "@geoip-direct",
-        "rules": [{ "ip_cidr": ["114.114.114.114/32"] }]
+        "tag": "@geosite-category-dev",
+        "rules": [
+          {
+            "domain_suffix": [
+              "dev.azure.com",
+              "codecommit.amazonaws.com",
+              "source.developers.google.com",
+              "sourcerepo.googleapis.com",
+              "gitlab.freedesktop.org",
+              "git.kernel.org",
+              "git.savannah.gnu.org",
+              "git.code.sf.net",
+              "git.sr.ht",
+              "godoc.org",
+              "gitea.io",
+              "gittea.com",
+              "cgit.freedesktop.org",
+              "salsa.debian.org",
+              "gitlab.gnome.org",
+              "gitlab.alpinelinux.org",
+              "bitbucket.org",
+              "pagure.io",
+              "codeberg.org",
+              "android.googlesource.com",
+              "chromium.googlesource.com",
+              "git.postgresql.org",
+              "git.php.net",
+              "git.eclipse.org",
+              "git.webkit.org",
+              "git.freebsd.org",
+              "git.openbsd.org",
+              "git.apache.org",
+              "git.torproject.org",
+              "repo.or.cz",
+              "framagit.org",
+              "notabug.org",
+              "gitgud.io",
+              "gerrit.googlesource.com",
+              "git.blender.org",
+              "git.drupal.org",
+              "git.ruby-lang.org",
+              "git.python.org",
+              "git.zx2c4.com",
+              "git.busybox.net",
+              "git.samba.org",
+              "repo.gentoo.org",
+              "invent.kde.org",
+              "git.ozlabs.org",
+              "git.infradead.org"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-duolingo@cn",
+        "rules": [
+          {
+            "domain_suffix": [
+              "duolingo.cn"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-fakeip-filter",
+        "rules": [
+          {
+            "domain": [
+              "lancache.steamcontent.com",
+              "localhost.ptlogin2.qq.com",
+              "localhost.sec.qq.com",
+              "localhost.work.weixin.qq.com"
+            ],
+            "domain_suffix": [
+              "local",
+              "lan",
+              "connect.rom.miui.com",
+              "miwifi.com",
+              "weixin.qq.com",
+              "wechat.com",
+              "time.windows.com",
+              "ntp.org",
+              "u-tools.cn",
+              "mediatek.com",
+              "cfprefer1.xyz",
+              "wetab.link",
+              "tyasaka.xyz",
+              "msftconnecttest.com",
+              "msftncsi.com",
+              "wpsmail.net",
+              "henzanapp.com",
+              "pconline.com.cn"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-geolocation-eu",
+        "rules": [
+          {
+            "domain_suffix": [
+              "nodeseek.com",
+              "iwara.tv"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-google-play@cn",
+        "rules": [
+          {
+            "domain": [
+              "redirector.c.play.google.com"
+            ],
+            "domain_regex": [
+              "^r+[0-9]+(---|\\.)sn-(2x3|ni5|j5o)\\w{5}\\.xn--ngstr-lra8j\\.com$"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-jetbrains@cn",
+        "rules": [
+          {
+            "domain_suffix": [
+              "cdn.jetbrains.com",
+              "download-cdn.jetbrains.com"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-netflix-detect",
+        "rules": [
+          {
+            "domain": [
+              "android.ngp.prod.cloud.netflix.com",
+              "ios.ngp.prod.cloud.netflix.com"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-should-block",
+        "rules": [
+          {
+            "domain_suffix": [
+              "dns.weixin.qq.com",
+              "api.installer.xiaomi.com",
+              "userlocation.googleapis.com"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-steam@cn",
+        "rules": [
+          {
+            "domain_suffix": [
+              "steamserver.net"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "geoip-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/srs/cn.srs"
+      },
+      {
+        "tag": "geosite-akamai@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-akamai@cn.srs"
+      },
+      {
+        "tag": "geosite-apple@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-apple@cn.srs"
+      },
+      {
+        "tag": "geosite-aws-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-aws-cn.srs"
+      },
+      {
+        "tag": "geosite-azure@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-azure@cn.srs"
+      },
+      {
+        "tag": "geosite-category-ai-!cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ai-!cn.srs"
+      },
+      {
+        "tag": "geosite-category-entertainment",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-entertainment.srs"
+      },
+      {
+        "tag": "geosite-category-game-platforms-download@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-game-platforms-download@cn.srs"
+      },
+      {
+        "tag": "geosite-category-ntp",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ntp.srs"
+      },
+      {
+        "tag": "geosite-category-social-media-!cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-social-media-!cn.srs"
+      },
+      {
+        "tag": "geosite-category-tech-media",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-tech-media.srs"
+      },
+      {
+        "tag": "geosite-connectivity-check",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-connectivity-check.srs"
+      },
+      {
+        "tag": "geosite-epicgames@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-epicgames@cn.srs"
+      },
+      {
+        "tag": "geosite-geolocation-!cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs"
+      },
+      {
+        "tag": "geosite-geolocation-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-cn.srs"
+      },
+      {
+        "tag": "geosite-github",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-github.srs"
+      },
+      {
+        "tag": "geosite-gitlab",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-gitlab.srs"
+      },
+      {
+        "tag": "geosite-google",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-google.srs"
+      },
+      {
+        "tag": "geosite-itunes@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-itunes@cn.srs"
+      },
+      {
+        "tag": "geosite-linkedin@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-linkedin@cn.srs"
+      },
+      {
+        "tag": "geosite-microsoft",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-microsoft.srs"
+      },
+      {
+        "tag": "geosite-microsoft@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-microsoft@cn.srs"
+      },
+      {
+        "tag": "geosite-netflix",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-netflix.srs"
+      },
+      {
+        "tag": "geosite-nvidia@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-nvidia@cn.srs"
+      },
+      {
+        "tag": "geosite-paypal@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-paypal@cn.srs"
+      },
+      {
+        "tag": "geosite-private",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-private.srs"
+      },
+      {
+        "tag": "geosite-reddit",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-reddit.srs"
+      },
+      {
+        "tag": "geosite-steam@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-steam@cn.srs"
+      },
+      {
+        "tag": "geosite-telegram",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-telegram.srs"
+      },
+      {
+        "tag": "geosite-tld-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-tld-cn.srs"
       }
     ],
     "final": "🙋 Select",
@@ -456,7 +1640,10 @@
     }
   },
   "experimental": {
-    "cache_file": { "enabled": true, "store_rdrc": true },
+    "cache_file": {
+      "enabled": true,
+      "store_rdrc": true
+    },
     "clash_api": {
       "external_controller": "127.0.0.1:19091",
       "default_mode": "Enhanced",
@@ -467,7 +1654,10 @@
     {
       "type": "tun",
       "tag": "tun-in",
-      "address": ["172.27.0.1/30", "fdfe:dcba:9876::1/126"],
+      "address": [
+        "172.27.0.1/30",
+        "fdfe:dcba:9876::1/126"
+      ],
       "auto_route": true,
       "route_exclude_address": [
         "10.0.0.0/8",
@@ -493,7 +1683,11 @@
     }
   ],
   "outbounds": [
-    { "type": "direct", "tag": "Direct", "domain_resolver": "dns-cn" },
+    {
+      "type": "direct",
+      "tag": "Direct",
+      "domain_resolver": "dns-cn"
+    },
     {
       "type": "direct",
       "tag": "direct-bootstrap",
@@ -502,63 +1696,81 @@
     {
       "type": "selector",
       "tag": "🙋 Select",
-      "outbounds": ["Direct"],
+      "outbounds": [
+        "Direct"
+      ],
       "default": "Direct",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "🔍 Google",
-      "outbounds": ["🙋 Select"],
+      "outbounds": [
+        "🙋 Select"
+      ],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "🐈 Git",
-      "outbounds": ["🙋 Select"],
+      "outbounds": [
+        "🙋 Select"
+      ],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "🪟 Microsoft",
-      "outbounds": ["🙋 Select"],
+      "outbounds": [
+        "🙋 Select"
+      ],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "🤖 AI-Service",
-      "outbounds": ["🙋 Select"],
+      "outbounds": [
+        "🙋 Select"
+      ],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "📺 Entertainment",
-      "outbounds": ["🙋 Select"],
+      "outbounds": [
+        "🙋 Select"
+      ],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "✈️ TelegramDC1(NA)",
-      "outbounds": ["🙋 Select"],
+      "outbounds": [
+        "🙋 Select"
+      ],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "✈️ TelegramDC4(EU)",
-      "outbounds": ["🙋 Select"],
+      "outbounds": [
+        "🙋 Select"
+      ],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "✈️ TelegramDC5(AP)",
-      "outbounds": ["🙋 Select"],
+      "outbounds": [
+        "🙋 Select"
+      ],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     }

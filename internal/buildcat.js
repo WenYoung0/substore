@@ -1,7 +1,7 @@
 const featureTransport = context.young.features.transport;
 const featureLocation = context.young.features.location;
 const featureBeautify = context.young.features.beautify;
-const secretPatch = context.secret?.patch;
+const { ghproxy } = context.secret.metadata;
 
 const productionPlatform = "mihomo";
 
@@ -155,8 +155,6 @@ let proxies = await produceArtifact({
   .then(applyTransport)
   .then(applyGeoSiteGeoIP)
   .then(applyPushGroup));
-
-if (typeof secretPatch === "function") secretPatch({ proxies, config });
 
 $content = ProxyUtils.yaml.dump({
   ...config,
