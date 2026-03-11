@@ -175,6 +175,7 @@ const applyBoostrapDirect = ({ config = {}, ...rest }) => {
       }
     });
   }
+  return { config, ...rest}
 };
 
 let proxies = await produceArtifact({
