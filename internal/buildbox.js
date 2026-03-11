@@ -1,8 +1,8 @@
 const featureTransport = context.young.features.transport;
 const featureLocation = context.young.features.location;
 const featureBeautify = context.young.features.beautify;
-const { ghproxy } = context.secret.metadata;
 
+const directDetourOutbound = "direct-bootstarp";
 const productionPlatform = "sing-box";
 
 const produce = (proxies = []) => {
@@ -102,7 +102,6 @@ const applyPushGroup = ({ proxies = [], config = {}, ...rest }) => {
 const applyGeoSiteGeoIP = ({ proxies = [], config = {}, ...rest }) => {
   const directIP = new Set();
   const directSite = new Set();
-  if (ghproxy) directSite.add(ghproxy)
   for (const proxy of proxies) {
     if (proxy.server === undefined || proxy["dialer-proxy"]) {
       continue;
@@ -138,24 +137,6 @@ const applyGeoSiteGeoIP = ({ proxies = [], config = {}, ...rest }) => {
   return { proxies, config, ...rest };
 };
 
-const applyRuleSet = ({ config = {}, ...rest }) => {
-  featureBeautify.func.completeRemoteRuleSetBox({
-    config: config,
-    downloadDetour: "direct-bootstrap",
-    geoipURL: (ruleSetName) =>
-      (ghproxy ? "https://" + ghproxy : "") +
-      "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/srs/" +
-      ruleSetName.slice(ruleSetName.indexOf("-") + 1, ruleSetName.length) +
-      ".srs",
-    geositeURL: (ruleSetName) =>
-      (ghproxy ? "https://" + ghproxy : "") +
-      "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/" +
-      ruleSetName +
-      ".srs",
-  });
-  return { config, ...rest };
-};
-
 const applyClientSubnet = ({ config = {}, ...rest }) => {
   const getClientIP = () => {
     const req = $options?._req;
@@ -185,6 +166,43 @@ const applyClientSubnet = ({ config = {}, ...rest }) => {
   return { config, ...rest };
 };
 
+const applyBoostrapDirect = ({ config = {}, ...rest }) => {
+  const ghproxy = context.secret?.metadata?.ghproxy ?? "hk.gh-proxy.org";
+  const githubDomains = [
+    "raw.githubusercontent.com",
+    "github.com",
+    "gist.githubusercontent.com",
+  ];
+
+  if (Array.isArray(config.route?.rule_set)) {
+    config.route.rule_set.map((ruleset) => {
+      if (
+        ruleset.type === "remote" &&
+        githubDomains.some((domain) =>
+          ruleset.url.startsWith("https://" + domain),
+        )
+      ) {
+        ruleset.url = `https://${ghproxy}/${ruleset.url}`;
+        ruleset.download_detour = directDetourOutbound;
+      }
+    });
+  }
+  if (
+    config.experimental?.clash_api?.external_ui_download_url &&
+    githubDomains.some((domain) =>
+      config.experimental.clash_api.external_ui_download_url.startsWith(
+        "https://" + domain,
+      ),
+    )
+  ) {
+    config.experimental.clash_api.external_ui_download_url = `https://${ghproxy}/${ruleset.url}`;
+    config.experimental.clash_api.external_ui_download_detour =
+      directDetourOutbound;
+  }
+
+  return { config, ...rest };
+};
+
 let config = JSON.parse($files[0]);
 
 let proxies = await produceArtifact({
@@ -202,7 +220,7 @@ let proxies = await produceArtifact({
   .then(applyTransport)
   .then(applyGeoSiteGeoIP)
   .then(applyPushGroup)
-  .then(applyRuleSet)
+  .then(applyBoostrapDirect)
   .then(applyClientSubnet));
 
 $content = JSON.stringify(
