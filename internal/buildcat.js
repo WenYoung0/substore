@@ -70,7 +70,7 @@ const applyPushGroup = ({ proxies = [], config = {}, ...rest }) => {
         [
           "🙋 Select",
           "🔍 Google",
-          "💻 Dev",
+          "🐈 Git",
           "🪟 Microsoft",
           "📺 Media-Social",
           "🤖 AI-Service",
@@ -133,8 +133,8 @@ const applyGeoSiteGeoIP = ({ proxies = [], config = {}, ...rest }) => {
   };
   config["rule-providers"]["_geosite-direct"] = {
     type: "inline",
-    behavior: "classical",
-    payload: [...directSite].map((site) => ["DOMAIN", site].join(",")),
+    behavior: "domain",
+    payload: [...directSite],
   };
 
   return { proxies, config, ...rest };

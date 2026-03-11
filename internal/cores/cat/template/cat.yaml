@@ -2,48 +2,68 @@ mixed-port: 7890
 socks-port: 7891
 port: 7892
 allow-lan: false
-bind-address: '*'
+bind-address: "*"
 unified-delay: true
 tcp-concurrent: true
+tun:
+  enable: true
+  stack: mixed
+  dns-hijack:
+    - "any:53"
+    - "tcp://any:53"
+  auto-route: true
+  auto-detect-interface: true
+geodata-mode: true
+geox-url:
+  geoip: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip-lite.dat"
+  geosite: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat"
+  mmdb: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/country-lite.mmdb"
+  asn: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/GeoLite2-ASN.mmdb"
 rules:
   - RULE-SET,geoip-private,DIRECT,no-resolve
   - RULE-SET,geosite-private,DIRECT
-  - AND,((NETWORK,udp),(DST-PORT,135/137/138/139/5353)),REJECT
   - AND,((NETWORK,udp),(DST-PORT,67/68/123)),DIRECT
   - AND,((NETWORK,udp),(SRC-PORT,67/68/123)),DIRECT
-  - RULE-SET,_geosite-block,REJECT,no-resolve
-  - RULE-SET,_geoip-direct,DIRECT,no-resolve
+  - RULE-SET,_geosite-should-block,REJECT
+  - RULE-SET,_geoip-direct,DIRECT
   - RULE-SET,_geosite-direct,DIRECT
-  - RULE-SET,geoip-cn,DIRECT,no-resolve
+  - RULE-SET,geosite-private,DIRECT
+  - RULE-SET,geosite-category-game-platforms-download@cn,DIRECT
+  - RULE-SET,geosite-connectivity-check,DIRECT
+  - RULE-SET,geosite-apple@cn,DIRECT
+  - RULE-SET,geosite-steam@cn,DIRECT
+  - RULE-SET,geosite-epicgames@cn,DIRECT
+  - RULE-SET,geosite-aws-cn,DIRECT
+  - RULE-SET,geosite-azure@cn,DIRECT
+  - RULE-SET,geosite-nvidia@cn,DIRECT
+  - RULE-SET,geosite-itunes@cn,DIRECT
+  - RULE-SET,geosite-paypal@cn,DIRECT
+  - RULE-SET,geosite-akamai@cn,DIRECT
+  - RULE-SET,geosite-linkedin@cn,DIRECT
+  - RULE-SET,_geosite-steam@cn,DIRECT
+  - RULE-SET,_geosite-direct,DIRECT
+  - RULE-SET,_geosite-duolingo@cn,DIRECT
+  - RULE-SET,_geosite-jetbrains@cn,DIRECT
+  - RULE-SET,_geosite-direct,DIRECT
+  - RULE-SET,_geosite-google-play@cn,DIRECT
+  - RULE-SET,geoip-cn,DIRECT
+  - RULE-SET,_geoip-telegram@dc5,✈️ TelegramDC5(AP),no-resolve
   - RULE-SET,_geoip-telegram@dc1,✈️ TelegramDC1(NA),no-resolve
   - RULE-SET,_geoip-telegram@dc4,✈️ TelegramDC4(EU),no-resolve
-  - RULE-SET,_geoip-telegram@dc5,✈️ TelegramDC5(AP),no-resolve
   - RULE-SET,geosite-telegram,✈️ TelegramDC4(EU)
-  - RULE-SET,geosite-category-ai-chat-!cn,🤖 AI-Service
-  - RULE-SET,_geosite-category-ai,🤖 AI-Service
-  - RULE-SET,_geosite-category-dev,💻 Dev
-  - RULE-SET,geosite-category-dev,💻 Dev
-  - RULE-SET,geosite-category-tech-media,💻 Dev
+  - RULE-SET,geosite-category-ai-!cn,🤖 AI-Service
+  - RULE-SET,_geosite-category-ai-!cn,🤖 AI-Service
+  - RULE-SET,_geosite-category-dev,🐈 Git
+  - RULE-SET,geosite-github,🐈 Git
+  - RULE-SET,geosite-gitlab,🐈 Git
+  - RULE-SET,geosite-category-tech-media,🐈 Git
   - RULE-SET,geosite-google,🔍 Google
   - RULE-SET,geosite-microsoft@cn,DIRECT
   - RULE-SET,geosite-microsoft,🪟 Microsoft
-  - DOMAIN-SUFFIX,steamserver.net,DIRECT
-  - RULE-SET,geosite-connectivity-check,DIRECT
-  - RULE-SET,geosite-steam@cn,DIRECT
   - RULE-SET,geosite-geolocation-cn,DIRECT
-  - RULE-SET,geosite-gamedownload,DIRECT
-  - RULE-SET,geosite-apple@cn,DIRECT
-  - RULE-SET,geosite-stream,📺 Media-Social
-  - RULE-SET,geosite-telegram,📺 Media-Social
-  - RULE-SET,geosite-twitter,📺 Media-Social
-  - RULE-SET,geosite-facebook,📺 Media-Social
-  - RULE-SET,geosite-instagram,📺 Media-Social
-  - RULE-SET,geosite-snap,📺 Media-Social
+  - RULE-SET,geosite-category-entertainment,📺 Media-Social
+  - RULE-SET,geosite-category-social-media-!cn,📺 Media-Social
   - RULE-SET,geosite-reddit,📺 Media-Social
-  - RULE-SET,geosite-whatsapp,📺 Media-Social
-  - RULE-SET,geosite-discord,📺 Media-Social
-  - RULE-SET,geosite-line,📺 Media-Social
-  - RULE-SET,geosite-category-ads-all,REJECT
   - MATCH,🙋 Select
 proxy-groups:
   - name: 🙋 Select
@@ -54,7 +74,7 @@ proxy-groups:
     type: select
     proxies:
       - 🙋 Select
-  - name: 💻 Dev
+  - name: 🐈 Git
     type: select
     proxies:
       - 🙋 Select
@@ -93,14 +113,9 @@ dns:
   fake-ip-range: 32.81.0.0/16
   fake-ip-range6: 5f00:7a61:b56:2170::/92
   fake-ip-filter:
-    - +.lan
-    - +.local
-    - +.market.xiaomi.com
-    - +.lancache.steamcontent.com
-    - rule-set:geosite-private
+    - rule-set:_geosite-fakeip-filter
     - rule-set:geosite-connectivity-check
     - rule-set:geosite-netflix
-    - rule-set:_geosite-direct
   nameserver-policy:
     rule-set:geosite-private:
       - system
@@ -143,3 +158,12 @@ sniffer:
   skip-domain:
     - Mijia Cloud
     - +.push.apple.com
+rule-providers:
+  _geoip-direct:
+    type: inline
+    behavior: ipcidr
+    payload: []
+  _geosite-direct:
+    type: inline
+    behavior: domain
+    payload: []
