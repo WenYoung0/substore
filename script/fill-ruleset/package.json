@@ -7,7 +7,7 @@
   "type": "commonjs",
   "main": "main.js",
   "scripts": {
-    "test": "node main.js"
+    "run": "node main.js"
   },
   "dependencies": {
     "js-yaml": "^4.1.1"

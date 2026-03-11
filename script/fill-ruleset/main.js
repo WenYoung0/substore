@@ -55,11 +55,13 @@ const generateConfig = {
   box: [
     {
       type: GEN_TYPE_DYNAMIC,
+      template: "../../internal/cores/box/template/box.json",
       path: "../../internal/cores/box/box.json",
       embed: true,
     },
     {
       type: GEN_TYPE_DYNAMIC,
+      template: "../../internal/cores/box/template/enhanced.json",
       path: "../../internal/cores/box/enhanced.json",
       embed: true,
     },
@@ -67,6 +69,7 @@ const generateConfig = {
   cat: [
     {
       type: GEN_TYPE_STATIC,
+      template: "../../internal/cores/cat/template/cat.yaml",
       path: "../../internal/cores/cat/cat.yaml",
       staticFile: "../../internal/cores/cat/ruleset.list",
       embed: true,
@@ -86,11 +89,11 @@ const main = () => {
 
 const applyBox = (item) => {
   const ruleset = [];
-  const configData = fs.readFileSync(item.path, "utf-8");
+  const configData = fs.readFileSync(item.template, "utf-8");
   const config = JSON.parse(configData);
   if (!config) {
-    console.log("empty file for: ", item.path);
-    return; //nop
+    console.log("empty template: ", item.template);
+    return;
   }
 
   if (item.type === GEN_TYPE_DYNAMIC) {
@@ -124,7 +127,11 @@ const applyBox = (item) => {
             ? generateConfig.dataSoucre.box.ip + "/" + name + ".json"
             : generateConfig.dataSoucre.box.domain + "/" + name + ".json";
           const rule = JSON.parse(fs.readFileSync(rulePath));
-          rulesetObject.rules = rule.rules;
+          rulesetObject = {
+            ...rulesetObject,
+            type: "inline",
+            rules: rule.rules,
+          };
         } else {
           rulesetObject = {
             ...rulesetObject,
@@ -140,17 +147,17 @@ const applyBox = (item) => {
       }),
     ],
   };
-  fs.writeFileSync(
-    item.path + ".ignored",
-    JSON.stringify(JSON.parse(configData), null, 2),
-  );
   fs.writeFileSync(item.path, JSON.stringify(config, null, 2));
 };
 
 const applyCat = (item) => {
   const ruleset = [];
-  const configData = fs.readFileSync(item.path, "utf-8");
+  const configData = fs.readFileSync(item.template, "utf-8");
   let config = yaml.load(configData);
+  if (!config) {
+    console.log("empty template: ", item.template);
+    return;
+  }
   if (item.type === GEN_TYPE_DYNAMIC) {
     console.log("cat doesn't support dynamic generation");
   } else if (item.type === GEN_TYPE_STATIC && item.staticFile) {
@@ -214,7 +221,6 @@ const applyCat = (item) => {
     ...Object.assign(config["rule-providers"] ?? {}, ...ruleProviders),
   };
 
-  fs.writeFileSync(item.path + ".ignored", yaml.dump(yaml.load(configData)));
   fs.writeFileSync(item.path, yaml.dump(config));
 };
 
@@ -241,6 +247,9 @@ const genRulesetFromConfig = (config) => {
     ...lookupRuleset({ ruleItem: config.dns }),
   ]) {
     rulesetSet.add(rs);
+  }
+  for (const rs of config.route?.rule_set ?? []) {
+    if (rs.tag) rulesetSet.delete(rs.tag);
   }
 
   return [...rulesetSet]

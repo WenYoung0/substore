@@ -1,0 +1,145 @@
+mixed-port: 7890
+socks-port: 7891
+port: 7892
+allow-lan: false
+bind-address: '*'
+unified-delay: true
+tcp-concurrent: true
+rules:
+  - RULE-SET,geoip-private,DIRECT,no-resolve
+  - RULE-SET,geosite-private,DIRECT
+  - AND,((NETWORK,udp),(DST-PORT,135/137/138/139/5353)),REJECT
+  - AND,((NETWORK,udp),(DST-PORT,67/68/123)),DIRECT
+  - AND,((NETWORK,udp),(SRC-PORT,67/68/123)),DIRECT
+  - RULE-SET,_geosite-block,REJECT,no-resolve
+  - RULE-SET,_geoip-direct,DIRECT,no-resolve
+  - RULE-SET,_geosite-direct,DIRECT
+  - RULE-SET,geoip-cn,DIRECT,no-resolve
+  - RULE-SET,_geoip-telegram@dc1,✈️ TelegramDC1(NA),no-resolve
+  - RULE-SET,_geoip-telegram@dc4,✈️ TelegramDC4(EU),no-resolve
+  - RULE-SET,_geoip-telegram@dc5,✈️ TelegramDC5(AP),no-resolve
+  - RULE-SET,geosite-telegram,✈️ TelegramDC4(EU)
+  - RULE-SET,geosite-category-ai-chat-!cn,🤖 AI-Service
+  - RULE-SET,_geosite-category-ai,🤖 AI-Service
+  - RULE-SET,_geosite-category-dev,💻 Dev
+  - RULE-SET,geosite-category-dev,💻 Dev
+  - RULE-SET,geosite-category-tech-media,💻 Dev
+  - RULE-SET,geosite-google,🔍 Google
+  - RULE-SET,geosite-microsoft@cn,DIRECT
+  - RULE-SET,geosite-microsoft,🪟 Microsoft
+  - DOMAIN-SUFFIX,steamserver.net,DIRECT
+  - RULE-SET,geosite-connectivity-check,DIRECT
+  - RULE-SET,geosite-steam@cn,DIRECT
+  - RULE-SET,geosite-geolocation-cn,DIRECT
+  - RULE-SET,geosite-gamedownload,DIRECT
+  - RULE-SET,geosite-apple@cn,DIRECT
+  - RULE-SET,geosite-stream,📺 Media-Social
+  - RULE-SET,geosite-telegram,📺 Media-Social
+  - RULE-SET,geosite-twitter,📺 Media-Social
+  - RULE-SET,geosite-facebook,📺 Media-Social
+  - RULE-SET,geosite-instagram,📺 Media-Social
+  - RULE-SET,geosite-snap,📺 Media-Social
+  - RULE-SET,geosite-reddit,📺 Media-Social
+  - RULE-SET,geosite-whatsapp,📺 Media-Social
+  - RULE-SET,geosite-discord,📺 Media-Social
+  - RULE-SET,geosite-line,📺 Media-Social
+  - RULE-SET,geosite-category-ads-all,REJECT
+  - MATCH,🙋 Select
+proxy-groups:
+  - name: 🙋 Select
+    type: select
+    proxies:
+      - DIRECT
+  - name: 🔍 Google
+    type: select
+    proxies:
+      - 🙋 Select
+  - name: 💻 Dev
+    type: select
+    proxies:
+      - 🙋 Select
+  - name: 🪟 Microsoft
+    type: select
+    proxies:
+      - 🙋 Select
+  - name: 📺 Media-Social
+    type: select
+    proxies:
+      - 🙋 Select
+  - name: 🤖 AI-Service
+    type: select
+    proxies:
+      - 🙋 Select
+  - name: ✈️ TelegramDC1(NA)
+    type: select
+    proxies:
+      - 🙋 Select
+  - name: ✈️ TelegramDC4(EU)
+    type: select
+    proxies:
+      - 🙋 Select
+  - name: ✈️ TelegramDC5(AP)
+    type: select
+    proxies:
+      - 🙋 Select
+dns:
+  enable: true
+  ipv6: true
+  use-hosts: true
+  use-system-hosts: true
+  enhanced-mode: fake-ip
+  cache-algorithm: arc
+  listen: 127.0.0.1:10853
+  fake-ip-range: 32.81.0.0/16
+  fake-ip-range6: 5f00:7a61:b56:2170::/92
+  fake-ip-filter:
+    - +.lan
+    - +.local
+    - +.market.xiaomi.com
+    - +.lancache.steamcontent.com
+    - rule-set:geosite-private
+    - rule-set:geosite-connectivity-check
+    - rule-set:geosite-netflix
+    - rule-set:_geosite-direct
+  nameserver-policy:
+    rule-set:geosite-private:
+      - system
+    rule-set:geosite-connectivity-check:
+      - system
+    rule-set:geosite-netflix:
+      - https://1.1.1.1/dns-query#📺 Media-Social
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  nameserver:
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
+  direct-nameserver:
+    - 223.5.5.5
+    - 223.6.6.6
+    - 119.29.29.29
+    - 114.114.114.114
+  proxy-nameserver:
+    - https://doh.pub/dns-query
+profile:
+  store-selected: true
+  store-fake-ip: true
+sniffer:
+  enable: true
+  override-destination: false
+  sniff:
+    HTTP:
+      ports:
+        - 80
+        - 8080-8880
+    TLS:
+      ports:
+        - 443
+        - 8443
+    QUIC:
+      ports:
+        - 443
+        - 8443
+  skip-domain:
+    - Mijia Cloud
+    - +.push.apple.com
