@@ -41,13 +41,15 @@
     ],
     "rules": [
       {
+        "rule_set": "geosite-private",
+        "server": "dns-local"
+      },
+      {
         "type": "logical",
         "mode": "and",
         "rules": [
           {
-            "default_interface_address": [
-              "2000::/3"
-            ],
+            "default_interface_address": ["2000::/3"],
             "invert": true
           },
           {
@@ -61,10 +63,7 @@
         "server": "dns-cn"
       },
       {
-        "query_type": [
-          "HTTPS",
-          "SVCB"
-        ],
+        "query_type": ["HTTPS", "SVCB"],
         "action": "reject"
       },
       {
@@ -76,14 +75,7 @@
         "action": "reject"
       },
       {
-        "rule_set": "geosite-private",
-        "server": "dns-local"
-      },
-      {
-        "rule_set": [
-          "geosite-netflix",
-          "@geosite-netflix-detect"
-        ],
+        "rule_set": ["geosite-netflix", "@geosite-netflix-detect"],
         "server": "dns-entertainment"
       },
       {
@@ -120,10 +112,7 @@
             "invert": true
           },
           {
-            "rule_set": [
-              "geoip-cn",
-              "@geoip-direct"
-            ],
+            "rule_set": ["geoip-cn", "@geoip-direct"],
             "rule_set_ip_cidr_accept_empty": true,
             "ip_is_private": true
           }
@@ -136,16 +125,11 @@
         "mode": "and",
         "rules": [
           {
-            "rule_set": [
-              "@geosite-fakeip-filter"
-            ],
+            "rule_set": ["@geosite-fakeip-filter"],
             "invert": true
           },
           {
-            "query_type": [
-              "A",
-              "AAAA"
-            ]
+            "query_type": ["A", "AAAA"]
           }
         ],
         "action": "route",
@@ -160,23 +144,6 @@
   "route": {
     "rules": [
       {
-        "type": "logical",
-        "mode": "and",
-        "rules": [
-          {
-            "ip_is_private": true,
-            "default_interface_address": [
-              "2000::/3"
-            ],
-            "invert": true
-          },
-          {
-            "ip_version": 6
-          }
-        ],
-        "action": "reject"
-      },
-      {
         "network": "icmp",
         "outbound": "Direct"
       },
@@ -186,9 +153,7 @@
         "rules": [
           {
             "network": "udp",
-            "port": [
-              123
-            ]
+            "port": [123]
           },
           {
             "clash_mode": "Direct"
@@ -202,9 +167,7 @@
         "mode": "or",
         "rules": [
           {
-            "inbound": [
-              "dns-in"
-            ]
+            "inbound": ["dns-in"]
           },
           {
             "port": 53
@@ -223,18 +186,27 @@
         "outbound": "Direct"
       },
       {
-        "rule_set": [
-          "@geoip-direct",
-          "geoip-cn"
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "ip_is_private": true,
+            "default_interface_address": ["2000::/3"],
+            "invert": true
+          },
+          {
+            "ip_version": 6
+          }
         ],
+        "action": "reject"
+      },
+      {
+        "rule_set": ["@geoip-direct", "geoip-cn"],
         "action": "route",
         "outbound": "Direct"
       },
       {
-        "port": [
-          80,
-          443
-        ],
+        "port": [80, 443],
         "network": "udp",
         "action": "reject"
       },
@@ -255,19 +227,12 @@
         "mode": "and",
         "rules": [
           {
-            "inbound": [
-              "mixed-in"
-            ],
+            "inbound": ["mixed-in"],
             "invert": true
           }
         ],
         "action": "sniff",
-        "sniffer": [
-          "http",
-          "tls",
-          "quic",
-          "ssh"
-        ],
+        "sniffer": ["http", "tls", "quic", "ssh"],
         "timeout": "50ms"
       },
       {
@@ -303,17 +268,11 @@
         "outbound": "🙋 Select"
       },
       {
-        "rule_set": [
-          "geosite-telegram",
-          "@geosite-geolocation-eu"
-        ],
+        "rule_set": ["geosite-telegram", "@geosite-geolocation-eu"],
         "outbound": "✈️ TelegramDC4(EU)"
       },
       {
-        "rule_set": [
-          "@geosite-category-ai-!cn",
-          "geosite-category-ai-!cn"
-        ],
+        "rule_set": ["@geosite-category-ai-!cn", "geosite-category-ai-!cn"],
         "outbound": "🤖 AI-Service"
       },
       {
@@ -367,9 +326,7 @@
         "tag": "@geoip-direct",
         "rules": [
           {
-            "ip_cidr": [
-              "114.114.114.114/32"
-            ]
+            "ip_cidr": ["114.114.114.114/32"]
           }
         ]
       }
@@ -397,10 +354,7 @@
     {
       "type": "tun",
       "tag": "tun-in",
-      "address": [
-        "172.27.0.1/30",
-        "fdfe:dcba:9876::1/126"
-      ],
+      "address": ["172.27.0.1/30", "fdfe:dcba:9876::1/126"],
       "auto_route": true,
       "route_exclude_address": [
         "10.0.0.0/8",
@@ -439,81 +393,63 @@
     {
       "type": "selector",
       "tag": "🙋 Select",
-      "outbounds": [
-        "Direct"
-      ],
+      "outbounds": ["Direct"],
       "default": "Direct",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "🔍 Google",
-      "outbounds": [
-        "🙋 Select"
-      ],
+      "outbounds": ["🙋 Select"],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "🐈 Git",
-      "outbounds": [
-        "🙋 Select"
-      ],
+      "outbounds": ["🙋 Select"],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "🪟 Microsoft",
-      "outbounds": [
-        "🙋 Select"
-      ],
+      "outbounds": ["🙋 Select"],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "🤖 AI-Service",
-      "outbounds": [
-        "🙋 Select"
-      ],
+      "outbounds": ["🙋 Select"],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "📺 Entertainment",
-      "outbounds": [
-        "🙋 Select"
-      ],
+      "outbounds": ["🙋 Select"],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "✈️ TelegramDC1(NA)",
-      "outbounds": [
-        "🙋 Select"
-      ],
+      "outbounds": ["🙋 Select"],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "✈️ TelegramDC4(EU)",
-      "outbounds": [
-        "🙋 Select"
-      ],
+      "outbounds": ["🙋 Select"],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "✈️ TelegramDC5(AP)",
-      "outbounds": [
-        "🙋 Select"
-      ],
+      "outbounds": ["🙋 Select"],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     }

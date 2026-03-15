@@ -77,6 +77,10 @@
     ],
     "rules": [
       {
+        "rule_set": "geosite-private",
+        "server": "dns-local"
+      },
+      {
         "type": "logical",
         "mode": "and",
         "rules": [
@@ -110,10 +114,6 @@
       {
         "rule_set": "@geosite-should-block",
         "action": "reject"
-      },
-      {
-        "rule_set": "geosite-private",
-        "server": "dns-local"
       },
       {
         "rule_set": [
@@ -223,23 +223,6 @@
   "route": {
     "rules": [
       {
-        "type": "logical",
-        "mode": "and",
-        "rules": [
-          {
-            "ip_is_private": true,
-            "default_interface_address": [
-              "2000::/3"
-            ],
-            "invert": true
-          },
-          {
-            "ip_version": 6
-          }
-        ],
-        "action": "reject"
-      },
-      {
         "network": "icmp",
         "outbound": "Direct"
       },
@@ -291,6 +274,23 @@
         "ip_is_private": true,
         "action": "route",
         "outbound": "Direct"
+      },
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "ip_is_private": true,
+            "default_interface_address": [
+              "2000::/3"
+            ],
+            "invert": true
+          },
+          {
+            "ip_version": 6
+          }
+        ],
+        "action": "reject"
       },
       {
         "rule_set": [
