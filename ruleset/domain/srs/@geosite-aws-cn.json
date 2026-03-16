@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain_suffix": [
+        "amzndns-cn.biz",
+        "amzndns-cn.com",
+        "amzndns-cn.net",
+        "amzndns-cn.top"
+      ],
+      "domain_regex": [
+        ".+\\.awsdns-cn-[0-9][0-9]\\.(biz|com|net|top)$"
+      ]
+    }
+  ]
+}

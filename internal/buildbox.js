@@ -118,6 +118,10 @@ const applyGeoSiteGeoIP = ({ proxies = [], config = {}, ...rest }) => {
       directIP.add(serverAddr); // IPv4
     else directSite.add(serverAddr); // Domain
   }
+  if (context.secret?.metadata?.ghproxy)
+    directSite.add(context.secret?.metadata?.ghproxy);
+  if (context.secret?.metadata?.subscribeURL)
+    directSite.add(context.secret?.metadata?.subscribeURL);
 
   config.route?.rule_set?.map((rs) => {
     if (rs.tag === "@geosite-direct" && directSite.size > 0) {

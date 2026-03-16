@@ -68,40 +68,11 @@
       },
       {
         "clash_mode": "Global",
-        "server": "dns-remote"
+        "server": "dns-final"
       },
       {
         "rule_set": "@geosite-should-block",
         "action": "reject"
-      },
-      {
-        "rule_set": ["geosite-netflix", "@geosite-netflix-detect"],
-        "server": "dns-entertainment"
-      },
-      {
-        "rule_set": [
-          "geosite-tld-cn",
-          "geosite-category-game-platforms-download@cn",
-          "geosite-connectivity-check",
-          "geosite-microsoft@cn",
-          "geosite-apple@cn",
-          "geosite-steam@cn",
-          "geosite-epicgames@cn",
-          "geosite-aws-cn",
-          "geosite-azure@cn",
-          "geosite-nvidia@cn",
-          "geosite-itunes@cn",
-          "geosite-paypal@cn",
-          "geosite-akamai@cn",
-          "geosite-linkedin@cn",
-          "geosite-category-ntp",
-          "@geosite-steam@cn",
-          "@geosite-direct",
-          "@geosite-duolingo@cn",
-          "@geosite-jetbrains@cn",
-          "@geosite-google-play@cn"
-        ],
-        "server": "dns-cn"
       },
       {
         "type": "logical",
@@ -117,7 +88,7 @@
             "ip_is_private": true
           }
         ],
-        "server": "dns-remote",
+        "server": "dns-final",
         "client_subnet": "0.0.0.0/0"
       },
       {
@@ -125,7 +96,10 @@
         "mode": "and",
         "rules": [
           {
-            "rule_set": ["@geosite-fakeip-filter"],
+            "rule_set": [
+              "@geosite-fakeip-filter",
+              "geosite-connectivity-check"
+            ],
             "invert": true
           },
           {
@@ -144,16 +118,17 @@
   "route": {
     "rules": [
       {
-        "network": "icmp",
-        "outbound": "Direct"
-      },
-      {
         "type": "logical",
         "mode": "or",
         "rules": [
           {
-            "network": "udp",
-            "port": [123]
+            "network": "icmp"
+          },
+          {
+            "port": [
+              25, 67, 68, 110, 123, 143, 179, 465, 546, 547, 587, 993, 995,
+              8899, 8733
+            ]
           },
           {
             "clash_mode": "Direct"
@@ -181,6 +156,11 @@
         "outbound": "🙋 Select"
       },
       {
+        "inbound": ["mixed-in"],
+        "action": "resolve",
+        "strategy": "prefer_ipv4"
+      },
+      {
         "ip_is_private": true,
         "action": "route",
         "outbound": "Direct"
@@ -201,16 +181,6 @@
         "action": "reject"
       },
       {
-        "rule_set": ["@geoip-direct", "geoip-cn"],
-        "action": "route",
-        "outbound": "Direct"
-      },
-      {
-        "port": [80, 443],
-        "network": "udp",
-        "action": "reject"
-      },
-      {
         "rule_set": "@geoip-telegram@dc5",
         "outbound": "✈️ TelegramDC5(AP)"
       },
@@ -221,6 +191,16 @@
       {
         "rule_set": "@geoip-telegram@dc4",
         "outbound": "✈️ TelegramDC4(EU)"
+      },
+      {
+        "rule_set": ["@geoip-direct", "geoip-cn"],
+        "action": "route",
+        "outbound": "Direct"
+      },
+      {
+        "port": [80, 443],
+        "network": "udp",
+        "action": "reject"
       },
       {
         "type": "logical",
@@ -241,35 +221,15 @@
       },
       {
         "rule_set": [
-          "geosite-private",
-          "geosite-category-game-platforms-download@cn",
-          "geosite-connectivity-check",
-          "geosite-apple@cn",
-          "geosite-steam@cn",
-          "geosite-epicgames@cn",
-          "geosite-aws-cn",
-          "geosite-azure@cn",
-          "geosite-nvidia@cn",
-          "geosite-itunes@cn",
-          "geosite-paypal@cn",
-          "geosite-akamai@cn",
-          "geosite-linkedin@cn",
+          "geosite-microsoft@cn",
+          "@geosite-direct",
+          "@geosite-akamai@cn",
           "@geosite-steam@cn",
-          "@geosite-direct",
-          "@geosite-duolingo@cn",
-          "@geosite-jetbrains@cn",
-          "@geosite-direct",
-          "@geosite-google-play@cn"
+          "@geosite-google-play@cn",
+          "@geosite-duolingo@cn"
         ],
+        "action": "route",
         "outbound": "Direct"
-      },
-      {
-        "rule_set": "@geosite-netflix-detect",
-        "outbound": "🙋 Select"
-      },
-      {
-        "rule_set": ["geosite-telegram", "@geosite-geolocation-eu"],
-        "outbound": "✈️ TelegramDC4(EU)"
       },
       {
         "rule_set": ["@geosite-category-ai-!cn", "geosite-category-ai-!cn"],
@@ -285,20 +245,21 @@
         "outbound": "🐈 Git"
       },
       {
-        "rule_set": "geosite-google",
+        "rule_set": ["geosite-google"],
+        "action": "route",
         "outbound": "🔍 Google"
-      },
-      {
-        "rule_set": "geosite-microsoft@cn",
-        "outbound": "Direct"
       },
       {
         "rule_set": "geosite-microsoft",
         "outbound": "🪟 Microsoft"
       },
       {
-        "rule_set": "geosite-geolocation-cn",
+        "rule_set": ["geosite-geolocation-cn"],
         "outbound": "Direct"
+      },
+      {
+        "rule_set": ["geosite-telegram", "@geosite-geolocation-eu"],
+        "outbound": "✈️ TelegramDC4(EU)"
       },
       {
         "rule_set": [

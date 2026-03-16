@@ -12,6 +12,8 @@ import (
 )
 
 var (
+	silentWarn = os.Getenv("RULESET_SILENT_WARN") != ""
+
 	generateSRS  bool
 	generateMRS  bool
 	generateAll  bool
@@ -24,6 +26,8 @@ type Entry struct {
 	Name    string
 	Type    string
 }
+
+var alwaysfalse bool
 
 func main() {
 	flag.BoolVar(&generateSRS, "srs", false, "Generate SRS")
@@ -63,7 +67,7 @@ func main() {
 				return err
 			}
 		default:
-			_, _ = fmt.Fprintf(os.Stderr, "[WARN] unable to determined rule type for %s\n", path)
+			_, _ = fmt.Fprintf(os.Stderr, "[ERROR] unable to determined rule type for %s\n", path)
 			return nil
 		}
 		entries = append(entries, Entry{Ruleset: ruleset, Name: entry.Name(), Type: typ})
@@ -142,9 +146,12 @@ func generateMRSFunc(entries []Entry) error {
 					return E.Ruleset.WriteMRS(w, F, B)
 				}); err != nil {
 					if errors.Is(err, ErrDomainNotSupport) {
-						_, _ = fmt.Fprintf(os.Stderr,
-							"[WARN] %s, so %s/%s will only generate behavior-classical file: generate %s\n",
-							err.Error(), E.Type, E.Name, path)
+						if !silentWarn {
+							_, _ = fmt.Fprintf(os.Stderr,
+								"[WARN] %s, so %s/%s will only generate behavior-classical file: generate %s\n",
+								err.Error(), E.Type, E.Name, path)
+						}
+
 						continue
 					}
 					return err

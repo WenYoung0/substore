@@ -28,46 +28,32 @@ rules:
   - RULE-SET,geosite-private,DIRECT
   - AND,((NETWORK,udp),(DST-PORT,67/68/123)),DIRECT
   - AND,((NETWORK,udp),(SRC-PORT,67/68/123)),DIRECT
-  - RULE-SET,_geosite-should-block,REJECT
-  - RULE-SET,_geoip-direct,DIRECT
-  - RULE-SET,_geosite-direct,DIRECT
-  - RULE-SET,geosite-private,DIRECT
-  - RULE-SET,geosite-category-game-platforms-download@cn,DIRECT
-  - RULE-SET,geosite-connectivity-check,DIRECT
-  - RULE-SET,geosite-apple@cn,DIRECT
-  - RULE-SET,geosite-steam@cn,DIRECT
-  - RULE-SET,geosite-epicgames@cn,DIRECT
-  - RULE-SET,geosite-aws-cn,DIRECT
-  - RULE-SET,geosite-azure@cn,DIRECT
-  - RULE-SET,geosite-nvidia@cn,DIRECT
-  - RULE-SET,geosite-itunes@cn,DIRECT
-  - RULE-SET,geosite-paypal@cn,DIRECT
-  - RULE-SET,geosite-akamai@cn,DIRECT
-  - RULE-SET,geosite-linkedin@cn,DIRECT
-  - RULE-SET,_geosite-steam@cn,DIRECT
-  - RULE-SET,_geosite-direct,DIRECT
-  - RULE-SET,_geosite-duolingo@cn,DIRECT
-  - RULE-SET,_geosite-jetbrains@cn,DIRECT
-  - RULE-SET,_geosite-direct,DIRECT
-  - RULE-SET,_geosite-google-play@cn,DIRECT
-  - RULE-SET,geoip-cn,DIRECT
   - RULE-SET,_geoip-telegram@dc5,✈️ TelegramDC5(AP),no-resolve
   - RULE-SET,_geoip-telegram@dc1,✈️ TelegramDC1(NA),no-resolve
   - RULE-SET,_geoip-telegram@dc4,✈️ TelegramDC4(EU),no-resolve
-  - RULE-SET,geosite-telegram,✈️ TelegramDC4(EU)
+  - RULE-SET,_geosite-should-block,REJECT
+  - RULE-SET,geosite-microsoft@cn,DIRECT
+  - RULE-SET,_geosite-direct,DIRECT
+  - RULE-SET,_geosite-akamai@cn,DIRECT
+  - RULE-SET,_geosite-steam@cn,DIRECT
+  - RULE-SET,_geosite-google-play@cn,DIRECT
+  - RULE-SET,_geosite-duolingo@cn,DIRECT
   - RULE-SET,geosite-category-ai-!cn,🤖 AI-Service
   - RULE-SET,_geosite-category-ai-!cn,🤖 AI-Service
+  - RULE-SET,geosite-google,🔍 Google
   - RULE-SET,_geosite-category-dev,🐈 Git
   - RULE-SET,geosite-github,🐈 Git
   - RULE-SET,geosite-gitlab,🐈 Git
   - RULE-SET,geosite-category-tech-media,🐈 Git
-  - RULE-SET,geosite-google,🔍 Google
-  - RULE-SET,geosite-microsoft@cn,DIRECT
   - RULE-SET,geosite-microsoft,🪟 Microsoft
+  - RULE-SET,geosite-telegram,✈️ TelegramDC4(EU)
+  - RULE-SET,_geosite-geolocation-eu,✈️ TelegramDC4(EU)
   - RULE-SET,geosite-geolocation-cn,DIRECT
   - RULE-SET,geosite-category-entertainment,📺 Media-Social
   - RULE-SET,geosite-category-social-media-!cn,📺 Media-Social
   - RULE-SET,geosite-reddit,📺 Media-Social
+  - RULE-SET,_geoip-direct,DIRECT
+  - RULE-SET,geoip-cn,DIRECT
   - MATCH,🙋 Select
 proxy-groups:
   - name: 🙋 Select
@@ -322,23 +308,23 @@ rule-providers:
       - DOMAIN,redirector.c.play.google.com
       - >-
         DOMAIN-REGEX,^r+[0-9]+(---|\.)sn-(2x3|ni5|j5o)\w{5}\.xn--ngstr-lra8j\.com$
-  _geosite-jetbrains@cn:
-    type: inline
-    behavior: classical
-    payload:
-      - DOMAIN-SUFFIX,cdn.jetbrains.com
-      - DOMAIN-SUFFIX,download-cdn.jetbrains.com
-  _geosite-netflix-detect:
-    type: inline
-    behavior: classical
-    payload:
-      - DOMAIN,android.ngp.prod.cloud.netflix.com
-      - DOMAIN,ios.ngp.prod.cloud.netflix.com
   _geosite-steam@cn:
     type: inline
     behavior: classical
     payload:
       - DOMAIN-SUFFIX,steamserver.net
+  _geosite-akamai@cn:
+    type: inline
+    behavior: classical
+    payload:
+      - DOMAIN-SUFFIX,akadns88.net
+      - DOMAIN-SUFFIX,akadns99.net
+      - DOMAIN-SUFFIX,akamai.com
+      - DOMAIN-SUFFIX,janrainservices.com
+      - DOMAIN-SUFFIX,aptdn.net
+      - DOMAIN-SUFFIX,edgekey88.net
+      - DOMAIN-SUFFIX,janrain.biz
+      - DOMAIN-SUFFIX,tl88.net
   geoip-cn:
     type: http
     format: mrs
@@ -367,20 +353,6 @@ rule-providers:
     behavior: domain
     url: >-
       https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/apple@cn.mrs
-  geosite-aws-cn:
-    type: http
-    format: mrs
-    interval: 86400
-    behavior: domain
-    url: >-
-      https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/aws-cn.mrs
-  geosite-azure@cn:
-    type: http
-    format: mrs
-    interval: 86400
-    behavior: domain
-    url: >-
-      https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/azure@cn.mrs
   geosite-category-ai-!cn:
     type: http
     format: mrs
@@ -395,20 +367,6 @@ rule-providers:
     behavior: domain
     url: >-
       https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-entertainment.mrs
-  geosite-category-game-platforms-download@cn:
-    type: http
-    format: mrs
-    interval: 86400
-    behavior: domain
-    url: >-
-      https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-game-platforms-download@cn.mrs
-  geosite-category-ntp:
-    type: http
-    format: mrs
-    interval: 86400
-    behavior: domain
-    url: >-
-      https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ntp.mrs
   geosite-category-social-media-!cn:
     type: http
     format: mrs
@@ -430,20 +388,6 @@ rule-providers:
     behavior: domain
     url: >-
       https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/connectivity-check.mrs
-  geosite-epicgames@cn:
-    type: http
-    format: mrs
-    interval: 86400
-    behavior: domain
-    url: >-
-      https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/epicgames@cn.mrs
-  geosite-geolocation-!cn:
-    type: http
-    format: mrs
-    interval: 86400
-    behavior: domain
-    url: >-
-      https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/geolocation-!cn.mrs
   geosite-geolocation-cn:
     type: http
     format: mrs
@@ -472,20 +416,6 @@ rule-providers:
     behavior: domain
     url: >-
       https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/google.mrs
-  geosite-itunes@cn:
-    type: http
-    format: mrs
-    interval: 86400
-    behavior: domain
-    url: >-
-      https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/itunes@cn.mrs
-  geosite-linkedin@cn:
-    type: http
-    format: mrs
-    interval: 86400
-    behavior: domain
-    url: >-
-      https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/linkedin@cn.mrs
   geosite-microsoft:
     type: http
     format: mrs
@@ -507,20 +437,6 @@ rule-providers:
     behavior: domain
     url: >-
       https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/netflix.mrs
-  geosite-nvidia@cn:
-    type: http
-    format: mrs
-    interval: 86400
-    behavior: domain
-    url: >-
-      https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/nvidia@cn.mrs
-  geosite-paypal@cn:
-    type: http
-    format: mrs
-    interval: 86400
-    behavior: domain
-    url: >-
-      https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/paypal@cn.mrs
   geosite-private:
     type: http
     format: mrs
@@ -549,10 +465,3 @@ rule-providers:
     behavior: domain
     url: >-
       https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/telegram.mrs
-  geosite-tld-cn:
-    type: http
-    format: mrs
-    interval: 86400
-    behavior: domain
-    url: >-
-      https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/tld-cn.mrs

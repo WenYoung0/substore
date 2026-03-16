@@ -23,56 +23,8 @@
       {
         "tag": "dns-final",
         "type": "https",
-        "server": "1.1.1.1",
-        "detour": "🙋 Select"
-      },
-      {
-        "tag": "dns-google",
-        "type": "https",
         "server": "8.8.8.8",
-        "detour": "🔍 Google"
-      },
-      {
-        "tag": "dns-git",
-        "type": "https",
-        "server": "1.1.1.1",
-        "detour": "🐈 Git"
-      },
-      {
-        "tag": "dns-microsoft",
-        "type": "https",
-        "server": "1.1.1.1",
-        "detour": "🪟 Microsoft"
-      },
-      {
-        "tag": "dns-asia",
-        "type": "https",
-        "server": "1.1.1.1",
-        "detour": "✈️ TelegramDC5(AP)"
-      },
-      {
-        "tag": "dns-north_america",
-        "type": "https",
-        "server": "1.1.1.1",
-        "detour": "✈️ TelegramDC1(NA)"
-      },
-      {
-        "tag": "dns-europe",
-        "type": "https",
-        "server": "1.1.1.1",
-        "detour": "✈️ TelegramDC4(EU)"
-      },
-      {
-        "tag": "dns-ai",
-        "type": "https",
-        "server": "1.1.1.1",
-        "detour": "🤖 AI-Service"
-      },
-      {
-        "tag": "dns-entertainment",
-        "type": "https",
-        "server": "1.1.1.1",
-        "detour": "📺 Entertainment"
+        "detour": "🙋 Select"
       }
     ],
     "rules": [
@@ -122,24 +74,9 @@
         "server": "dns-cn"
       },
       {
-        "rule_set": ["geosite-google"],
+        "rule_set": ["geosite-microsoft", "geosite-google"],
         "action": "route",
-        "server": "dns-google"
-      },
-      {
-        "type": "logical",
-        "mode": "and",
-        "rules": [
-          {
-            "rule_set": ["geosite-github", "@geosite-category-dev"],
-            "invert": true
-          },
-          {
-            "rule_set": ["geosite-microsoft"]
-          }
-        ],
-        "action": "route",
-        "server": "dns-microsoft"
+        "server": "dns-final"
       },
       {
         "rule_set": "geosite-cn",
@@ -161,30 +98,6 @@
         ],
         "server": "dns-final",
         "client_subnet": "0.0.0.0/0"
-      },
-      {
-        "rule_set": ["@geosite-category-ai-!cn", "geosite-category-ai-!cn"],
-        "action": "route",
-        "server": "dns-ai"
-      },
-      {
-        "rule_set": [
-          "@geosite-category-dev",
-          "geosite-github",
-          "geosite-gitlab",
-          "geosite-category-tech-media"
-        ],
-        "action": "route",
-        "server": "dns-git"
-      },
-      {
-        "rule_set": [
-          "geosite-category-entertainment",
-          "geosite-category-social-media-!cn",
-          "geosite-reddit"
-        ],
-        "action": "route",
-        "server": "dns-entertainment"
       }
     ],
     "final": "dns-final",
@@ -257,18 +170,6 @@
         "action": "reject"
       },
       {
-        "rule_set": "@geoip-telegram@dc5",
-        "outbound": "✈️ TelegramDC5(AP)"
-      },
-      {
-        "rule_set": "@geoip-telegram@dc1",
-        "outbound": "✈️ TelegramDC1(NA)"
-      },
-      {
-        "rule_set": "@geoip-telegram@dc4",
-        "outbound": "✈️ TelegramDC4(EU)"
-      },
-      {
         "rule_set": ["@geoip-direct", "geoip-cn"],
         "action": "route",
         "outbound": "Direct"
@@ -308,42 +209,13 @@
         "outbound": "Direct"
       },
       {
-        "rule_set": ["@geosite-category-ai-!cn", "geosite-category-ai-!cn"],
-        "outbound": "🤖 AI-Service"
-      },
-      {
-        "rule_set": [
-          "@geosite-category-dev",
-          "geosite-github",
-          "geosite-gitlab",
-          "geosite-category-tech-media"
-        ],
-        "outbound": "🐈 Git"
-      },
-      {
-        "rule_set": ["geosite-google"],
+        "rule_set": ["geosite-google", "geosite-microsoft"],
         "action": "route",
-        "outbound": "🔍 Google"
-      },
-      {
-        "rule_set": "geosite-microsoft",
-        "outbound": "🪟 Microsoft"
+        "outbound": "🙋 Select"
       },
       {
         "rule_set": ["geosite-geolocation-cn"],
         "outbound": "Direct"
-      },
-      {
-        "rule_set": ["geosite-telegram", "@geosite-geolocation-eu"],
-        "outbound": "✈️ TelegramDC4(EU)"
-      },
-      {
-        "rule_set": [
-          "geosite-category-entertainment",
-          "geosite-category-social-media-!cn",
-          "geosite-reddit"
-        ],
-        "outbound": "📺 Entertainment"
       }
     ],
     "rule_set": [
@@ -434,62 +306,6 @@
       "tag": "🙋 Select",
       "outbounds": ["Direct"],
       "default": "Direct",
-      "interrupt_exist_connections": true
-    },
-    {
-      "type": "selector",
-      "tag": "🔍 Google",
-      "outbounds": ["🙋 Select"],
-      "default": "🙋 Select",
-      "interrupt_exist_connections": true
-    },
-    {
-      "type": "selector",
-      "tag": "🐈 Git",
-      "outbounds": ["🙋 Select"],
-      "default": "🙋 Select",
-      "interrupt_exist_connections": true
-    },
-    {
-      "type": "selector",
-      "tag": "🪟 Microsoft",
-      "outbounds": ["🙋 Select"],
-      "default": "🙋 Select",
-      "interrupt_exist_connections": true
-    },
-    {
-      "type": "selector",
-      "tag": "🤖 AI-Service",
-      "outbounds": ["🙋 Select"],
-      "default": "🙋 Select",
-      "interrupt_exist_connections": true
-    },
-    {
-      "type": "selector",
-      "tag": "📺 Entertainment",
-      "outbounds": ["🙋 Select"],
-      "default": "🙋 Select",
-      "interrupt_exist_connections": true
-    },
-    {
-      "type": "selector",
-      "tag": "✈️ TelegramDC1(NA)",
-      "outbounds": ["🙋 Select"],
-      "default": "🙋 Select",
-      "interrupt_exist_connections": true
-    },
-    {
-      "type": "selector",
-      "tag": "✈️ TelegramDC4(EU)",
-      "outbounds": ["🙋 Select"],
-      "default": "🙋 Select",
-      "interrupt_exist_connections": true
-    },
-    {
-      "type": "selector",
-      "tag": "✈️ TelegramDC5(AP)",
-      "outbounds": ["🙋 Select"],
-      "default": "🙋 Select",
       "interrupt_exist_connections": true
     }
   ]

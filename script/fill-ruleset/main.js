@@ -65,6 +65,12 @@ const generateConfig = {
       path: "../../internal/cores/box/enhanced.json",
       embed: true,
     },
+    {
+      type: GEN_TYPE_DYNAMIC,
+      template: "../../internal/cores/box/template/mininal.json",
+      path: "../../internal/cores/box/mininal.json",
+      embed: true,
+    },
   ],
   cat: [
     {

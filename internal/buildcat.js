@@ -121,6 +121,10 @@ const applyGeoSiteGeoIP = ({ proxies = [], config = {}, ...rest }) => {
       directIP.add(serverAddr); // IPv4
     else directSite.add(serverAddr); // Domain
   }
+  if (context.secret?.metadata?.ghproxy)
+    directSite.add(context.secret?.metadata?.ghproxy);
+  if (context.secret?.metadata?.subscribeURL)
+    directSite.add(context.secret?.metadata?.subscribeURL);
 
   if (!("rule-providers" in config)) config["rule-providers"] = {};
 
@@ -175,7 +179,7 @@ const applyBoostrapDirect = ({ config = {}, ...rest }) => {
       }
     });
   }
-  return { config, ...rest}
+  return { config, ...rest };
 };
 
 let proxies = await produceArtifact({
