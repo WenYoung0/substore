@@ -111,12 +111,8 @@
         "action": "reject"
       },
       {
-        "rule_set": ["geosite-netflix", "@geosite-netflix-detect"],
-        "server": "dns-entertainment"
-      },
-      {
         "rule_set": [
-          "geosite-tld-cn",
+          "geosite-cn",
           "geosite-category-game-platforms-download@cn",
           "geosite-connectivity-check",
           "geosite-microsoft@cn",
@@ -409,8 +405,10 @@
       "store_rdrc": true
     },
     "clash_api": {
+      "external_ui": "zashboard",
+      "external_ui_download_url": "https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip",
       "external_controller": "127.0.0.1:19091",
-      "default_mode": "Smart",
+      "default_mode": "Enhanced",
       "secret": "20002000"
     }
   },

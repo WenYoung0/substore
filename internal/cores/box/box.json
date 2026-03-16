@@ -117,14 +117,7 @@
       },
       {
         "rule_set": [
-          "geosite-netflix",
-          "@geosite-netflix-detect"
-        ],
-        "server": "dns-entertainment"
-      },
-      {
-        "rule_set": [
-          "geosite-tld-cn",
+          "geosite-cn",
           "geosite-category-game-platforms-download@cn",
           "geosite-connectivity-check",
           "geosite-microsoft@cn",
@@ -728,6 +721,12 @@
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-tech-media.srs"
       },
       {
+        "tag": "geosite-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs"
+      },
+      {
         "tag": "geosite-connectivity-check",
         "type": "remote",
         "format": "binary",
@@ -794,12 +793,6 @@
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-microsoft@cn.srs"
       },
       {
-        "tag": "geosite-netflix",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-netflix.srs"
-      },
-      {
         "tag": "geosite-nvidia@cn",
         "type": "remote",
         "format": "binary",
@@ -834,12 +827,6 @@
         "type": "remote",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-telegram.srs"
-      },
-      {
-        "tag": "geosite-tld-cn",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-tld-cn.srs"
       }
     ],
     "final": "🙋 Select",
@@ -856,8 +843,10 @@
       "store_rdrc": true
     },
     "clash_api": {
+      "external_ui": "zashboard",
+      "external_ui_download_url": "https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip",
       "external_controller": "127.0.0.1:19091",
-      "default_mode": "Smart",
+      "default_mode": "Enhanced",
       "secret": "20002000"
     }
   },
