@@ -199,7 +199,7 @@ const applyBoostrapDirect = ({ config = {}, ...rest }) => {
       ),
     )
   ) {
-    config.experimental.clash_api.external_ui_download_url = `https://${ghproxy}/${ruleset.url}`;
+    config.experimental.clash_api.external_ui_download_url = `https://${ghproxy}/${config.experimental.clash_api.external_ui_download_url}`;
     config.experimental.clash_api.external_ui_download_detour =
       directDetourOutbound;
   }
