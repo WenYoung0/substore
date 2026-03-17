@@ -7,11 +7,6 @@
   "dns": {
     "servers": [
       {
-        "tag": "dns-bootstrap",
-        "type": "udp",
-        "server": "223.5.5.5"
-      },
-      {
         "tag": "dns-local",
         "type": "local"
       },
@@ -122,6 +117,19 @@
         "mode": "or",
         "rules": [
           {
+            "inbound": ["dns-in"]
+          },
+          {
+            "port": 53
+          }
+        ],
+        "action": "hijack-dns"
+      },
+      {
+        "type": "logical",
+        "mode": "or",
+        "rules": [
+          {
             "network": "icmp"
           },
           {
@@ -136,19 +144,6 @@
         ],
         "action": "route",
         "outbound": "Direct"
-      },
-      {
-        "type": "logical",
-        "mode": "or",
-        "rules": [
-          {
-            "inbound": ["dns-in"]
-          },
-          {
-            "port": 53
-          }
-        ],
-        "action": "hijack-dns"
       },
       {
         "clash_mode": "Global",
@@ -295,7 +290,7 @@
     "final": "🙋 Select",
     "auto_detect_interface": true,
     "default_domain_resolver": {
-      "server": "dns-bootstrap",
+      "server": "dns-cn",
       "rewrite_ttl": 3600,
       "strategy": "prefer_ipv4"
     }
@@ -341,11 +336,6 @@
       "type": "direct",
       "tag": "Direct",
       "domain_resolver": "dns-cn"
-    },
-    {
-      "type": "direct",
-      "tag": "direct-bootstrap",
-      "domain_resolver": "dns-bootstrap"
     },
     {
       "type": "selector",

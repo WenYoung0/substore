@@ -7,11 +7,6 @@
   "dns": {
     "servers": [
       {
-        "tag": "dns-bootstrap",
-        "type": "udp",
-        "server": "223.5.5.5"
-      },
-      {
         "tag": "dns-local",
         "type": "local"
       },
@@ -47,16 +42,8 @@
         "action": "reject"
       },
       {
-        "clash_mode": "Direct",
-        "server": "dns-cn"
-      },
-      {
         "query_type": ["HTTPS", "SVCB"],
         "action": "reject"
-      },
-      {
-        "clash_mode": "Global",
-        "server": "dns-final"
       },
       {
         "rule_set": "@geosite-should-block",
@@ -118,9 +105,6 @@
               25, 67, 68, 110, 123, 143, 179, 465, 546, 547, 587, 993, 995,
               8899, 8733
             ]
-          },
-          {
-            "clash_mode": "Direct"
           }
         ],
         "action": "route",
@@ -138,11 +122,6 @@
           }
         ],
         "action": "hijack-dns"
-      },
-      {
-        "clash_mode": "Global",
-        "action": "route",
-        "outbound": "🙋 Select"
       },
       {
         "inbound": ["mixed-in"],
@@ -193,10 +172,6 @@
         "timeout": "50ms"
       },
       {
-        "rule_set": "@geosite-should-block",
-        "action": "reject"
-      },
-      {
         "rule_set": [
           "geosite-microsoft@cn",
           "@geosite-direct",
@@ -243,7 +218,7 @@
     "final": "🙋 Select",
     "auto_detect_interface": true,
     "default_domain_resolver": {
-      "server": "dns-bootstrap",
+      "server": "dns-cn",
       "rewrite_ttl": 3600,
       "strategy": "prefer_ipv4"
     }
@@ -252,13 +227,6 @@
     "cache_file": {
       "enabled": true,
       "store_rdrc": true
-    },
-    "clash_api": {
-      "external_ui": "zashboard",
-      "external_ui_download_url": "https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip",
-      "external_controller": "127.0.0.1:19091",
-      "default_mode": "Enhanced",
-      "secret": "20002000"
     }
   },
   "inbounds": [
@@ -271,6 +239,7 @@
         "10.0.0.0/8",
         "172.16.0.0/12",
         "192.168.0.0/16",
+        "127.0.0.0/8",
         "fc00::/7"
       ],
       "endpoint_independent_nat": true,
@@ -295,11 +264,6 @@
       "type": "direct",
       "tag": "Direct",
       "domain_resolver": "dns-cn"
-    },
-    {
-      "type": "direct",
-      "tag": "direct-bootstrap",
-      "domain_resolver": "dns-bootstrap"
     },
     {
       "type": "selector",

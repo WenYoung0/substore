@@ -2,7 +2,7 @@ const featureTransport = context.young.features.transport;
 const featureLocation = context.young.features.location;
 const featureBeautify = context.young.features.beautify;
 
-const directDetourOutbound = "direct-bootstrap";
+const directDetourOutbound = "Direct";
 const productionPlatform = "sing-box";
 
 const produce = (proxies = []) => {

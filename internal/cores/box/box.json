@@ -7,11 +7,6 @@
   "dns": {
     "servers": [
       {
-        "tag": "dns-bootstrap",
-        "type": "udp",
-        "server": "223.5.5.5"
-      },
-      {
         "tag": "dns-local",
         "type": "local"
       },
@@ -134,21 +129,18 @@
         "server": "dns-google"
       },
       {
-        "type": "logical",
-        "mode": "and",
-        "rules": [
-          {
-            "rule_set": [
-              "geosite-github",
-              "@geosite-category-dev"
-            ],
-            "invert": true
-          },
-          {
-            "rule_set": [
-              "geosite-microsoft"
-            ]
-          }
+        "rule_set": [
+          "@geosite-category-dev",
+          "geosite-github",
+          "geosite-gitlab",
+          "geosite-category-tech-media"
+        ],
+        "action": "route",
+        "server": "dns-git"
+      },
+      {
+        "rule_set": [
+          "geosite-microsoft"
         ],
         "action": "route",
         "server": "dns-microsoft"
@@ -187,16 +179,6 @@
       },
       {
         "rule_set": [
-          "@geosite-category-dev",
-          "geosite-github",
-          "geosite-gitlab",
-          "geosite-category-tech-media"
-        ],
-        "action": "route",
-        "server": "dns-git"
-      },
-      {
-        "rule_set": [
           "geosite-category-entertainment",
           "geosite-category-social-media-!cn",
           "geosite-reddit"
@@ -211,6 +193,21 @@
   },
   "route": {
     "rules": [
+      {
+        "type": "logical",
+        "mode": "or",
+        "rules": [
+          {
+            "inbound": [
+              "dns-in"
+            ]
+          },
+          {
+            "port": 53
+          }
+        ],
+        "action": "hijack-dns"
+      },
       {
         "type": "logical",
         "mode": "or",
@@ -243,21 +240,6 @@
         ],
         "action": "route",
         "outbound": "Direct"
-      },
-      {
-        "type": "logical",
-        "mode": "or",
-        "rules": [
-          {
-            "inbound": [
-              "dns-in"
-            ]
-          },
-          {
-            "port": 53
-          }
-        ],
-        "action": "hijack-dns"
       },
       {
         "clash_mode": "Global",
@@ -741,7 +723,7 @@
     "final": "🙋 Select",
     "auto_detect_interface": true,
     "default_domain_resolver": {
-      "server": "dns-bootstrap",
+      "server": "dns-cn",
       "rewrite_ttl": 3600,
       "strategy": "prefer_ipv4"
     }
@@ -796,11 +778,6 @@
       "type": "direct",
       "tag": "Direct",
       "domain_resolver": "dns-cn"
-    },
-    {
-      "type": "direct",
-      "tag": "direct-bootstrap",
-      "domain_resolver": "dns-bootstrap"
     },
     {
       "type": "selector",
