@@ -392,6 +392,13 @@
     "cache_file": {
       "enabled": true,
       "store_rdrc": true
+    },
+    "clash_api": {
+      "external_ui": "zashboard",
+      "external_ui_download_url": "https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip",
+      "external_controller": "127.0.0.1:9090",
+      "default_mode": "Enhanced",
+      "secret": "20002000"
     }
   },
   "inbounds": [
