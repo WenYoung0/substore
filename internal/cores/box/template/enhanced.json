@@ -63,11 +63,16 @@
       },
       {
         "clash_mode": "Global",
-        "server": "dns-final"
+        "server": "dns-remote"
       },
       {
         "rule_set": "@geosite-should-block",
         "action": "reject"
+      },
+      {
+        "rule_set": "geosite-netflix",
+        "action": "route",
+        "server": "dns-entertainment"
       },
       {
         "type": "logical",
@@ -83,7 +88,7 @@
             "ip_is_private": true
           }
         ],
-        "server": "dns-final",
+        "server": "dns-remote",
         "client_subnet": "0.0.0.0/0"
       },
       {
