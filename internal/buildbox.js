@@ -71,6 +71,7 @@ const applyPushGroup = ({ proxies = [], config = {}, ...rest }) => {
           "🪟 Microsoft",
           "📺 Entertainment",
           "🤖 AI-Service",
+          "🍎 Apple",
         ].includes(selector.tag)
       ) {
         selector.outbounds.push(...out);

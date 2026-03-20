@@ -29,6 +29,7 @@ rules:
   - RULE-SET,_geoip-telegram@dc4,✈️ TelegramDC4(EU),no-resolve
   - RULE-SET,_geosite-should-block,REJECT
   - RULE-SET,geosite-microsoft@cn,DIRECT
+  - RULE-SET,geosite-apple@cn,DIRECT
   - RULE-SET,_geosite-direct,DIRECT
   - RULE-SET,_geosite-akamai@cn,DIRECT
   - RULE-SET,_geosite-steam@cn,DIRECT
@@ -36,11 +37,12 @@ rules:
   - RULE-SET,_geosite-duolingo@cn,DIRECT
   - RULE-SET,geosite-category-ai-!cn,🤖 AI-Service
   - RULE-SET,_geosite-category-ai-!cn,🤖 AI-Service
-  - RULE-SET,geosite-google,🔍 Google
   - RULE-SET,_geosite-category-dev,🐈 Git
   - RULE-SET,geosite-github,🐈 Git
   - RULE-SET,geosite-gitlab,🐈 Git
   - RULE-SET,geosite-category-tech-media,🐈 Git
+  - RULE-SET,geosite-google,🔍 Google
+  - RULE-SET,geosite-apple,🍎 Apple
   - RULE-SET,geosite-microsoft,🪟 Microsoft
   - RULE-SET,geosite-telegram,✈️ TelegramDC4(EU)
   - RULE-SET,_geosite-geolocation-eu,✈️ TelegramDC4(EU)
@@ -60,11 +62,15 @@ proxy-groups:
     type: select
     proxies:
       - 🙋 Select
-  - name: 🐈 Git
+  - name: 🍎 Apple
     type: select
     proxies:
       - 🙋 Select
   - name: 🪟 Microsoft
+    type: select
+    proxies:
+      - 🙋 Select
+  - name: 🐈 Git
     type: select
     proxies:
       - 🙋 Select

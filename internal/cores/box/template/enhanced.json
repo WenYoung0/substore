@@ -75,6 +75,18 @@
         "server": "dns-entertainment"
       },
       {
+        "rule_set": [
+          "geosite-microsoft@cn",
+          "geosite-apple@cn",
+          "@geosite-direct",
+          "@geosite-akamai@cn",
+          "@geosite-steam@cn",
+          "@geosite-google-play@cn"
+        ],
+        "action": "route",
+        "server": "dns-cn"
+      },
+      {
         "type": "logical",
         "mode": "and",
         "rules": [
@@ -222,6 +234,7 @@
       {
         "rule_set": [
           "geosite-microsoft@cn",
+          "gesotie-apple@cn",
           "@geosite-direct",
           "@geosite-akamai@cn",
           "@geosite-steam@cn",
@@ -248,6 +261,11 @@
         "rule_set": ["geosite-google"],
         "action": "route",
         "outbound": "🔍 Google"
+      },
+      {
+        "rule_set": ["geosite-apple"],
+        "action": "route",
+        "outbound": "🍎 Apple"
       },
       {
         "rule_set": "geosite-microsoft",
@@ -358,14 +376,14 @@
     },
     {
       "type": "selector",
-      "tag": "🐈 Git",
+      "tag": "🪟 Microsoft",
       "outbounds": ["🙋 Select"],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
-      "tag": "🪟 Microsoft",
+      "tag": "🐈 Git",
       "outbounds": ["🙋 Select"],
       "default": "🙋 Select",
       "interrupt_exist_connections": true

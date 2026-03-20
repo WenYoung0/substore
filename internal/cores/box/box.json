@@ -28,6 +28,12 @@
         "detour": "🔍 Google"
       },
       {
+        "tag": "dns-apple",
+        "type": "https",
+        "server": "1.1.1.1",
+        "detour": "🍎 Apple"
+      },
+      {
         "tag": "dns-git",
         "type": "https",
         "server": "1.1.1.1",
@@ -113,6 +119,7 @@
       {
         "rule_set": [
           "geosite-microsoft@cn",
+          "geosite-apple@cn",
           "@geosite-direct",
           "@geosite-akamai@cn",
           "@geosite-steam@cn",
@@ -123,10 +130,11 @@
       },
       {
         "rule_set": [
-          "geosite-google"
+          "@geosite-category-ai-!cn",
+          "geosite-category-ai-!cn"
         ],
         "action": "route",
-        "server": "dns-google"
+        "server": "dns-ai"
       },
       {
         "rule_set": [
@@ -140,6 +148,20 @@
       },
       {
         "rule_set": [
+          "geosite-google"
+        ],
+        "action": "route",
+        "server": "dns-google"
+      },
+      {
+        "rule_set": [
+          "geosite-apple"
+        ],
+        "action": "route",
+        "server": "dns-apple"
+      },
+      {
+        "rule_set": [
           "geosite-microsoft"
         ],
         "action": "route",
@@ -148,6 +170,15 @@
       {
         "rule_set": "geosite-cn",
         "server": "dns-cn"
+      },
+      {
+        "rule_set": [
+          "geosite-category-entertainment",
+          "geosite-category-social-media-!cn",
+          "geosite-reddit"
+        ],
+        "action": "route",
+        "server": "dns-entertainment"
       },
       {
         "type": "logical",
@@ -168,23 +199,6 @@
         ],
         "server": "dns-final",
         "client_subnet": "0.0.0.0/0"
-      },
-      {
-        "rule_set": [
-          "@geosite-category-ai-!cn",
-          "geosite-category-ai-!cn"
-        ],
-        "action": "route",
-        "server": "dns-ai"
-      },
-      {
-        "rule_set": [
-          "geosite-category-entertainment",
-          "geosite-category-social-media-!cn",
-          "geosite-reddit"
-        ],
-        "action": "route",
-        "server": "dns-entertainment"
       }
     ],
     "final": "dns-final",
@@ -330,6 +344,7 @@
       {
         "rule_set": [
           "geosite-microsoft@cn",
+          "gesotie-apple@cn",
           "@geosite-direct",
           "@geosite-akamai@cn",
           "@geosite-steam@cn",
@@ -361,6 +376,13 @@
         ],
         "action": "route",
         "outbound": "🔍 Google"
+      },
+      {
+        "rule_set": [
+          "geosite-apple"
+        ],
+        "action": "route",
+        "outbound": "🍎 Apple"
       },
       {
         "rule_set": "geosite-microsoft",
@@ -630,6 +652,18 @@
         "url": "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/srs/cn.srs"
       },
       {
+        "tag": "geosite-apple",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-apple.srs"
+      },
+      {
+        "tag": "geosite-apple@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-apple@cn.srs"
+      },
+      {
         "tag": "geosite-category-ai-!cn",
         "type": "remote",
         "format": "binary",
@@ -718,6 +752,12 @@
         "type": "remote",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-telegram.srs"
+      },
+      {
+        "tag": "gesotie-apple@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/gesotie-apple@cn.srs"
       }
     ],
     "final": "🙋 Select",
@@ -785,7 +825,6 @@
       "outbounds": [
         "Direct"
       ],
-      "default": "Direct",
       "interrupt_exist_connections": true
     },
     {
@@ -799,7 +838,7 @@
     },
     {
       "type": "selector",
-      "tag": "🐈 Git",
+      "tag": "🍎 Apple",
       "outbounds": [
         "🙋 Select"
       ],
@@ -809,6 +848,15 @@
     {
       "type": "selector",
       "tag": "🪟 Microsoft",
+      "outbounds": [
+        "🙋 Select"
+      ],
+      "default": "🙋 Select",
+      "interrupt_exist_connections": true
+    },
+    {
+      "type": "selector",
+      "tag": "🐈 Git",
       "outbounds": [
         "🙋 Select"
       ],

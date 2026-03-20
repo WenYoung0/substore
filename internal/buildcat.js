@@ -74,6 +74,7 @@ const applyPushGroup = ({ proxies = [], config = {}, ...rest }) => {
           "🪟 Microsoft",
           "📺 Media-Social",
           "🤖 AI-Service",
+          "🍎 Apple",
         ].includes(selector.name)
       ) {
         selector.proxies.push(...out);

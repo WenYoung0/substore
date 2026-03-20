@@ -80,6 +80,18 @@
         "server": "dns-entertainment"
       },
       {
+        "rule_set": [
+          "geosite-microsoft@cn",
+          "geosite-apple@cn",
+          "@geosite-direct",
+          "@geosite-akamai@cn",
+          "@geosite-steam@cn",
+          "@geosite-google-play@cn"
+        ],
+        "action": "route",
+        "server": "dns-cn"
+      },
+      {
         "type": "logical",
         "mode": "and",
         "rules": [
@@ -265,6 +277,7 @@
       {
         "rule_set": [
           "geosite-microsoft@cn",
+          "gesotie-apple@cn",
           "@geosite-direct",
           "@geosite-akamai@cn",
           "@geosite-steam@cn",
@@ -296,6 +309,13 @@
         ],
         "action": "route",
         "outbound": "🔍 Google"
+      },
+      {
+        "rule_set": [
+          "geosite-apple"
+        ],
+        "action": "route",
+        "outbound": "🍎 Apple"
       },
       {
         "rule_set": "geosite-microsoft",
@@ -599,6 +619,18 @@
         "url": "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/srs/cn.srs"
       },
       {
+        "tag": "geosite-apple",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-apple.srs"
+      },
+      {
+        "tag": "geosite-apple@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-apple@cn.srs"
+      },
+      {
         "tag": "geosite-category-ai-!cn",
         "type": "remote",
         "format": "binary",
@@ -693,6 +725,12 @@
         "type": "remote",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-telegram.srs"
+      },
+      {
+        "tag": "gesotie-apple@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/gesotie-apple@cn.srs"
       }
     ],
     "final": "🙋 Select",
@@ -768,7 +806,7 @@
     },
     {
       "type": "selector",
-      "tag": "🐈 Git",
+      "tag": "🪟 Microsoft",
       "outbounds": [
         "🙋 Select"
       ],
@@ -777,7 +815,7 @@
     },
     {
       "type": "selector",
-      "tag": "🪟 Microsoft",
+      "tag": "🐈 Git",
       "outbounds": [
         "🙋 Select"
       ],
