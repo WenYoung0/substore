@@ -234,7 +234,7 @@
       {
         "rule_set": [
           "geosite-microsoft@cn",
-          "gesotie-apple@cn",
+          "geosite-apple@cn",
           "@geosite-direct",
           "@geosite-akamai@cn",
           "@geosite-steam@cn",
