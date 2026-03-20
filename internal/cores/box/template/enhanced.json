@@ -376,6 +376,13 @@
     },
     {
       "type": "selector",
+      "tag": "🍎 Apple",
+      "outbounds": ["🙋 Select"],
+      "default": "🙋 Select",
+      "interrupt_exist_connections": true
+    },
+    {
+      "type": "selector",
       "tag": "🪟 Microsoft",
       "outbounds": ["🙋 Select"],
       "default": "🙋 Select",
