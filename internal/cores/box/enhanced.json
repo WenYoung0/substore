@@ -289,6 +289,13 @@
       },
       {
         "rule_set": [
+          "geosite-google"
+        ],
+        "action": "route",
+        "outbound": "🔍 Google"
+      },
+      {
+        "rule_set": [
           "@geosite-category-ai-!cn",
           "geosite-category-ai-!cn"
         ],
@@ -302,13 +309,6 @@
           "geosite-category-tech-media"
         ],
         "outbound": "🐈 Git"
-      },
-      {
-        "rule_set": [
-          "geosite-google"
-        ],
-        "action": "route",
-        "outbound": "🔍 Google"
       },
       {
         "rule_set": [

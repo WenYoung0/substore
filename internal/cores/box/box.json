@@ -130,6 +130,13 @@
       },
       {
         "rule_set": [
+          "geosite-google"
+        ],
+        "action": "route",
+        "server": "dns-google"
+      },
+      {
+        "rule_set": [
           "@geosite-category-ai-!cn",
           "geosite-category-ai-!cn"
         ],
@@ -145,13 +152,6 @@
         ],
         "action": "route",
         "server": "dns-git"
-      },
-      {
-        "rule_set": [
-          "geosite-google"
-        ],
-        "action": "route",
-        "server": "dns-google"
       },
       {
         "rule_set": [
@@ -356,6 +356,13 @@
       },
       {
         "rule_set": [
+          "geosite-google"
+        ],
+        "action": "route",
+        "outbound": "🔍 Google"
+      },
+      {
+        "rule_set": [
           "@geosite-category-ai-!cn",
           "geosite-category-ai-!cn"
         ],
@@ -369,13 +376,6 @@
           "geosite-category-tech-media"
         ],
         "outbound": "🐈 Git"
-      },
-      {
-        "rule_set": [
-          "geosite-google"
-        ],
-        "action": "route",
-        "outbound": "🔍 Google"
       },
       {
         "rule_set": [

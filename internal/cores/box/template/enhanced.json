@@ -44,7 +44,9 @@
         "mode": "and",
         "rules": [
           {
-            "default_interface_address": ["2000::/3"],
+            "default_interface_address": [
+              "2000::/3"
+            ],
             "invert": true
           },
           {
@@ -58,7 +60,10 @@
         "server": "dns-cn"
       },
       {
-        "query_type": ["HTTPS", "SVCB"],
+        "query_type": [
+          "HTTPS",
+          "SVCB"
+        ],
         "action": "reject"
       },
       {
@@ -95,7 +100,10 @@
             "invert": true
           },
           {
-            "rule_set": ["geoip-cn", "@geoip-direct"],
+            "rule_set": [
+              "geoip-cn",
+              "@geoip-direct"
+            ],
             "rule_set_ip_cidr_accept_empty": true,
             "ip_is_private": true
           }
@@ -115,7 +123,10 @@
             "invert": true
           },
           {
-            "query_type": ["A", "AAAA"]
+            "query_type": [
+              "A",
+              "AAAA"
+            ]
           }
         ],
         "action": "route",
@@ -134,7 +145,9 @@
         "mode": "or",
         "rules": [
           {
-            "inbound": ["dns-in"]
+            "inbound": [
+              "dns-in"
+            ]
           },
           {
             "port": 53
@@ -151,8 +164,21 @@
           },
           {
             "port": [
-              25, 67, 68, 110, 123, 143, 179, 465, 546, 547, 587, 993, 995,
-              8899, 8733
+              25,
+              67,
+              68,
+              110,
+              123,
+              143,
+              179,
+              465,
+              546,
+              547,
+              587,
+              993,
+              995,
+              8899,
+              8733
             ]
           },
           {
@@ -168,7 +194,9 @@
         "outbound": "🙋 Select"
       },
       {
-        "inbound": ["mixed-in"],
+        "inbound": [
+          "mixed-in"
+        ],
         "action": "resolve",
         "strategy": "prefer_ipv4"
       },
@@ -183,7 +211,9 @@
         "rules": [
           {
             "ip_is_private": true,
-            "default_interface_address": ["2000::/3"],
+            "default_interface_address": [
+              "2000::/3"
+            ],
             "invert": true
           },
           {
@@ -205,12 +235,18 @@
         "outbound": "✈️ TelegramDC4(EU)"
       },
       {
-        "rule_set": ["@geoip-direct", "geoip-cn"],
+        "rule_set": [
+          "@geoip-direct",
+          "geoip-cn"
+        ],
         "action": "route",
         "outbound": "Direct"
       },
       {
-        "port": [80, 443],
+        "port": [
+          80,
+          443
+        ],
         "network": "udp",
         "action": "reject"
       },
@@ -219,12 +255,19 @@
         "mode": "and",
         "rules": [
           {
-            "inbound": ["mixed-in"],
+            "inbound": [
+              "mixed-in"
+            ],
             "invert": true
           }
         ],
         "action": "sniff",
-        "sniffer": ["http", "tls", "quic", "ssh"],
+        "sniffer": [
+          "http",
+          "tls",
+          "quic",
+          "ssh"
+        ],
         "timeout": "50ms"
       },
       {
@@ -245,7 +288,17 @@
         "outbound": "Direct"
       },
       {
-        "rule_set": ["@geosite-category-ai-!cn", "geosite-category-ai-!cn"],
+        "rule_set": [
+          "geosite-google"
+        ],
+        "action": "route",
+        "outbound": "🔍 Google"
+      },
+      {
+        "rule_set": [
+          "@geosite-category-ai-!cn",
+          "geosite-category-ai-!cn"
+        ],
         "outbound": "🤖 AI-Service"
       },
       {
@@ -258,12 +311,9 @@
         "outbound": "🐈 Git"
       },
       {
-        "rule_set": ["geosite-google"],
-        "action": "route",
-        "outbound": "🔍 Google"
-      },
-      {
-        "rule_set": ["geosite-apple"],
+        "rule_set": [
+          "geosite-apple"
+        ],
         "action": "route",
         "outbound": "🍎 Apple"
       },
@@ -272,11 +322,16 @@
         "outbound": "🪟 Microsoft"
       },
       {
-        "rule_set": ["geosite-geolocation-cn"],
+        "rule_set": [
+          "geosite-geolocation-cn"
+        ],
         "outbound": "Direct"
       },
       {
-        "rule_set": ["geosite-telegram", "@geosite-geolocation-eu"],
+        "rule_set": [
+          "geosite-telegram",
+          "@geosite-geolocation-eu"
+        ],
         "outbound": "✈️ TelegramDC4(EU)"
       },
       {
@@ -305,7 +360,9 @@
         "tag": "@geoip-direct",
         "rules": [
           {
-            "ip_cidr": ["114.114.114.114/32"]
+            "ip_cidr": [
+              "114.114.114.114/32"
+            ]
           }
         ]
       }
@@ -336,7 +393,10 @@
     {
       "type": "tun",
       "tag": "tun-in",
-      "address": ["172.27.0.1/30", "fdfe:dcba:9876::1/126"],
+      "address": [
+        "172.27.0.1/30",
+        "fdfe:dcba:9876::1/126"
+      ],
       "auto_route": true,
       "endpoint_independent_nat": true,
       "route_exclude_address": [
@@ -363,70 +423,90 @@
     {
       "type": "selector",
       "tag": "🙋 Select",
-      "outbounds": ["Direct"],
+      "outbounds": [
+        "Direct"
+      ],
       "default": "Direct",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "🔍 Google",
-      "outbounds": ["🙋 Select"],
+      "outbounds": [
+        "🙋 Select"
+      ],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "🍎 Apple",
-      "outbounds": ["🙋 Select"],
+      "outbounds": [
+        "🙋 Select"
+      ],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "🪟 Microsoft",
-      "outbounds": ["🙋 Select"],
+      "outbounds": [
+        "🙋 Select"
+      ],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "🐈 Git",
-      "outbounds": ["🙋 Select"],
+      "outbounds": [
+        "🙋 Select"
+      ],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "🤖 AI-Service",
-      "outbounds": ["🙋 Select"],
+      "outbounds": [
+        "🙋 Select"
+      ],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "📺 Entertainment",
-      "outbounds": ["🙋 Select"],
+      "outbounds": [
+        "🙋 Select"
+      ],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "✈️ TelegramDC1(NA)",
-      "outbounds": ["🙋 Select"],
+      "outbounds": [
+        "🙋 Select"
+      ],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "✈️ TelegramDC4(EU)",
-      "outbounds": ["🙋 Select"],
+      "outbounds": [
+        "🙋 Select"
+      ],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     },
     {
       "type": "selector",
       "tag": "✈️ TelegramDC5(AP)",
-      "outbounds": ["🙋 Select"],
+      "outbounds": [
+        "🙋 Select"
+      ],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
     }
