@@ -39,13 +39,13 @@ rules:
   - RULE-SET,_geosite-steam@cn,DIRECT
   - RULE-SET,_geosite-google-play@cn,DIRECT
   - RULE-SET,_geosite-duolingo@cn,DIRECT
+  - RULE-SET,geosite-google,🔍 Google
   - RULE-SET,geosite-category-ai-!cn,🤖 AI-Service
   - RULE-SET,_geosite-category-ai-!cn,🤖 AI-Service
   - RULE-SET,_geosite-category-dev,🐈 Git
   - RULE-SET,geosite-github,🐈 Git
   - RULE-SET,geosite-gitlab,🐈 Git
   - RULE-SET,geosite-category-tech-media,🐈 Git
-  - RULE-SET,geosite-google,🔍 Google
   - RULE-SET,geosite-apple,🍎 Apple
   - RULE-SET,geosite-microsoft,🪟 Microsoft
   - RULE-SET,geosite-telegram,✈️ TelegramDC4(EU)
