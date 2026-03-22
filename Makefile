@@ -17,4 +17,4 @@ clean_ruleset:
 
 .PHONY: deploy_binary
 deploy_binary:
-	
+	cd script/ && go run installBinary.go
