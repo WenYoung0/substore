@@ -1,7 +1,3 @@
-BOX_VERSION=1.13.3
-CAT_VERSION=
-
-
 .PHONY: ruleset
 ruleset: clean_ruleset
 	cd script/generate-ruleset && go mod tidy && RULESET_SILENT_WARN=1 go run . --from "../../ruleset/data" --output "../../ruleset" --srs --mrs --all

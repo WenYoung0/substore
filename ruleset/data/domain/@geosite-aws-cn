@@ -1,5 +1,0 @@
-amzndns-cn.biz
-amzndns-cn.com
-amzndns-cn.net
-amzndns-cn.top
-regexp:.+\.awsdns-cn-[0-9][0-9]\.(biz|com|net|top)$
