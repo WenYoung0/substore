@@ -10,6 +10,43 @@ const produce = (proxies = []) => {
     .outbounds;
 };
 
+const insertRouteRule = (config, rule) => {
+  config.route = {
+    ...(config.route ?? {}),
+    rules: [
+      {
+        ...rule,
+      },
+      ...(config.route?.rules ?? []),
+    ],
+  };
+};
+
+const insertDNSRule = (config, rule) => {
+  config.dns = {
+    ...(config.dns ?? {}),
+    rules: [
+      {
+        ...rule,
+      },
+      ...(config.dns?.rules ?? []),
+    ],
+  };
+};
+
+const produceEndpoint = (endpoints = []) => {
+  return JSON.parse(
+    ProxyUtils.produce(
+      [
+        ...endpoints.filter(
+          (e) => e.type === "tailscale" || e.type === "wireguard",
+        ),
+      ],
+      productionPlatform,
+    ),
+  ).endpoints;
+};
+
 const applySortAndCompability = ({ proxies = [], ...rest }) => {
   const sortedProxies = featureBeautify.func.sortProxies({ proxies });
 
@@ -208,37 +245,46 @@ const applyBoostrapDirect = ({ config = {}, ...rest }) => {
   return { config, ...rest };
 };
 
-const applyTailscale = ({ config = {}, ...rest }) => {
-  const tailscaleItems = context.secret?.tailscales;
-  if (!Array.isArray(tailscaleItems)) return { config, ...rest };
-  const { tailscale } = $options?._req?.query ?? { tailscale: undefined };
-  if (!tailscale) return { config, ...rest };
-  for (const ts of tailscaleItems) {
-    if (ts.id != tailscale) continue;
-    delete ts["id"];
-    ts.tag = "ts-" + tailscale;
-    config.endpoints = [
-      ...(config.endpoints ?? []),
-      {
-        type: "tailscale",
-        ...ts,
-      },
-    ];
-    config.route = {
-      ...(config.route ?? {}),
-      rules: [
+const applyEndpoints = ({ config = {}, endpoints = [], ...rest }) => {
+  const { endpoint } = $options?._req?.query ?? { endpoint: undefined };
+  if (!endpoint || !endpoints) return { config, ...rest };
+  const endpointIDs = endpoint.split("_");
+  for (const eid of endpointIDs) {
+    for (const ep of endpoints) {
+      if (ep.properties?.endpoint?.id !== eid) continue;
+      config.endpoints = [
+        ...(config.endpoints ?? []),
         {
-          ip_cidr: ["fd7a:115c:a1e0::/48", "100.64.0.0/10"],
-          action: "route",
-          outbound: ts.tag,
+          ...produceEndpoint([ep])[0],
         },
-        ...(config.route?.rules ?? []),
-      ],
-    };
-    break;
+      ];
+      const domainMatch = {};
+      if (ep.properties.endpoint.route?.domain)
+        domainMatch.domain = ep.properties.endpoint.route.domain;
+      if (ep.properties.endpoint.route?.domain_suffix)
+        domainMatch.domain_suffix = ep.properties.endpoint.route.domain_suffix;
+      if (domainMatch.domain || domainMatch.domain_suffix) {
+        insertDNSRule(config, {
+          ...domainMatch,
+          action: "route",
+          server: ep.name,
+        });
+        insertRouteRule(config, {
+          ...domainMatch,
+          action: "route",
+          outbound: ep.name,
+        });
+      }
+      if (ep.properties.endpoint.route?.ip)
+        insertRouteRule(config, {
+          ip_cidr: ep.properties.endpoint.route.ip,
+          action: "route",
+          outbound: ep.name,
+        });
+    }
   }
 
-  return { config, ...rest };
+  return { config, endpoints, ...rest };
 };
 
 let config = JSON.parse($files[0]);
@@ -250,8 +296,19 @@ let proxies = await produceArtifact({
   produceType: "internal",
 });
 
+let endpoints = [];
+if (context.endpointGroup) {
+  endpoints = await produceArtifact({
+    type: context.productionType,
+    name: context.endpointGroup,
+    platform: "json",
+    produceType: "internal",
+  });
+}
+
 ({ proxies, config } = await Promise.resolve({
   proxies,
+  endpoints,
   config,
 })
   .then(applySortAndCompability)
@@ -260,13 +317,13 @@ let proxies = await produceArtifact({
   .then(applyPushGroup)
   .then(applyBoostrapDirect)
   .then(applyClientSubnet)
-  .then(applyTailscale));
+  .then(applyEndpoints));
 
-$content = JSON.stringify(
+const lastProduce = ($content = JSON.stringify(
   {
     ...config,
     outbounds: [...(config.outbounds ?? []), ...produce(proxies)],
   },
   null,
   2,
-);
+));
