@@ -210,7 +210,6 @@
         "mode": "and",
         "rules": [
           {
-            "ip_is_private": true,
             "default_interface_address": [
               "2000::/3"
             ],
