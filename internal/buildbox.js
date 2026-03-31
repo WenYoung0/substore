@@ -34,6 +34,18 @@ const insertDNSRule = (config, rule) => {
   };
 };
 
+const insertDNSServer = (config, rule) => {
+  config.dns = {
+    ...(config.dns ?? {}),
+    servers: [
+      {
+        ...rule,
+      },
+      ...(config.dns?.servers ?? []),
+    ],
+  };
+};
+
 const produceEndpoint = (endpoints = []) => {
   return JSON.parse(
     ProxyUtils.produce(
@@ -264,17 +276,25 @@ const applyEndpoints = ({ config = {}, endpoints = [], ...rest }) => {
       if (ep.properties.endpoint.route?.domain_suffix)
         domainMatch.domain_suffix = ep.properties.endpoint.route.domain_suffix;
       if (domainMatch.domain || domainMatch.domain_suffix) {
-        insertDNSRule(config, {
-          ...domainMatch,
-          action: "route",
-          server: ep.name,
-        });
+        if (ep.type == "tailscale") {
+          insertDNSRule(config, {
+            ...domainMatch,
+            action: "route",
+            server: "dns-" + ep.name,
+          });
+          insertDNSServer(config, {
+            type: "tailscale",
+            tag: "dns-" + ep.name,
+            endpoint: ep.name,
+          });
+        }
         insertRouteRule(config, {
           ...domainMatch,
           action: "route",
           outbound: ep.name,
         });
       }
+
       if (ep.properties.endpoint.route?.ip)
         insertRouteRule(config, {
           ip_cidr: ep.properties.endpoint.route.ip,
