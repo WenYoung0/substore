@@ -16,9 +16,15 @@
         "server": "223.5.5.5"
       },
       {
+        "tag": "dns-ecs",
+        "type": "https",
+        "server": "9.9.9.11",
+        "detour": "🙋 Select"
+      },
+      {
         "tag": "dns-final",
         "type": "https",
-        "server": "8.8.8.8",
+        "server": "1.1.1.1",
         "detour": "🙋 Select"
       }
     ],
@@ -83,7 +89,7 @@
             "ip_is_private": true
           }
         ],
-        "server": "dns-final",
+        "server": "dns-ecs",
         "client_subnet": "0.0.0.0/0"
       }
     ],

@@ -22,6 +22,12 @@
         "detour": "🙋 Select"
       },
       {
+        "tag": "dns-ecs",
+        "type": "https",
+        "server": "9.9.9.11",
+        "detour": "🙋 Select"
+      },
+      {
         "tag": "dns-google",
         "type": "https",
         "server": "8.8.8.8",
@@ -44,18 +50,6 @@
         "type": "https",
         "server": "1.1.1.1",
         "detour": "🪟 Microsoft"
-      },
-      {
-        "tag": "dns-asia",
-        "type": "https",
-        "server": "1.1.1.1",
-        "detour": "✈️ TelegramDC5(AP)"
-      },
-      {
-        "tag": "dns-north_america",
-        "type": "https",
-        "server": "1.1.1.1",
-        "detour": "✈️ TelegramDC1(NA)"
       },
       {
         "tag": "dns-europe",
@@ -197,7 +191,7 @@
             "ip_is_private": true
           }
         ],
-        "server": "dns-final",
+        "server": "dns-ecs",
         "client_subnet": "0.0.0.0/0"
       }
     ],

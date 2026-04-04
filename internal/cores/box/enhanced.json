@@ -18,13 +18,19 @@
       {
         "tag": "dns-remote",
         "type": "https",
-        "server": "8.8.8.8",
+        "server": "1.1.1.1",
+        "detour": "🙋 Select"
+      },
+      {
+        "tag": "dns-ecs",
+        "type": "https",
+        "server": "9.9.9.11",
         "detour": "🙋 Select"
       },
       {
         "tag": "dns-entertainment",
         "type": "https",
-        "server": "8.8.8.8",
+        "server": "1.1.1.1",
         "detour": "📺 Entertainment"
       },
       {
@@ -108,7 +114,7 @@
             "ip_is_private": true
           }
         ],
-        "server": "dns-remote",
+        "server": "dns-ecs",
         "client_subnet": "0.0.0.0/0"
       },
       {
