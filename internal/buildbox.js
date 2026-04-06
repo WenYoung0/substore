@@ -258,9 +258,12 @@ const applyBoostrapDirect = ({ config = {}, ...rest }) => {
 };
 
 const applyEndpoints = ({ config = {}, endpoints = [], ...rest }) => {
-  const { endpoint } = $options?._req?.query ?? { endpoint: undefined };
-  if (!endpoint || !endpoints) return { config, ...rest };
+  const { endpoint } = $options?._req?.query ?? { endpoint: "" };
   const endpointIDs = endpoint.split("_");
+
+  if (!endpoint || !endpoints || endpointIDs.length == 0) {
+    return { config, ...rest };
+  }
   for (const eid of endpointIDs) {
     for (const ep of endpoints) {
       if (ep.properties?.endpoint?.id !== eid) continue;
@@ -295,12 +298,21 @@ const applyEndpoints = ({ config = {}, endpoints = [], ...rest }) => {
         });
       }
 
-      if (ep.properties.endpoint.route?.ip)
+      if (ep.properties.endpoint.route?.ip) {
         insertRouteRule(config, {
           ip_cidr: ep.properties.endpoint.route.ip,
           action: "route",
           outbound: ep.name,
         });
+        (config.inbounds ?? [])
+          .filter((inbound) => inbound.type === "tun")
+          .map((inbound) => {
+            inbound.route_address = [
+              ...(inbound.route_address ?? []),
+              ...ep.properties.endpoint.route.ip,
+            ];
+          });
+      }
     }
   }
 
