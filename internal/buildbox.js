@@ -258,7 +258,7 @@ const applyBoostrapDirect = ({ config = {}, ...rest }) => {
 };
 
 const applyEndpoints = ({ config = {}, endpoints = [], ...rest }) => {
-  const { endpoint } = $options?._req?.query ?? { endpoint: "" };
+  const endpoint = $options?._req?.query?.endpoint ?? "";
   const endpointIDs = endpoint.split("_");
 
   if (!endpoint || !endpoints || endpointIDs.length == 0) {
