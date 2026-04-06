@@ -1,0 +1,161 @@
+mixed-port: 7890
+socks-port: 7891
+port: 7892
+allow-lan: false
+bind-address: "*"
+unified-delay: true
+tcp-concurrent: true
+tun:
+  enable: true
+  stack: mixed
+  dns-hijack:
+    - "any:53"
+    - "tcp://any:53"
+  auto-route: true
+  auto-detect-interface: true
+geodata-mode: true
+geox-url:
+  geoip: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip-lite.dat"
+  geosite: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat"
+  mmdb: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/country-lite.mmdb"
+  asn: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/GeoLite2-ASN.mmdb"
+rules:
+  - RULE-SET,geoip-private,DIRECT,no-resolve
+  - RULE-SET,geosite-private,DIRECT
+  - AND,((NETWORK,udp),(DST-PORT,67/68/123)),DIRECT
+  - AND,((NETWORK,udp),(SRC-PORT,67/68/123)),DIRECT
+  - RULE-SET,_geoip-telegram@dc5,✈️ TelegramDC5(AP),no-resolve
+  - RULE-SET,_geoip-telegram@dc1,✈️ TelegramDC1(NA),no-resolve
+  - RULE-SET,_geoip-telegram@dc4,✈️ TelegramDC4(EU),no-resolve
+  - RULE-SET,_geosite-should-block,REJECT
+  - RULE-SET,geosite-microsoft@cn,DIRECT
+  - RULE-SET,geosite-apple@cn,DIRECT
+  - RULE-SET,_geosite-direct,DIRECT
+  - RULE-SET,_geosite-akamai@cn,DIRECT
+  - RULE-SET,_geosite-steam@cn,DIRECT
+  - RULE-SET,_geosite-google-play@cn,DIRECT
+  - RULE-SET,_geosite-duolingo@cn,DIRECT
+  - RULE-SET,geosite-google,🔍 Google
+  - RULE-SET,geosite-category-ai-!cn,🤖 AI-Service
+  - RULE-SET,_geosite-category-ai-!cn,🤖 AI-Service
+  - RULE-SET,_geosite-category-dev,🐈 Git
+  - RULE-SET,geosite-github,🐈 Git
+  - RULE-SET,geosite-gitlab,🐈 Git
+  - RULE-SET,geosite-category-tech-media,🐈 Git
+  - RULE-SET,geosite-apple,🍎 Apple
+  - RULE-SET,geosite-microsoft,🪟 Microsoft
+  - RULE-SET,geosite-telegram,✈️ TelegramDC4(EU)
+  - RULE-SET,_geosite-geolocation-eu,✈️ TelegramDC4(EU)
+  - RULE-SET,geosite-geolocation-cn,DIRECT
+  - RULE-SET,geosite-category-entertainment,📺 Media-Social
+  - RULE-SET,geosite-category-social-media-!cn,📺 Media-Social
+  - RULE-SET,geosite-reddit,📺 Media-Social
+  - RULE-SET,_geoip-direct,DIRECT
+  - RULE-SET,geoip-cn,DIRECT
+  - MATCH,🙋 Select
+proxy-groups:
+  - name: 🙋 Select
+    type: select
+    proxies:
+      - DIRECT
+  - name: 🔍 Google
+    type: select
+    proxies:
+      - 🙋 Select
+  - name: 🍎 Apple
+    type: select
+    proxies:
+      - 🙋 Select
+  - name: 🪟 Microsoft
+    type: select
+    proxies:
+      - 🙋 Select
+  - name: 🐈 Git
+    type: select
+    proxies:
+      - 🙋 Select
+  - name: 📺 Media-Social
+    type: select
+    proxies:
+      - 🙋 Select
+  - name: 🤖 AI-Service
+    type: select
+    proxies:
+      - 🙋 Select
+  - name: ✈️ TelegramDC1(NA)
+    type: select
+    proxies:
+      - 🙋 Select
+  - name: ✈️ TelegramDC4(EU)
+    type: select
+    proxies:
+      - 🙋 Select
+  - name: ✈️ TelegramDC5(AP)
+    type: select
+    proxies:
+      - 🙋 Select
+dns:
+  enable: true
+  ipv6: true
+  use-hosts: true
+  use-system-hosts: true
+  enhanced-mode: fake-ip
+  cache-algorithm: arc
+  listen: 127.0.0.1:10853
+  fake-ip-range: 32.81.0.0/16
+  fake-ip-range6: 5f00:7a61:b56:2170::/92
+  fake-ip-filter:
+    - rule-set:_geosite-fakeip-filter
+    - rule-set:geosite-connectivity-check
+    - rule-set:geosite-netflix
+  nameserver-policy:
+    rule-set:geosite-private:
+      - system
+    rule-set:geosite-connectivity-check:
+      - system
+    rule-set:geosite-netflix:
+      - https://1.1.1.1/dns-query#📺 Media-Social
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  nameserver:
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
+  direct-nameserver:
+    - 223.5.5.5
+    - 223.6.6.6
+    - 119.29.29.29
+    - 114.114.114.114
+  proxy-nameserver:
+    - https://doh.pub/dns-query
+profile:
+  store-selected: true
+  store-fake-ip: true
+sniffer:
+  enable: true
+  override-destination: false
+  sniff:
+    HTTP:
+      ports:
+        - 80
+        - 8080-8880
+    TLS:
+      ports:
+        - 443
+        - 8443
+    QUIC:
+      ports:
+        - 443
+        - 8443
+  skip-domain:
+    - Mijia Cloud
+    - +.push.apple.com
+rule-providers:
+  _geoip-direct:
+    type: inline
+    behavior: ipcidr
+    payload: []
+  _geosite-direct:
+    type: inline
+    behavior: domain
+    payload: []

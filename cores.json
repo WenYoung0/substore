@@ -1,0 +1,14 @@
+{
+  "cores": [
+    {
+      "type": "box",
+      "binary_name": "sing-box",
+      "version": "1.13.3"
+    },
+    {
+      "type": "cat",
+      "binary_name": "mihomo",
+      "version": "1.19.21"
+    }
+  ]
+}

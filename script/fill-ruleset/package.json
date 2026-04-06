@@ -1,0 +1,15 @@
+{
+  "name": "fill-ruleset",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "run": "node main.js"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain_suffix": [
+        "dns.weixin.qq.com",
+        "api.installer.xiaomi.com",
+        "userlocation.googleapis.com"
+      ]
+    }
+  ]
+}
