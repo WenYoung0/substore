@@ -97,9 +97,32 @@
         "mode": "and",
         "rules": [
           {
-            "rule_set": "geosite-geolocation-!cn",
-            "invert": true
+            "query_type": ["A", "AAAA"]
           },
+          {
+            "rule_set": ["geosite-geolocation-!cn"]
+          },
+          {
+            "rule_set": [
+              "@geosite-fakeip-filter",
+              "geosite-connectivity-check"
+            ],
+            "invert": true
+          }
+        ],
+        "action": "route",
+        "server": "dns-fake",
+        "rewrite_ttl": 1
+      },
+      {
+        "rule_set": "geosite-cn",
+        "action": "route",
+        "server": "dns-cn"
+      },
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
           {
             "rule_set": ["geoip-cn", "@geoip-direct"],
             "rule_set_ip_cidr_accept_empty": true,

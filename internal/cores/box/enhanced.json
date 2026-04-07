@@ -102,9 +102,37 @@
         "mode": "and",
         "rules": [
           {
-            "rule_set": "geosite-geolocation-!cn",
-            "invert": true
+            "query_type": [
+              "A",
+              "AAAA"
+            ]
           },
+          {
+            "rule_set": [
+              "geosite-geolocation-!cn"
+            ]
+          },
+          {
+            "rule_set": [
+              "@geosite-fakeip-filter",
+              "geosite-connectivity-check"
+            ],
+            "invert": true
+          }
+        ],
+        "action": "route",
+        "server": "dns-fake",
+        "rewrite_ttl": 1
+      },
+      {
+        "rule_set": "geosite-cn",
+        "action": "route",
+        "server": "dns-cn"
+      },
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
           {
             "rule_set": [
               "geoip-cn",
@@ -649,6 +677,12 @@
         "type": "remote",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-tech-media.srs"
+      },
+      {
+        "tag": "geosite-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs"
       },
       {
         "tag": "geosite-connectivity-check",
