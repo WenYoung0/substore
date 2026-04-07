@@ -129,7 +129,8 @@ const applyPushGroup = ({ proxies = [], config = {}, ...rest }) => {
           ...out.filter(
             (o) =>
               featureLocation.func.getArea({ name: o }) ===
-              "AREA_NORTH_AMERICA",
+                "AREA_NORTH_AMERICA" ||
+              featureLocation.func.getLocation({ name: o }) == "JP",
           ),
         );
       } else if (["✈️ TelegramDC4(EU)"].includes(selector.tag)) {
