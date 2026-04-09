@@ -761,7 +761,7 @@
     "clash_api": {
       "external_ui": "zashboard",
       "external_ui_download_url": "https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip",
-      "external_controller": "127.0.0.1:19091",
+      "external_controller": "127.0.0.1:9090",
       "default_mode": "Smart",
       "secret": "20002000"
     }
