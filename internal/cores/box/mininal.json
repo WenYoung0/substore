@@ -84,24 +84,33 @@
         "server": "dns-cn"
       },
       {
+        "rule_set": "geosite-geolocation-!cn",
+        "server": "dns-final"
+      },
+      {
+        "action": "evaluate",
+        "server": "dns-ecs",
+        "client_subnet": "0.0.0.0/0"
+      },
+      {
         "type": "logical",
-        "mode": "and",
+        "mode": "or",
         "rules": [
           {
-            "rule_set": "geosite-geolocation-!cn",
-            "invert": true
-          },
-          {
+            "match_response": true,
             "rule_set": [
               "geoip-cn",
               "@geoip-direct"
             ],
-            "rule_set_ip_cidr_accept_empty": true,
             "ip_is_private": true
+          },
+          {
+            "match_response": true,
+            "ip_accept_any": true,
+            "invert": true
           }
         ],
-        "server": "dns-ecs",
-        "client_subnet": "0.0.0.0/0"
+        "action": "respond"
       }
     ],
     "final": "dns-final",
@@ -411,7 +420,10 @@
         "101.0.0.0/8",
         "102.0.0.0/7",
         "104.0.0.0/5",
-        "112.0.0.0/4",
+        "112.0.0.0/5",
+        "120.0.0.0/6",
+        "124.0.0.0/7",
+        "126.0.0.0/8",
         "128.0.0.0/3",
         "160.0.0.0/5",
         "168.0.0.0/6",
