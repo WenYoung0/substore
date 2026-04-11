@@ -314,8 +314,12 @@ const applyEndpoints = ({ config = {}, endpoints = [], ...rest }) => {
     });
     insertDNSRule(config, {
       action: "route",
-      ip_accept_any: true,
       server: "dns-" + ep.name,
+    });
+    insertDNSRule(config, {
+      match_response: true,
+      ip_accept_any: true,
+      action: "respond",
     });
     insertRouteRule(config, {
       action: "route",
