@@ -162,7 +162,6 @@
       }
     ],
     "final": "dns-cn",
-    "independent_cache": true,
     "reverse_mapping": true
   },
   "route": {
@@ -351,7 +350,7 @@
   "experimental": {
     "cache_file": {
       "enabled": true,
-      "store_rdrc": true,
+      "store_dns": true,
       "store_fakeip": true
     },
     "clash_api": {

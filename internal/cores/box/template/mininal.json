@@ -103,7 +103,6 @@
       }
     ],
     "final": "dns-final",
-    "independent_cache": true,
     "reverse_mapping": true
   },
   "route": {
@@ -224,7 +223,7 @@
   "experimental": {
     "cache_file": {
       "enabled": true,
-      "store_rdrc": true
+      "store_dns": true
     },
     "clash_api": {
       "external_ui": "zashboard",
