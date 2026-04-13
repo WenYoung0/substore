@@ -55,7 +55,7 @@ const locationEntries = [
       "呼港",
       "穗港",
       "京港",
-      "港"
+      "港",
     ],
     area: "AREA_ASIA",
   },
@@ -87,7 +87,7 @@ const locationEntries = [
       "台",
       "臺",
       "Taipei",
-      "Tai Wan"
+      "Tai Wan",
     ],
     area: "AREA_ASIA",
   },
@@ -114,7 +114,7 @@ const locationEntries = [
       "广日",
       "大坂",
       "Osaka",
-      "Tokyo"
+      "Tokyo",
     ],
     area: "AREA_ASIA",
   },
@@ -133,7 +133,7 @@ const locationEntries = [
       "首尔",
       "春川",
       "Chuncheon",
-      "Seoul"
+      "Seoul",
     ],
     area: "AREA_ASIA",
   },
@@ -197,7 +197,7 @@ const locationEntries = [
       "杭新",
       "广新",
       "廣新",
-      "滬新"
+      "滬新",
     ],
     area: "AREA_ASIA",
   },
@@ -535,7 +535,7 @@ const locationEntries = [
       "广德",
       "法兰克福",
       "Frankfurt",
-      "德意志"
+      "德意志",
     ],
     area: "AREA_EUROPE",
   },
@@ -586,7 +586,7 @@ const locationEntries = [
       "United Kingdom",
       "伦敦",
       "英",
-      "London"
+      "London",
     ],
     area: "AREA_EUROPE",
   },
@@ -753,7 +753,7 @@ const locationEntries = [
       "滬澳",
       "沪澳",
       "广澳",
-      "Sydney"
+      "Sydney",
     ],
     area: "AREA_OCEANIA",
   },
@@ -982,48 +982,22 @@ const locationEntries = [
   },
 ];
 
-const getLocation = ({ name }) => {
-  if (!name) {
-    return "";
+const getFull = (proxy) => {
+  if (!proxy) {
+    return { cca2: "", flag: "", keywords: [], area: "", order: -1 };
   }
-
-  // First, prioritize flag matching
-  for (const entry of locationEntries) {
-    if (name.includes(entry.flag)) {
-      return entry.cca2;
-    }
-  }
-
-  // If no flag match, then check keywords
-  for (const entry of locationEntries) {
-    if (
-      entry.keywords.some(
-        (keyword) =>
-          keyword &&
-          keyword !== "" &&
-          name.toLowerCase().includes(keyword.toLowerCase()),
-      )
-    ) {
-      return entry.cca2;
-    }
-  }
-  return "";
-};
-
-const getOrder = ({ name }) => {
-  if (!name) {
-    return 0;
-  }
-
-  // First, prioritize flag matching
+  const accurateLocation = proxy.properties?.location ?? "";
+  const proxyName = proxy.name.toLowerCase();
   for (let i = 0; i < locationEntries.length; i++) {
     const entry = locationEntries[i];
-    if (name.includes(entry.flag)) {
-      return i + 1;
+    if (
+      (accurateLocation && entry.cca2 === accurateLocation) ||
+      proxyName.includes(entry.flag)
+    ) {
+      return { ...entry, order: i + 1 };
     }
   }
-
-  // If no flag match, then check keywords
+  // fallback
   for (let i = 0; i < locationEntries.length; i++) {
     const entry = locationEntries[i];
     if (
@@ -1031,47 +1005,70 @@ const getOrder = ({ name }) => {
         (keyword) =>
           keyword &&
           keyword !== "" &&
-          name.toLowerCase().includes(keyword.toLowerCase()),
+          proxyName.includes(keyword.toLowerCase()),
       )
     ) {
-      return i + 1;
+      return { ...entry, order: i + 1 };
     }
   }
-  return -1;
+
+  // not found
+  return { cca2: "", flag: "", keywords: [], area: "", order: -1 };
 };
 
-const getArea = ({ name }) => {
-  if (!name) {
-    return "";
-  }
+const getLocation = (proxy) => getFull(proxy).cca2;
+const getOrder = (proxy) => getFull(proxy).order;
+const getArea = (proxy) => getFull(proxy).area;
 
-  // First, prioritize flag matching
-  for (const entry of locationEntries) {
-    if (name.includes(entry.flag)) {
-      return entry.area;
-    }
-  }
+const sortProxies = ({ proxies }) => {
+  const emptyProviderKey = "_empty";
+  const providerList = {};
+  const finalProxies = [];
 
-  // If no flag match, then check keywords
-  for (const entry of locationEntries) {
+  // rename and merge proxies
+  for (const proxy of proxies) {
+    let providerName = emptyProviderKey;
     if (
-      entry.keywords.some(
-        (keyword) =>
-          keyword &&
-          keyword !== "" &&
-          name.toLowerCase().includes(keyword.toLowerCase()),
-      )
+      proxy.properties !== undefined &&
+      proxy.properties.provider !== undefined
     ) {
-      return entry.area;
+      providerName = proxy.properties.provider;
+      proxy.name = [providerName, proxy.name].join("/");
     }
+    proxy.name = proxy.name.trim();
+
+    providerList[providerName] = [...(providerList[providerName] ?? []), proxy];
   }
-  return "";
+
+  Object.keys(providerList)
+    .sort((a, b) => {
+      if (a === emptyProviderKey) return b === emptyProviderKey ? 0 : -1;
+      if (b === emptyProviderKey) return 0;
+      else return a.localeCompare(b);
+    })
+    .map((providerName) => {
+      const providerSet = providerList[providerName];
+      providerSet.sort((a, b) => {
+        const locationDiff = getOrder(a) - getOrder(b);
+        if (locationDiff !== 0) return locationDiff;
+
+        return a.name.localeCompare(b.name);
+      });
+      return providerSet;
+    })
+    .map((providerSet) => {
+      finalProxies.push(...providerSet);
+    });
+
+  return finalProxies;
 };
 
 const locationObj = { load: true, func: {}, const: {} };
+locationObj.func.getFull = getFull;
 locationObj.func.getLocation = getLocation;
 locationObj.func.getOrder = getOrder;
 locationObj.func.getArea = getArea;
+locationObj.func.sortProxies = sortProxies;
 
 locationObj.const.locationEntries = locationEntries;
 

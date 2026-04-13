@@ -1,6 +1,5 @@
 const featureTransport = context.young.features.transport;
 const featureLocation = context.young.features.location;
-const featureBeautify = context.young.features.beautify;
 
 const directDetourOutbound = "DIRECT";
 const productionPlatform = "mihomo";
@@ -12,7 +11,7 @@ const produce = (proxies = []) => {
 };
 
 const applySortAndCompability = ({ proxies = [], ...rest }) => {
-  const sortedProxies = featureBeautify.func.sortProxies({ proxies });
+  const sortedProxies = featureLocation.func.sortProxies({ proxies });
 
   // Notice heer , different platform has different name selector (tag or name)
   const names = produce(proxies).map((pp) => pp.name);
@@ -25,7 +24,6 @@ const applySortAndCompability = ({ proxies = [], ...rest }) => {
 const applyTransport = ({ proxies = [], config = {}, ...rest }) => {
   const transportGroups = featureTransport.func.completeTransport({
     proxies: proxies,
-    fallback: ["HK", "JP", "SG", "US"],
   });
 
   Object.keys(transportGroups).map((selectorName) => {
@@ -183,22 +181,62 @@ const applyBoostrapDirect = ({ config = {}, ...rest }) => {
   return { config, ...rest };
 };
 
-let proxies = await produceArtifact({
-  type: context.productionType,
-  name: context.productionTarget,
-  platform: "json",
-  produceType: "internal",
-});
+const generateContext = async () => {
+  const lookupQuery = (name) => {
+    return $options?._req?.query?.[name];
+  };
 
-({ proxies, config } = await Promise.resolve({
-  proxies,
-  config: ProxyUtils.yaml.safeLoad($files[0]),
-})
+  const generated = {
+    config: ProxyUtils.yaml.safeLoad($files[0]),
+    experimental: {},
+  };
+
+  if (lookupQuery("user") || context.test?.user) {
+    const userID = lookupQuery("user") || context.test?.user || "";
+    const produced = await produceArtifact({
+      type: lookupQuery("prod_type") || "collection",
+      name: userID,
+      platform: "json",
+      produceType: "internal",
+    });
+    generated.proxies = produced.filter((proxy) =>
+      [
+        "socks",
+        "http",
+        "ss",
+        "vmess",
+        "trojan",
+        "naive",
+        "hysteria",
+        "hysteria2",
+        "vless",
+        "tuic",
+        "anytls",
+        "tor",
+        "ssh",
+        "mieru",
+        "sudoku",
+        "masque",
+        "trusttunnel",
+      ].includes(proxy.type),
+    );
+  }
+
+  (lookupQuery("experimental") || context.test?.experimental || "")
+    .split(",")
+    .map((fe) => {
+      generated.experimental[fe] = true;
+    });
+
+  return generated;
+};
+
+const { proxies, config } = await generateContext()
   .then(applySortAndCompability)
   .then(applyTransport)
   .then(applyGeoSiteGeoIP)
   .then(applyBoostrapDirect)
-  .then(applyPushGroup));
+  .then(applyPushGroup);
 
 $content = ProxyUtils.yaml.dump({
   ...config,

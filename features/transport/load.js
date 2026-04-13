@@ -33,9 +33,7 @@ const completeTransport = ({ proxies, detourName, fallback }) => {
 
   const transportGroups = {};
   for (const tp of transportProxies) {
-    const transportLocation = featureLocation.func.getLocation({
-      name: tp.name,
-    });
+    const transportLocation = featureLocation.func.getLocation(tp);
 
     if (transportGroups[transportLocation] === undefined) {
       transportGroups[transportLocation] = {
@@ -58,9 +56,7 @@ const completeTransport = ({ proxies, detourName, fallback }) => {
       else if (Array.isArray(dp.properties.destination.require))
         destinationRequiredLocation.push(...dp.properties.destination.require);
     } else {
-      const destinationLocation = featureLocation.func.getLocation({
-        name: dp.name,
-      });
+      const destinationLocation = featureLocation.func.getLocation(dp);
       if (destinationLocation !== "")
         destinationRequiredLocation.push(destinationLocation);
 
@@ -85,7 +81,6 @@ const completeTransport = ({ proxies, detourName, fallback }) => {
 
   return transportGroups;
 };
-
 
 const transportObj = { load: true, func: {}, const: {} };
 
