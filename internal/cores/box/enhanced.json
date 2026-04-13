@@ -1,5 +1,5 @@
 {
-  "$schema": "https://github.com/jiang-zhexin/typebox/releases/latest/download/schema.json",
+  "$schema": "https://github.com/jiang-zhexin/typebox/releases/download/v1.14.5/schema.json",
   "log": {
     "disabled": false,
     "level": "warn"
@@ -62,8 +62,9 @@
         "action": "reject"
       },
       {
-        "clash_mode": "Direct",
-        "server": "dns-cn"
+        "clash_mode": "IPv4Only",
+        "query_type": "AAAA",
+        "action": "reject"
       },
       {
         "query_type": [
@@ -224,19 +225,11 @@
             ]
           },
           {
-            "clash_mode": "Direct"
-          },
-          {
             "ip_is_private": true
           }
         ],
         "action": "route",
         "outbound": "Direct"
-      },
-      {
-        "clash_mode": "Global",
-        "action": "route",
-        "outbound": "🙋 Select"
       },
       {
         "type": "logical",
@@ -253,6 +246,16 @@
           }
         ],
         "action": "reject"
+      },
+      {
+        "clash_mode": "IPv4Only",
+        "ip_version": 6,
+        "action": "reject"
+      },
+      {
+        "clash_mode": "Global",
+        "action": "route",
+        "outbound": "🙋 Select"
       },
       {
         "rule_set": "@geoip-telegram@dc5",

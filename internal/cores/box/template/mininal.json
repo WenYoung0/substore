@@ -1,5 +1,5 @@
 {
-  "$schema": "https://github.com/jiang-zhexin/typebox/releases/latest/download/schema.json",
+  "$schema": "https://github.com/jiang-zhexin/typebox/releases/download/v1.14.5/schema.json",
   "log": {
     "disabled": false,
     "level": "warn"
