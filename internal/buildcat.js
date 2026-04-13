@@ -21,7 +21,12 @@ const applySortAndCompability = ({ proxies = [], ...rest }) => {
   };
 };
 
-const applyTransport = ({ proxies = [], config = {}, ...rest }) => {
+const applyTransport = ({
+  proxies = [],
+  config = {},
+  experimental = {},
+  ...rest
+}) => {
   const transportGroups = featureTransport.func.completeTransport({
     proxies: proxies,
   });
@@ -31,7 +36,7 @@ const applyTransport = ({ proxies = [], config = {}, ...rest }) => {
     if (selected.use && selected.proxies.length > 1) {
       config["proxy-groups"] = [
         {
-          type: "select",
+          type: !!experimental.transport_use_urltest ? "url-test" : "select",
           name: selected.name,
           proxies: [...selected.proxies],
         },

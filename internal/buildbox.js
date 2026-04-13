@@ -33,7 +33,12 @@ const applySortAndCompability = ({ proxies = [], ...rest }) => {
   };
 };
 
-const applyTransport = ({ proxies = [], config = {}, ...rest }) => {
+const applyTransport = ({
+  proxies = [],
+  config = {},
+  experimental = {},
+  ...rest
+}) => {
   const transportGroups = featureTransport.func.completeTransport({
     proxies: proxies,
   });
@@ -43,7 +48,7 @@ const applyTransport = ({ proxies = [], config = {}, ...rest }) => {
     if (selected.use && selected.proxies.length > 1) {
       config.outbounds = [
         {
-          type: "selector",
+          type: !!experimental.transport_use_urltest ? "urltest" : "selector",
           tag: selected.name,
           outbounds: [...selected.proxies],
         },
@@ -57,6 +62,7 @@ const applyTransport = ({ proxies = [], config = {}, ...rest }) => {
         !featureTransport.func.isDestionation({ proxy }) ||
         "dialer-proxy" in proxy,
     ),
+    experimental,
     config,
     ...rest,
   };
