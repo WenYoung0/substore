@@ -34,11 +34,19 @@ const applyTransport = ({
   Object.keys(transportGroups).map((selectorName) => {
     const selected = transportGroups[selectorName];
     if (selected.use && selected.proxies.length > 1) {
+      const transportGroup = {
+        type: "select",
+        name: selected.name,
+        proxies: [...selected.proxies],
+      };
+      if (!!experimental.transport_use_urltest) {
+        transportGroup.type = "url-test";
+        transportGroup.tolerance = 20;
+        transportGroup.interval = 30;
+      }
       config["proxy-groups"] = [
         {
-          type: !!experimental.transport_use_urltest ? "url-test" : "select",
-          name: selected.name,
-          proxies: [...selected.proxies],
+          ...transportGroup,
         },
         ...config["proxy-groups"],
       ];

@@ -18,7 +18,7 @@
       {
         "tag": "dns-ecs",
         "type": "https",
-        "server": "9.9.9.11",
+        "server": "8.8.8.8",
         "detour": "🙋 Select"
       },
       {

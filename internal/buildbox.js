@@ -46,11 +46,19 @@ const applyTransport = ({
   Object.keys(transportGroups).map((selectorName) => {
     const selected = transportGroups[selectorName];
     if (selected.use && selected.proxies.length > 1) {
+      const transportGroup = {
+        type: "selector",
+        tag: selected.name,
+        outbounds: [...selected.proxies],
+      };
+      if (!!experimental.transport_use_urltest) {
+        transportGroup.type = "urltest";
+        transportGroup.tolerance = "20ms";
+        transportGroup.interval = "30s";
+      }
       config.outbounds = [
         {
-          type: !!experimental.transport_use_urltest ? "urltest" : "selector",
-          tag: selected.name,
-          outbounds: [...selected.proxies],
+          ...transportGroup,
         },
         ...config.outbounds,
       ];
