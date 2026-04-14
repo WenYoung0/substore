@@ -53,7 +53,7 @@ const applyTransport = ({
       };
       if (!!experimental.transport_use_urltest) {
         transportGroup.type = "urltest";
-        transportGroup.tolerance = "20ms";
+        transportGroup.tolerance = 20;
         transportGroup.interval = "30s";
       }
       config.outbounds = [
