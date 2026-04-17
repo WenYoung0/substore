@@ -779,7 +779,6 @@
   "experimental": {
     "cache_file": {
       "enabled": true,
-      "store_dns": true,
       "store_fakeip": true
     },
     "clash_api": {

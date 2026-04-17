@@ -222,8 +222,7 @@
   },
   "experimental": {
     "cache_file": {
-      "enabled": true,
-      "store_dns": true
+      "enabled": true
     },
     "clash_api": {
       "external_ui": "zashboard",
