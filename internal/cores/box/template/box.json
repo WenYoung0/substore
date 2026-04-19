@@ -31,6 +31,12 @@
         "detour": "🙋 Select"
       },
       {
+        "tag": "dns-ecs",
+        "type": "https",
+        "server": "8.8.8.8",
+        "detour": "🙋 Select"
+      },
+      {
         "tag": "dns-google",
         "type": "https",
         "server": "8.8.8.8",
@@ -163,6 +169,37 @@
         ],
         "action": "route",
         "server": "dns-entertainment"
+      },
+      {
+        "action": "evaluate",
+        "server": "dns-ecs",
+        "client_subnet": "114.114.114.114/32"
+      },
+      {
+        "type": "logical",
+        "mode": "or",
+        "rules": [
+          {
+            "match_response": true,
+            "response_rcode": "NOERROR",
+            "invert": true
+          },
+          {
+            "match_response": true,
+            "query_type": ["A", "AAAA"],
+            "ip_accept_any": true,
+            "invert": true
+          }
+        ],
+        "action": "respond"
+      },
+      {
+        "match_response": true,
+        "rule_set": ["geoip-cn", "@geoip-direct"],
+        "query_type": ["A", "AAAA"],
+        "ip_is_private": true,
+        "action": "route",
+        "server": "dns-cn"
       }
     ],
     "final": "dns-final",

@@ -134,38 +134,44 @@
         "server": "dns-cn"
       },
       {
-        "query_type": [
-          "A",
-          "AAAA"
-        ],
         "action": "evaluate",
-        "server": "dns-final"
+        "server": "dns-ecs",
+        "client_subnet": "114.114.114.114/32"
       },
       {
         "type": "logical",
         "mode": "or",
         "rules": [
           {
-            "query_type": [
-              "A",
-              "AAAA"
-            ]
-          },
-          {
             "match_response": true,
-            "ip_accept_any": true,
+            "response_rcode": "NOERROR",
             "invert": true
           },
           {
             "match_response": true,
-            "ip_is_private": true,
-            "rule_set": [
-              "geoip-cn",
-              "@geoip-direct"
-            ]
+            "query_type": [
+              "A",
+              "AAAA"
+            ],
+            "ip_accept_any": true,
+            "invert": true
           }
         ],
         "action": "respond"
+      },
+      {
+        "match_response": true,
+        "rule_set": [
+          "geoip-cn",
+          "@geoip-direct"
+        ],
+        "query_type": [
+          "A",
+          "AAAA"
+        ],
+        "ip_is_private": true,
+        "action": "route",
+        "server": "dns-cn"
       },
       {
         "type": "logical",
