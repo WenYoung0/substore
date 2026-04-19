@@ -1,9 +1,18 @@
 {
-  "$schema": "https://github.com/jiang-zhexin/typebox/releases/download/v1.14.5/schema.json",
+  "$schema": "https://github.com/jiang-zhexin/typebox/releases/download/v1.14.6/schema.json",
   "log": {
     "disabled": false,
     "level": "warn"
   },
+  "http_clients": [
+    {
+      "tag": "http-direct",
+      "engine": "go",
+      "tls": {
+        "enabled": true
+      }
+    }
+  ],
   "dns": {
     "servers": [
       {
@@ -19,12 +28,6 @@
         "tag": "dns-final",
         "type": "https",
         "server": "1.1.1.1",
-        "detour": "🙋 Select"
-      },
-      {
-        "tag": "dns-ecs",
-        "type": "https",
-        "server": "8.8.8.8",
         "detour": "🙋 Select"
       },
       {
@@ -174,39 +177,14 @@
         ],
         "action": "route",
         "server": "dns-entertainment"
-      },
-      {
-        "rule_set": "geosite-geolocation-!cn",
-        "server": "dns-final"
-      },
-      {
-        "action": "evaluate",
-        "server": "dns-ecs",
-        "client_subnet": "0.0.0.0/0"
-      },
-      {
-        "type": "logical",
-        "mode": "or",
-        "rules": [
-          {
-            "match_response": true,
-            "ip_accept_any": true,
-            "invert": true
-          },
-          {
-            "match_response": true,
-            "rule_set": [
-              "geoip-cn",
-              "@geoip-direct"
-            ],
-            "ip_is_private": true
-          }
-        ],
-        "action": "respond"
       }
     ],
     "final": "dns-final",
-    "reverse_mapping": true
+    "reverse_mapping": true,
+    "optimistic": {
+      "enabled": true,
+      "timeout": "3d"
+    }
   },
   "route": {
     "rules": [
@@ -696,12 +674,6 @@
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs"
       },
       {
-        "tag": "geosite-geolocation-!cn",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs"
-      },
-      {
         "tag": "geosite-geolocation-cn",
         "type": "remote",
         "format": "binary",
@@ -758,6 +730,7 @@
     ],
     "final": "🙋 Select",
     "auto_detect_interface": true,
+    "default_http_client": "http-direct",
     "default_domain_resolver": {
       "server": "dns-cn",
       "rewrite_ttl": 3600,

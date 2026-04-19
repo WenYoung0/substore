@@ -1,9 +1,18 @@
 {
-  "$schema": "https://github.com/jiang-zhexin/typebox/releases/download/v1.14.5/schema.json",
+  "$schema": "https://github.com/jiang-zhexin/typebox/releases/download/v1.14.6/schema.json",
   "log": {
     "disabled": false,
     "level": "warn"
   },
+  "http_clients": [
+    {
+      "tag": "http-direct",
+      "engine": "go",
+      "tls": {
+        "enabled": true
+      }
+    }
+  ],
   "dns": {
     "servers": [
       {
@@ -19,12 +28,6 @@
         "tag": "dns-remote",
         "type": "https",
         "server": "1.1.1.1",
-        "detour": "🙋 Select"
-      },
-      {
-        "tag": "dns-ecs",
-        "type": "https",
-        "server": "8.8.8.8",
         "detour": "🙋 Select"
       },
       {
@@ -121,14 +124,17 @@
         "server": "dns-cn"
       },
       {
+        "query_type": ["A", "AAAA"],
         "action": "evaluate",
-        "server": "dns-ecs",
-        "client_subnet": "0.0.0.0/0"
+        "server": "dns-final"
       },
       {
         "type": "logical",
         "mode": "or",
         "rules": [
+          {
+            "query_type": ["A", "AAAA"]
+          },
           {
             "match_response": true,
             "ip_accept_any": true,
@@ -147,14 +153,14 @@
         "mode": "and",
         "rules": [
           {
+            "query_type": ["A", "AAAA"]
+          },
+          {
             "rule_set": [
               "@geosite-fakeip-filter",
               "geosite-connectivity-check"
             ],
             "invert": true
-          },
-          {
-            "query_type": ["A", "AAAA"]
           }
         ],
         "action": "route",
@@ -162,8 +168,12 @@
         "rewrite_ttl": 1
       }
     ],
-    "final": "dns-cn",
-    "reverse_mapping": true
+    "final": "dns-final",
+    "reverse_mapping": true,
+    "optimistic": {
+      "enabled": true,
+      "timeout": "3d"
+    }
   },
   "route": {
     "rules": [

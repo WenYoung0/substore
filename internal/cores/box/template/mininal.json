@@ -1,9 +1,18 @@
 {
-  "$schema": "https://github.com/jiang-zhexin/typebox/releases/download/v1.14.5/schema.json",
+  "$schema": "https://github.com/jiang-zhexin/typebox/releases/download/v1.14.6/schema.json",
   "log": {
     "disabled": false,
     "level": "warn"
   },
+  "http_clients": [
+    {
+      "tag": "http-direct",
+      "engine": "go",
+      "tls": {
+        "enabled": true
+      }
+    }
+  ],
   "dns": {
     "servers": [
       {
@@ -14,12 +23,6 @@
         "tag": "dns-cn",
         "type": "https",
         "server": "223.5.5.5"
-      },
-      {
-        "tag": "dns-ecs",
-        "type": "https",
-        "server": "8.8.8.8",
-        "detour": "🙋 Select"
       },
       {
         "tag": "dns-final",
@@ -58,7 +61,6 @@
       {
         "rule_set": [
           "geosite-microsoft@cn",
-          "@geosite-direct",
           "@geosite-akamai@cn",
           "@geosite-steam@cn",
           "@geosite-google-play@cn"
@@ -78,28 +80,6 @@
       {
         "rule_set": "geosite-geolocation-!cn",
         "server": "dns-final"
-      },
-      {
-        "action": "evaluate",
-        "server": "dns-ecs",
-        "client_subnet": "0.0.0.0/0"
-      },
-      {
-        "type": "logical",
-        "mode": "or",
-        "rules": [
-          {
-            "match_response": true,
-            "ip_accept_any": true,
-            "invert": true
-          },
-          {
-            "match_response": true,
-            "rule_set": ["geoip-cn", "@geoip-direct"],
-            "ip_is_private": true
-          }
-        ],
-        "action": "respond"
       }
     ],
     "final": "dns-final",
@@ -146,7 +126,7 @@
         "action": "reject"
       },
       {
-        "rule_set": ["@geoip-direct", "geoip-cn"],
+        "rule_set": ["geoip-cn"],
         "action": "route",
         "outbound": "Direct"
       },
@@ -171,7 +151,6 @@
       {
         "rule_set": [
           "geosite-microsoft@cn",
-          "@geosite-direct",
           "@geosite-akamai@cn",
           "@geosite-steam@cn",
           "@geosite-google-play@cn",
@@ -190,30 +169,10 @@
         "outbound": "Direct"
       }
     ],
-    "rule_set": [
-      {
-        "type": "inline",
-        "tag": "@geosite-direct",
-        "rules": [
-          {
-            "domain": [
-              "__this_is_a_placehold_domain_._this_rule_is_generated_by_substore.example.com"
-            ]
-          }
-        ]
-      },
-      {
-        "type": "inline",
-        "tag": "@geoip-direct",
-        "rules": [
-          {
-            "ip_cidr": ["114.114.114.114/32"]
-          }
-        ]
-      }
-    ],
+    "rule_set": [],
     "final": "🙋 Select",
     "auto_detect_interface": true,
+    "default_http_client": "http-direct",
     "default_domain_resolver": {
       "server": "dns-cn",
       "rewrite_ttl": 3600,

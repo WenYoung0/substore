@@ -41,8 +41,8 @@ const applyTransport = ({
       };
       if (!!experimental.transport_use_urltest) {
         transportGroup.type = "url-test";
-        transportGroup.tolerance = 20;
-        transportGroup.interval = 30;
+        transportGroup.tolerance = 30;
+        transportGroup.interval = 15;
       }
       config["proxy-groups"] = [
         {

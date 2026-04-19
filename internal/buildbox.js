@@ -1,7 +1,8 @@
 const featureTransport = context.young.features.transport;
 const featureLocation = context.young.features.location;
 
-const directDetourOutbound = "Direct";
+const directOutbound = "Direct";
+const directHTTPClient = "http-direct";
 const productionPlatform = "sing-box";
 
 const produce = (proxies = []) => {
@@ -53,8 +54,8 @@ const applyTransport = ({
       };
       if (!!experimental.transport_use_urltest) {
         transportGroup.type = "urltest";
-        transportGroup.tolerance = 20;
-        transportGroup.interval = "30s";
+        transportGroup.tolerance = 30;
+        transportGroup.interval = "15s";
       }
       config.outbounds = [
         {
@@ -207,7 +208,7 @@ const applyBoostrapDirect = ({ config = {}, ...rest }) => {
         )
       ) {
         ruleset.url = `https://${ghproxy}/${ruleset.url}`;
-        ruleset.download_detour = directDetourOutbound;
+        ruleset.http_client = directHTTPClient;
       }
     });
   }
@@ -220,8 +221,7 @@ const applyBoostrapDirect = ({ config = {}, ...rest }) => {
     )
   ) {
     config.experimental.clash_api.external_ui_download_url = `https://${ghproxy}/${config.experimental.clash_api.external_ui_download_url}`;
-    config.experimental.clash_api.external_ui_download_detour =
-      directDetourOutbound;
+    config.experimental.clash_api.external_ui_download_detour = directOutbound;
   }
 
   return { config, ...rest };
