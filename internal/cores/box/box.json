@@ -181,6 +181,7 @@
           "geosite-category-social-media-!cn",
           "geosite-reddit"
         ],
+        "ip_version": 4,
         "action": "route",
         "server": "dns-entertainment"
       },
