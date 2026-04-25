@@ -67,8 +67,8 @@ const generateConfig = {
     },
     {
       type: GEN_TYPE_DYNAMIC,
-      template: "../../internal/cores/box/template/mininal.json",
-      path: "../../internal/cores/box/mininal.json",
+      template: "../../internal/cores/box/template/minimal.json",
+      path: "../../internal/cores/box/minimal.json",
       embed: true,
     },
   ],
