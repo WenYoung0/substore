@@ -98,6 +98,7 @@ const locationEntries = [
       "JP",
       "JPN",
       "TYO",
+      "NRT",
       "Japan",
       "日本",
       "东京",

@@ -49,24 +49,24 @@
         "server": "dns-local"
       },
       {
+        "clash_mode": "IPv4Only",
+        "query_type": "AAAA",
+        "action": "reject"
+      },
+      {
         "type": "logical",
         "mode": "and",
         "rules": [
+          {
+            "query_type": "AAAA"
+          },
           {
             "default_interface_address": [
               "2000::/3"
             ],
             "invert": true
-          },
-          {
-            "query_type": "AAAA"
           }
         ],
-        "action": "reject"
-      },
-      {
-        "clash_mode": "IPv4Only",
-        "query_type": "AAAA",
         "action": "reject"
       },
       {
@@ -90,13 +90,37 @@
         "server": "dns-entertainment"
       },
       {
-        "rule_set": [
-          "geosite-microsoft@cn",
-          "geosite-apple@cn",
-          "@geosite-direct",
-          "@geosite-akamai@cn",
-          "@geosite-steam@cn",
-          "@geosite-google-play@cn"
+        "type": "logical",
+        "mode": "or",
+        "rules": [
+          {
+            "rule_set": [
+              "geosite-microsoft@cn",
+              "geosite-apple@cn",
+              "@geosite-direct",
+              "@geosite-akamai@cn",
+              "@geosite-steam@cn",
+              "@geosite-google-play@cn"
+            ]
+          },
+          {
+            "port": [
+              25,
+              67,
+              68,
+              110,
+              123,
+              143,
+              179,
+              465,
+              546,
+              547,
+              587,
+              995,
+              8899,
+              8733
+            ]
+          }
         ],
         "action": "route",
         "server": "dns-cn"
@@ -129,14 +153,16 @@
         "rewrite_ttl": 1
       },
       {
+        "query_type": [
+          "A",
+          "AAAA"
+        ],
         "rule_set": "geosite-cn",
-        "action": "route",
-        "server": "dns-cn"
+        "server": "dns-local"
       },
       {
         "action": "evaluate",
-        "server": "dns-ecs",
-        "client_subnet": "114.114.114.114/32"
+        "server": "dns-cn"
       },
       {
         "type": "logical",
@@ -160,18 +186,25 @@
         "action": "respond"
       },
       {
-        "match_response": true,
-        "rule_set": [
-          "geoip-cn",
-          "@geoip-direct"
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "query_type": [
+              "A",
+              "AAAA"
+            ]
+          },
+          {
+            "match_response": true,
+            "rule_set": [
+              "geoip-cn",
+              "@geoip-direct"
+            ],
+            "ip_is_private": true
+          }
         ],
-        "query_type": [
-          "A",
-          "AAAA"
-        ],
-        "ip_is_private": true,
-        "action": "route",
-        "server": "dns-cn"
+        "action": "respond"
       },
       {
         "type": "logical",
@@ -186,7 +219,8 @@
           {
             "rule_set": [
               "@geosite-fakeip-filter",
-              "geosite-connectivity-check"
+              "geosite-connectivity-check",
+              "geosite-category-games-!cn"
             ],
             "invert": true
           }
@@ -196,7 +230,7 @@
         "rewrite_ttl": 1
       }
     ],
-    "final": "dns-final",
+    "final": "dns-remote",
     "reverse_mapping": true,
     "optimistic": {
       "enabled": true,
@@ -240,7 +274,6 @@
               546,
               547,
               587,
-              993,
               995,
               8899,
               8733
@@ -698,6 +731,12 @@
         "type": "remote",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-entertainment.srs"
+      },
+      {
+        "tag": "geosite-category-games-!cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-games-!cn.srs"
       },
       {
         "tag": "geosite-category-social-media-!cn",

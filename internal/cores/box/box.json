@@ -31,12 +31,6 @@
         "detour": "🙋 Select"
       },
       {
-        "tag": "dns-ecs",
-        "type": "https",
-        "server": "8.8.8.8",
-        "detour": "🙋 Select"
-      },
-      {
         "tag": "dns-google",
         "type": "https",
         "server": "8.8.8.8",
@@ -121,13 +115,37 @@
         "action": "reject"
       },
       {
-        "rule_set": [
-          "geosite-microsoft@cn",
-          "geosite-apple@cn",
-          "@geosite-direct",
-          "@geosite-akamai@cn",
-          "@geosite-steam@cn",
-          "@geosite-google-play@cn"
+        "type": "logical",
+        "mode": "or",
+        "rules": [
+          {
+            "rule_set": [
+              "geosite-microsoft@cn",
+              "geosite-apple@cn",
+              "@geosite-direct",
+              "@geosite-akamai@cn",
+              "@geosite-steam@cn",
+              "@geosite-google-play@cn"
+            ]
+          },
+          {
+            "port": [
+              25,
+              67,
+              68,
+              110,
+              123,
+              143,
+              179,
+              465,
+              546,
+              547,
+              587,
+              995,
+              8899,
+              8733
+            ]
+          }
         ],
         "action": "route",
         "server": "dns-cn"
@@ -172,23 +190,25 @@
         "server": "dns-microsoft"
       },
       {
-        "rule_set": "geosite-cn",
-        "server": "dns-cn"
-      },
-      {
         "rule_set": [
           "geosite-category-entertainment",
           "geosite-category-social-media-!cn",
           "geosite-reddit"
         ],
-        "ip_version": 4,
         "action": "route",
         "server": "dns-entertainment"
       },
       {
+        "query_type": [
+          "A",
+          "AAAA"
+        ],
+        "rule_set": "geosite-cn",
+        "server": "dns-local"
+      },
+      {
         "action": "evaluate",
-        "server": "dns-ecs",
-        "client_subnet": "114.114.114.114/32"
+        "server": "dns-cn"
       },
       {
         "type": "logical",
@@ -212,18 +232,25 @@
         "action": "respond"
       },
       {
-        "match_response": true,
-        "rule_set": [
-          "geoip-cn",
-          "@geoip-direct"
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "query_type": [
+              "A",
+              "AAAA"
+            ]
+          },
+          {
+            "match_response": true,
+            "rule_set": [
+              "geoip-cn",
+              "@geoip-direct"
+            ],
+            "ip_is_private": true
+          }
         ],
-        "query_type": [
-          "A",
-          "AAAA"
-        ],
-        "ip_is_private": true,
-        "action": "route",
-        "server": "dns-cn"
+        "action": "respond"
       }
     ],
     "final": "dns-final",

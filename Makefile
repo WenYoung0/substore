@@ -5,7 +5,7 @@ all: install_binary ruleset check
 check:
 	.test/bin/sing-box check -c internal/cores/box/box.json
 	.test/bin/sing-box check -c internal/cores/box/enhanced.json
-	.test/bin/sing-box check -c internal/cores/box/mininal.json
+	.test/bin/sing-box check -c internal/cores/box/minimal.json
 	.test/bin/mihomo -t -f internal/cores/cat/cat.yaml
 
 .PHONY: ruleset

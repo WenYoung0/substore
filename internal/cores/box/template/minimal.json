@@ -74,12 +74,46 @@
         "server": "dns-final"
       },
       {
+        "query_type": ["A", "AAAA"],
         "rule_set": "geosite-cn",
+        "server": "dns-local"
+      },
+      {
+        "action": "evaluate",
         "server": "dns-cn"
       },
       {
-        "rule_set": "geosite-geolocation-!cn",
-        "server": "dns-final"
+        "type": "logical",
+        "mode": "or",
+        "rules": [
+          {
+            "match_response": true,
+            "response_rcode": "NOERROR",
+            "invert": true
+          },
+          {
+            "match_response": true,
+            "query_type": ["A", "AAAA"],
+            "ip_accept_any": true,
+            "invert": true
+          }
+        ],
+        "action": "respond"
+      },
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "query_type": ["A", "AAAA"]
+          },
+          {
+            "match_response": true,
+            "rule_set": ["geoip-cn"],
+            "ip_is_private": true
+          }
+        ],
+        "action": "respond"
       }
     ],
     "final": "dns-final",
