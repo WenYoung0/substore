@@ -31,6 +31,12 @@
         "detour": "🙋 Select"
       },
       {
+        "tag": "dns-ecs",
+        "type": "https",
+        "server": "8.8.8.8",
+        "detour": "🙋 Select"
+      },
+      {
         "tag": "dns-entertainment",
         "type": "https",
         "server": "1.1.1.1",
@@ -162,7 +168,8 @@
       },
       {
         "action": "evaluate",
-        "server": "dns-cn"
+        "server": "dns-ecs",
+        "client_subnet": "0.0.0.0/0"
       },
       {
         "type": "logical",
