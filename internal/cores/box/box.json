@@ -214,6 +214,13 @@
         "server": "dns-local"
       },
       {
+        "rule_set": [
+          "geosite-geolocation-!cn"
+        ],
+        "action": "route",
+        "server": "dns-final"
+      },
+      {
         "action": "evaluate",
         "server": "dns-cn"
       },
@@ -759,6 +766,12 @@
         "type": "remote",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs"
+      },
+      {
+        "tag": "geosite-geolocation-!cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs"
       },
       {
         "tag": "geosite-geolocation-cn",

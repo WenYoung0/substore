@@ -185,6 +185,11 @@
         "server": "dns-local"
       },
       {
+        "rule_set": ["geosite-geolocation-!cn"],
+        "action": "route",
+        "server": "dns-final"
+      },
+      {
         "action": "evaluate",
         "server": "dns-cn"
       },
