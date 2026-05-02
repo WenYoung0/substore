@@ -121,6 +121,7 @@
         "rules": [
           {
             "rule_set": [
+              "geosite-ntp",
               "geosite-microsoft@cn",
               "geosite-apple@cn",
               "@geosite-direct",

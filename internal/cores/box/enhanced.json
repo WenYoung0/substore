@@ -101,6 +101,7 @@
         "rules": [
           {
             "rule_set": [
+              "geosite-ntp",
               "geosite-microsoft@cn",
               "geosite-apple@cn",
               "@geosite-direct",
@@ -636,19 +637,6 @@
               "localhost.work.weixin.qq.com"
             ],
             "domain_suffix": [
-              "local",
-              "lan",
-              "connect.rom.miui.com",
-              "miwifi.com",
-              "weixin.qq.com",
-              "wechat.com",
-              "time.windows.com",
-              "ntp.org",
-              "u-tools.cn",
-              "mediatek.com",
-              "cfprefer1.xyz",
-              "wetab.link",
-              "tyasaka.xyz",
               "msftconnecttest.com",
               "msftncsi.com",
               "wpsmail.net",
@@ -815,6 +803,12 @@
         "type": "remote",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-netflix.srs"
+      },
+      {
+        "tag": "geosite-ntp",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-ntp.srs"
       },
       {
         "tag": "geosite-private",

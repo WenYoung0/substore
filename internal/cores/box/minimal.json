@@ -69,6 +69,7 @@
         "rules": [
           {
             "rule_set": [
+              "geosite-ntp",
               "geosite-microsoft@cn",
               "geosite-apple@cn",
               "@geosite-akamai@cn",
@@ -340,6 +341,12 @@
         "type": "remote",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-microsoft@cn.srs"
+      },
+      {
+        "tag": "geosite-ntp",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-ntp.srs"
       },
       {
         "tag": "geosite-private",
