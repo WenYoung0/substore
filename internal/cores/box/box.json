@@ -214,8 +214,7 @@
       },
       {
         "action": "evaluate",
-        "server": "dns-ecs",
-        "client_subnet": "0.0.0.0/0"
+        "server": "dns-cn"
       },
       {
         "type": "logical",
