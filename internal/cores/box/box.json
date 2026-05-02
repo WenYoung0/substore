@@ -126,7 +126,7 @@
         "rules": [
           {
             "rule_set": [
-              "geosite-ntp",
+              "geosite-category-ntp",
               "geosite-microsoft@cn",
               "geosite-apple@cn",
               "@geosite-direct",
@@ -737,6 +737,12 @@
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-entertainment.srs"
       },
       {
+        "tag": "geosite-category-ntp",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ntp.srs"
+      },
+      {
         "tag": "geosite-category-social-media-!cn",
         "type": "remote",
         "format": "binary",
@@ -789,12 +795,6 @@
         "type": "remote",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-microsoft@cn.srs"
-      },
-      {
-        "tag": "geosite-ntp",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-ntp.srs"
       },
       {
         "tag": "geosite-private",
