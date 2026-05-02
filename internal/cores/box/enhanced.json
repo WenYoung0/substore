@@ -21,19 +21,13 @@
       },
       {
         "tag": "dns-cn",
-        "type": "https",
+        "type": "h3",
         "server": "223.5.5.5"
       },
       {
         "tag": "dns-remote",
         "type": "https",
         "server": "1.1.1.1",
-        "detour": "🙋 Select"
-      },
-      {
-        "tag": "dns-ecs",
-        "type": "https",
-        "server": "8.8.8.8",
         "detour": "🙋 Select"
       },
       {
