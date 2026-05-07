@@ -195,11 +195,11 @@ const applyDnsEnhanced = ({ config = {}, experimental = {}, ...rest }) => {
   // experimental h3
   if (experimental.dns_cn_use_h3 && Array.isArray(config?.dns?.servers))
     config.dns.servers.map((dns) => {
-      if (dns.tag == "dns-cn") dns.type.replace("https", "h3");
+      if (dns.tag === "dns-cn" && dns.type === "https") dns.type = "h3";
     });
 
   // leak
-  if (experimental.dns_leak_boost && Array.isArray(config?.dns.rules)) {
+  if (experimental.dns_leak_boost && Array.isArray(config?.dns?.rules)) {
     config.dns.rules.map((r) => {
       if (r.server === "dns-ecs") {
         r.server = "dns-cn";
