@@ -21,13 +21,19 @@
       },
       {
         "tag": "dns-cn",
-        "type": "h3",
+        "type": "https",
         "server": "223.5.5.5"
       },
       {
         "tag": "dns-final",
         "type": "https",
         "server": "1.1.1.1",
+        "detour": "🙋 Select"
+      },
+      {
+        "tag": "dns-ecs",
+        "type": "https",
+        "server": "8.8.8.8",
         "detour": "🙋 Select"
       },
       {
@@ -185,7 +191,8 @@
       },
       {
         "action": "evaluate",
-        "server": "dns-cn"
+        "server": "dns-ecs",
+        "client_subnet": "0.0.0.0/0"
       },
       {
         "type": "logical",
@@ -257,8 +264,8 @@
           },
           {
             "port": [
-              25, 67, 68, 110, 123, 143, 179, 465, 546, 547, 587, 993, 995,
-              8899, 8733
+              25, 67, 68, 110, 123, 143, 179, 465, 546, 547, 587, 995, 8899,
+              8733
             ]
           },
           {

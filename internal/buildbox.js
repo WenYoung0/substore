@@ -166,7 +166,8 @@ const applyGeoSiteGeoIP = ({ proxies = [], config = {}, ...rest }) => {
   return { proxies, config, ...rest };
 };
 
-const applyClientSubnet = ({ config = {}, ...rest }) => {
+const applyDnsEnhanced = ({ config = {}, experimental = {}, ...rest }) => {
+  // client subnet
   const getClientIP = () => {
     const req = $options?._req;
     const headers = req?.headers ?? {};
@@ -183,12 +184,31 @@ const applyClientSubnet = ({ config = {}, ...rest }) => {
   let ip = getClientIP();
   if (ip === "") ip = "114.114.114.114";
   for (const dnsRule of [...(config?.dns?.rules ?? [])]) {
-    if (dnsRule.client_subnet === "0.0.0.0/0") {
+    if (
+      dnsRule.client_subnet === "0.0.0.0/0" ||
+      dnsRule.client_subnet === "::/0"
+    ) {
       dnsRule.client_subnet = ip + (ip.includes(":") ? "/128" : "/32");
     }
   }
 
-  return { config, ...rest };
+  // experimental h3
+  if (experimental.dns_cn_use_h3 && Array.isArray(config?.dns?.servers))
+    config.dns.servers.map((dns) => {
+      if (dns.tag == "dns-cn") dns.type.replace("https", "h3");
+    });
+
+  // leak
+  if (experimental.dns_leak_boost && Array.isArray(config?.dns.rules)) {
+    config.dns.rules.map((r) => {
+      if (r.server === "dns-ecs") {
+        r.server = "dns-cn";
+        r.client_subnet = undefined;
+      }
+    });
+  }
+
+  return { config, experimental, ...rest };
 };
 
 const applyBoostrapDirect = ({ config = {}, ...rest }) => {
@@ -378,7 +398,7 @@ const { config, proxies, endpoints } = await generateContext()
   .then(applyGeoSiteGeoIP)
   .then(applyPushGroup)
   .then(applyBoostrapDirect)
-  .then(applyClientSubnet)
+  .then(applyDnsEnhanced)
   .then(applyEndpoints);
 
 const lastProduce = ($content = JSON.stringify(

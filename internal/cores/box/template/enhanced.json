@@ -21,13 +21,19 @@
       },
       {
         "tag": "dns-cn",
-        "type": "h3",
+        "type": "https",
         "server": "223.5.5.5"
       },
       {
         "tag": "dns-remote",
         "type": "https",
         "server": "1.1.1.1",
+        "detour": "🙋 Select"
+      },
+      {
+        "tag": "dns-ecs",
+        "type": "https",
+        "server": "8.8.8.8",
         "detour": "🙋 Select"
       },
       {
@@ -138,7 +144,8 @@
       },
       {
         "action": "evaluate",
-        "server": "dns-cn"
+        "server": "dns-ecs",
+        "client_subnet": "0.0.0.0/0"
       },
       {
         "type": "logical",
@@ -293,7 +300,7 @@
         ],
         "action": "sniff",
         "sniffer": ["http", "tls", "quic", "ssh"],
-        "timeout": "50ms"
+        "timeout": "30ms"
       },
       {
         "rule_set": "@geosite-should-block",
