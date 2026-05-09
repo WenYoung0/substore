@@ -127,6 +127,7 @@
           {
             "rule_set": [
               "geosite-category-ntp",
+              "geosite-category-games@cn",
               "geosite-microsoft@cn",
               "geosite-apple@cn",
               "@geosite-direct",
@@ -411,13 +412,13 @@
       },
       {
         "rule_set": [
+          "geosite-category-ntp",
+          "geosite-category-games@cn",
           "geosite-microsoft@cn",
           "geosite-apple@cn",
-          "@geosite-direct",
           "@geosite-akamai@cn",
           "@geosite-steam@cn",
-          "@geosite-google-play@cn",
-          "@geosite-duolingo@cn"
+          "@geosite-google-play@cn"
         ],
         "action": "route",
         "outbound": "Direct"
@@ -653,17 +654,6 @@
         ]
       },
       {
-        "tag": "@geosite-duolingo@cn",
-        "type": "inline",
-        "rules": [
-          {
-            "domain_suffix": [
-              "duolingo.cn"
-            ]
-          }
-        ]
-      },
-      {
         "tag": "@geosite-geolocation-eu",
         "type": "inline",
         "rules": [
@@ -742,6 +732,12 @@
         "type": "remote",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-entertainment.srs"
+      },
+      {
+        "tag": "geosite-category-games@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-games@cn.srs"
       },
       {
         "tag": "geosite-category-ntp",
