@@ -39,17 +39,7 @@ const applyTransport = ({
         name: selected.name,
         proxies: [...selected.proxies],
       };
-      if (!!experimental.transport_use_urltest) {
-        transportGroup.type = "url-test";
-        transportGroup.tolerance = 30;
-        transportGroup.interval = 15;
-      }
-      config["proxy-groups"] = [
-        {
-          ...transportGroup,
-        },
-        ...config["proxy-groups"],
-      ];
+      config["proxy-groups"] = [transportGroup, ...config["proxy-groups"]];
     }
   });
   return {

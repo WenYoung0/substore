@@ -52,17 +52,7 @@ const applyTransport = ({
         tag: selected.name,
         outbounds: [...selected.proxies],
       };
-      if (!!experimental.transport_use_urltest) {
-        transportGroup.type = "urltest";
-        transportGroup.tolerance = 30;
-        transportGroup.interval = "15s";
-      }
-      config.outbounds = [
-        {
-          ...transportGroup,
-        },
-        ...config.outbounds,
-      ];
+      config.outbounds = [transportGroup, ...config.outbounds];
     }
   });
   return {
