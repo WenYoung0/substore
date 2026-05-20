@@ -70,7 +70,8 @@
               "geosite-apple@cn",
               "@geosite-akamai@cn",
               "@geosite-steam@cn",
-              "@geosite-google-play@cn"
+              "@geosite-google-play@cn",
+              "@geosite-geolocation-cn"
             ]
           },
           {
@@ -168,7 +169,8 @@
           "geosite-apple@cn",
           "@geosite-akamai@cn",
           "@geosite-steam@cn",
-          "@geosite-google-play@cn"
+          "@geosite-google-play@cn",
+          "@geosite-geolocation-cn"
         ],
         "action": "route",
         "outbound": "Direct"

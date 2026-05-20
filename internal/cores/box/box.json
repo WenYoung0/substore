@@ -133,7 +133,8 @@
               "@geosite-direct",
               "@geosite-akamai@cn",
               "@geosite-steam@cn",
-              "@geosite-google-play@cn"
+              "@geosite-google-play@cn",
+              "@geosite-geolocation-cn"
             ]
           },
           {
@@ -418,7 +419,8 @@
           "geosite-apple@cn",
           "@geosite-akamai@cn",
           "@geosite-steam@cn",
-          "@geosite-google-play@cn"
+          "@geosite-google-play@cn",
+          "@geosite-geolocation-cn"
         ],
         "action": "route",
         "outbound": "Direct"
@@ -649,6 +651,17 @@
               "invent.kde.org",
               "git.ozlabs.org",
               "git.infradead.org"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "@geosite-geolocation-cn",
+        "type": "inline",
+        "rules": [
+          {
+            "domain_suffix": [
+              "yridc.net"
             ]
           }
         ]
