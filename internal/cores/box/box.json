@@ -661,7 +661,8 @@
         "rules": [
           {
             "domain_suffix": [
-              "yridc.net"
+              "yridc.net",
+              "yridc.net.cn"
             ]
           }
         ]
