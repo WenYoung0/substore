@@ -62,33 +62,40 @@ const uaLookup = (ua = "") => {
   if (ua === "") {
     return undefined;
   }
+
   const defaultUaInfo = {
     SFM: false,
     SFI: false,
     SFT: false,
     SFA: false,
-
     version: parseSemver(undefined),
     language: "",
   };
-  const match =
-    /^([^/]+)\/(\S+) \(Build ([^;]+); sing-box ([^;]+); language ([^)]+)\)$/;
-  const uaMatched = ua.match(match);
-  if (
-    !match ||
-    !["SFM/", "SFI/", "SFT/", "SFA/"].some((c) => ua.startsWith(c))
-  ) {
+
+  const regex =
+    /^([^/]+)\/(\S+) \((?:Build )?([^;]+); sing-box ([^;]+); language ([^)]+)\)$/;
+
+  const uaMatched = ua.match(regex);
+  if (!uaMatched) {
     return defaultUaInfo;
   }
-  // https://github.com/SagerNet/sing-box-for-apple/blob/7968187383bae1a62aab7a3c75bb3770a68e6911/Library/Shared/Variant.swift#L12
+
   defaultUaInfo.SFM = uaMatched[1] === "SFM";
   defaultUaInfo.SFI = uaMatched[1] === "SFI";
   defaultUaInfo.SFT = uaMatched[1] === "SFT";
-  // https://github.com/SagerNet/sing-box-for-android/blob/cf924dcb8174095fe47d78058f42d7a69336b539/app/src/main/java/io/nekohasekai/sfa/utils/HTTPClient.kt#L11
   defaultUaInfo.SFA = uaMatched[1] === "SFA";
 
   defaultUaInfo.version = parseSemver(uaMatched[2]);
-  defaultUaInfo.language = uaMatched[5].split("_")[0];
+
+  // 语言处理
+  if (defaultUaInfo.SFM || defaultUaInfo.SFI || defaultUaInfo.SFT) {
+    defaultUaInfo.language = uaMatched[5].startsWith("zh-Hans")
+      ? "zh_CN"
+      : "en_US";
+  } else if (defaultUaInfo.SFA) {
+    defaultUaInfo.language = uaMatched[5];
+  }
+
   return defaultUaInfo;
 };
 
