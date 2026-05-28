@@ -24,6 +24,18 @@ const produceEndpoint = (endpoints = []) => {
 };
 
 const parseSemver = (version) => {
+  const defaultSemverInfo = {
+    full: "",
+    major: 0,
+    minor: 0,
+    patch: 0,
+    prerelease: "",
+    build: "",
+    // sing-box
+    alphaVersion: 0,
+  };
+  if (!version) return defaultSemverInfo;
+
   const semverRegex =
     /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
 
@@ -31,20 +43,16 @@ const parseSemver = (version) => {
 
   if (match) {
     const [full, major, minor, patch, prerelease, build] = match;
-    let alphaVersion = 0;
     if (prerelease) {
-      alphaVersion = Number(prerelease.split(".")[1]);
+      defaultSemverInfo.alphaVersion = Number(prerelease.split(".")[1]);
     }
-    return {
-      full,
-      major: Number(major),
-      minor: Number(minor),
-      patch: Number(patch),
-      prerelease,
-      build,
-      // sing-box
-      alphaVersion,
-    };
+    defaultSemverInfo.full = full;
+    defaultSemverInfo.major = Number(major);
+    defaultSemverInfo.minor = Number(minor);
+    defaultSemverInfo.patch = Number(patch);
+    defaultSemverInfo.prerelease = prerelease;
+    defaultSemverInfo.build = build;
+    return defaultSemverInfo;
   } else {
     throw new Error("Parse Semver failed");
   }
@@ -54,24 +62,34 @@ const uaLookup = (ua = "") => {
   if (ua === "") {
     return undefined;
   }
+  const defaultUaInfo = {
+    SFM: false,
+    SFI: false,
+    SFT: false,
+    SFA: false,
+
+    version: parseSemver(undefined),
+    language: "",
+  };
   const match =
     /^([^/]+)\/(\S+) \(Build ([^;]+); sing-box ([^;]+); language ([^)]+)\)$/;
   const uaMatched = ua.match(match);
-  if (!match) {
-    throw new Error("Invalid User-Agent: " + ua);
+  if (
+    !match ||
+    !["SFM/", "SFI/", "SFT/", "SFA/"].some((c) => ua.startsWith(c))
+  ) {
+    return defaultUaInfo;
   }
-  return {
-    // https://github.com/SagerNet/sing-box-for-apple/blob/7968187383bae1a62aab7a3c75bb3770a68e6911/Library/Shared/Variant.swift#L12
-    SFM: uaMatched[1] === "SFM",
-    SFI: uaMatched[1] === "SFI",
-    SFT: uaMatched[1] === "SFT",
+  // https://github.com/SagerNet/sing-box-for-apple/blob/7968187383bae1a62aab7a3c75bb3770a68e6911/Library/Shared/Variant.swift#L12
+  defaultUaInfo.SFM = uaMatched[1] === "SFM";
+  defaultUaInfo.SFI = uaMatched[1] === "SFI";
+  defaultUaInfo.SFT = uaMatched[1] === "SFT";
+  // https://github.com/SagerNet/sing-box-for-android/blob/cf924dcb8174095fe47d78058f42d7a69336b539/app/src/main/java/io/nekohasekai/sfa/utils/HTTPClient.kt#L11
+  defaultUaInfo.SFA = uaMatched[1] === "SFA";
 
-    // https://github.com/SagerNet/sing-box-for-android/blob/cf924dcb8174095fe47d78058f42d7a69336b539/app/src/main/java/io/nekohasekai/sfa/utils/HTTPClient.kt#L11
-    SFA: uaMatched[1] === "SFA",
-
-    version: parseSemver(uaMatched[2]),
-    language: uaMatched[5].split("_")[0],
-  };
+  defaultUaInfo.version = parseSemver(uaMatched[2]);
+  defaultUaInfo.language = uaMatched[5].split("_")[0];
+  return defaultUaInfo;
 };
 
 const applySortAndCompability = ({ proxies = [], ...rest }) => {
@@ -455,6 +473,8 @@ const generateContext = async () => {
     generated.endpoints = produced.filter((proxy) =>
       ["wireguard", "tailscale"].includes(proxy.type),
     );
+  } else {
+    generated.proxies = [];
   }
 
   (lookupQuery("experimental") || context.test?.experimental || "")
@@ -467,11 +487,6 @@ const generateContext = async () => {
 };
 
 const { config, proxies, endpoints } = await generateContext()
-  .catch((exception) => {
-    if ($options?._res) $options._res.status = 500;
-
-    $content = exception.message;
-  })
   .then(applySortAndCompability)
   .then(applyTransport)
   .then(applyGeoSiteGeoIP)
