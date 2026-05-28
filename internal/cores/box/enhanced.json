@@ -1,5 +1,5 @@
 {
-  "$schema": "https://github.com/jiang-zhexin/typebox/releases/download/v1.14.6/schema.json",
+  "$schema": "https://github.com/jiang-zhexin/typebox/releases/download/v1.14.15/schema.json",
   "log": {
     "disabled": false,
     "level": "warn"
@@ -254,6 +254,9 @@
         "mode": "or",
         "rules": [
           {
+            "protocol": "dns"
+          },
+          {
             "inbound": [
               "dns-in"
             ]
@@ -406,8 +409,7 @@
         "rule_set": [
           "@geosite-category-dev",
           "geosite-github",
-          "geosite-gitlab",
-          "geosite-category-tech-media"
+          "geosite-gitlab"
         ],
         "outbound": "🐈 Git"
       },
@@ -756,12 +758,6 @@
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-social-media-!cn.srs"
       },
       {
-        "tag": "geosite-category-tech-media",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-tech-media.srs"
-      },
-      {
         "tag": "geosite-cn",
         "type": "remote",
         "format": "binary",
@@ -872,6 +868,11 @@
         "fdfe:dcba:9876::1/126"
       ],
       "auto_route": true,
+      "dns_mode": "hijack",
+      "dns_address": [
+        "172.27.0.2",
+        "fdfe:dcba:9876::2"
+      ],
       "endpoint_independent_nat": true,
       "route_exclude_address": [
         "10.0.0.0/8",

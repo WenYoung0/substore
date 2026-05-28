@@ -1,5 +1,5 @@
 {
-  "$schema": "https://github.com/jiang-zhexin/typebox/releases/download/v1.14.6/schema.json",
+  "$schema": "https://github.com/jiang-zhexin/typebox/releases/download/v1.14.15/schema.json",
   "log": {
     "disabled": false,
     "level": "warn"
@@ -121,7 +121,16 @@
   "route": {
     "rules": [
       {
-        "port": 53,
+        "type": "logical",
+        "mode": "or",
+        "rules": [
+          {
+            "port": 53
+          },
+          {
+            "protocol": "dns"
+          }
+        ],
         "action": "hijack-dns"
       },
       {
@@ -397,6 +406,11 @@
         "fdfe:dcba:9876::1/126"
       ],
       "auto_route": true,
+      "dns_mode": "hijack",
+      "dns_address": [
+        "172.27.0.2",
+        "fdfe:dcba:9876::2"
+      ],
       "endpoint_independent_nat": true,
       "route_exclude_address": [
         "10.0.0.0/8",
