@@ -23,6 +23,57 @@ const produceEndpoint = (endpoints = []) => {
   ).endpoints;
 };
 
+const parseSemver = (version) => {
+  const semverRegex =
+    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
+
+  const match = version.match(semverRegex);
+
+  if (match) {
+    const [full, major, minor, patch, prerelease, build] = match;
+    let alphaVersion = 0;
+    if (prerelease) {
+      alphaVersion = Number(prerelease.split(".")[1]);
+    }
+    return {
+      full,
+      major: Number(major),
+      minor: Number(minor),
+      patch: Number(patch),
+      prerelease,
+      build,
+      // sing-box
+      alphaVersion,
+    };
+  } else {
+    throw new Error("Parse Semver failed");
+  }
+};
+
+const uaLookup = (ua = "") => {
+  if (ua === "") {
+    return undefined;
+  }
+  const match =
+    /^([^/]+)\/(\S+) \(Build ([^;]+); sing-box ([^;]+); language ([^)]+)\)$/;
+  const uaMatched = ua.match(match);
+  if (!match) {
+    throw new Error("Invalid User-Agent: " + ua);
+  }
+  return {
+    // https://github.com/SagerNet/sing-box-for-apple/blob/7968187383bae1a62aab7a3c75bb3770a68e6911/Library/Shared/Variant.swift#L12
+    SFM: uaMatched[1] === "SFM",
+    SFI: uaMatched[1] === "SFI",
+    SFT: uaMatched[1] === "SFT",
+
+    // https://github.com/SagerNet/sing-box-for-android/blob/cf924dcb8174095fe47d78058f42d7a69336b539/app/src/main/java/io/nekohasekai/sfa/utils/HTTPClient.kt#L11
+    SFA: uaMatched[1] === "SFA",
+
+    version: parseSemver(uaMatched[2]),
+    language: uaMatched[5].split("_")[0],
+  };
+};
+
 const applySortAndCompability = ({ proxies = [], ...rest }) => {
   const sortedProxies = featureLocation.func.sortProxies({ proxies });
 
@@ -336,12 +387,45 @@ const applyEndpoints = ({ config = {}, endpoints = [], ...rest }) => {
   return { config, endpoints: availableEndpoints, ...rest };
 };
 
+const applyPlatformSettings = ({ config = {}, ua = undefined, ...rest }) => {
+  const ret = { config, ua, ...rest };
+  if (ua === undefined) {
+    return ret;
+  }
+
+  // on macos , only set ipv6 dns address to fix the program
+  // which read the /etc/resolv.conf as major dns resolver config.
+  if (
+    ua.SFM &&
+    ua.version.major >= 1 &&
+    ua.version.minor >= 14 &&
+    ua.version.alphaVersion >= 21
+  )
+    config?.inbounds
+      ?.filter((inb) => inb.type === "tun")
+      .map((inb) => {
+        if (!inb.dns_address) {
+          return;
+        }
+        inb.dns_address = inb.dns_address.filter((addr) => addr.includes(":"));
+      });
+
+  return ret;
+};
+
 const generateContext = async () => {
   const lookupQuery = (name) => {
     return $options?._req?.query?.[name];
   };
 
-  const generated = { config: JSON.parse($files[0]), experimental: {} };
+  const generated = {
+    config: JSON.parse($files[0]),
+    experimental: {},
+    ua: uaLookup(
+      $options?._req?.headers?.["user-agent"] ||
+        $options?._req?.headers?.["User-Agent"],
+    ),
+  };
 
   if (lookupQuery("user") || context.test?.user) {
     const userID = lookupQuery("user") || context.test?.user || "";
@@ -383,13 +467,19 @@ const generateContext = async () => {
 };
 
 const { config, proxies, endpoints } = await generateContext()
+  .catch((exception) => {
+    if ($options?._res) $options._res.status = 500;
+
+    $content = exception.message;
+  })
   .then(applySortAndCompability)
   .then(applyTransport)
   .then(applyGeoSiteGeoIP)
   .then(applyPushGroup)
   .then(applyBoostrapDirect)
   .then(applyDnsEnhanced)
-  .then(applyEndpoints);
+  .then(applyEndpoints)
+  .then(applyPlatformSettings);
 
 const lastProduce = ($content = JSON.stringify(
   {
