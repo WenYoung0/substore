@@ -438,11 +438,12 @@ const applyPlatformSettings = ({ config = {}, ua = undefined, ...rest }) => {
   return ret;
 };
 
-const applySuperSecretSettings = (...rest) => {
+const applySuperSecretSettingsFunc = (...rest) => {
   if (context.secret?.superSecretSettings) {
-    return context.secret?.superSecretSettings(...rest);
+    return context.secret?.superSecretSettings;
   }
-  return { ...rest };
+
+  return (...rest) => ({ ...rest });
 };
 
 const generateContext = async () => {
@@ -509,7 +510,7 @@ const { config, proxies, endpoints } = await generateContext()
   .then(applyDnsEnhanced)
   .then(applyEndpoints)
   .then(applyPlatformSettings)
-  .then(applySuperSecretSettings);
+  .then(applySuperSecretSettingsFunc());
 
 const lastProduce = ($content = JSON.stringify(
   {
