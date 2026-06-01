@@ -438,6 +438,13 @@ const applyPlatformSettings = ({ config = {}, ua = undefined, ...rest }) => {
   return ret;
 };
 
+const applySuperSecretSettings = (...rest) => {
+  if (context.secret?.superSecretSettings) {
+    return context.secret?.superSecretSettings(...rest);
+  }
+  return { ...rest };
+};
+
 const generateContext = async () => {
   const lookupQuery = (name) => {
     return $options?._req?.query?.[name];
@@ -501,7 +508,8 @@ const { config, proxies, endpoints } = await generateContext()
   .then(applyBoostrapDirect)
   .then(applyDnsEnhanced)
   .then(applyEndpoints)
-  .then(applyPlatformSettings);
+  .then(applyPlatformSettings)
+  .then(applySuperSecretSettings);
 
 const lastProduce = ($content = JSON.stringify(
   {
