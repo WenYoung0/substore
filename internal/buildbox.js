@@ -76,7 +76,7 @@ const uaLookup = (ua = "") => {
     /^([^/]+)\/(\S+) \((?:Build )?([^;]+); sing-box ([^;]+); language ([^)]+)\)$/;
 
   const uaMatched = ua.match(regex);
-  if (!uaMatched) {
+  if (!uaMatched || uaMatched.length < 6) {
     return defaultUaInfo;
   }
 
@@ -374,6 +374,7 @@ const applyEndpoints = ({ config = {}, endpoints = [], ...rest }) => {
           type: "tailscale",
           tag: "dns-" + ep.name,
           endpoint: ep.name,
+          accept_search_domain: true,
         },
       ],
       rules: [
