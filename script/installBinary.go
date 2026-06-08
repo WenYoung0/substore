@@ -70,7 +70,7 @@ func downloadBox(c Core) error {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("bad status code %w: %d", distUrl, resp.StatusCode)
+		return fmt.Errorf("bad status code %s: %d", distUrl, resp.StatusCode)
 	}
 
 	gzipReader, err := gzip.NewReader(resp.Body)

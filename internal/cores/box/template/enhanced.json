@@ -363,7 +363,8 @@
         "rule_set": [
           "geosite-category-entertainment",
           "geosite-category-social-media-!cn",
-          "geosite-reddit"
+          "geosite-reddit",
+          "@geosite-cloudflare-challenge"
         ],
         "outbound": "📺 Entertainment"
       }

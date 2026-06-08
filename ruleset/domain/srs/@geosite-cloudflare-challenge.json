@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "challenges.cloudflare.com",
+        "stun.cloudflare.com"
+      ]
+    }
+  ]
+}
