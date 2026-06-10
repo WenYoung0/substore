@@ -119,6 +119,20 @@ const applyTransport = ({
 }) => {
   const transportGroups = featureTransport.func.completeTransport({
     proxies: proxies,
+    detourName: (cca2) => {
+      let defaultTransportName = "🚀 Transport";
+      const trnaslation = {
+        zh_CN: "🚀 链式传输",
+        en_US: defaultTransportName,
+      };
+      if (ua && ua.language in trnaslation) {
+        defaultTransportName = trnaslation[ua.language];
+      }
+      if (!cca2) {
+        return defaultTransportName;
+      }
+      return defaultTransportName + " (" + cca2 + ")";
+    },
   });
 
   Object.keys(transportGroups).map((selectorName) => {
@@ -456,7 +470,6 @@ const applyTranslation = ({ config = {}, ua = undefined, ...rest }) => {
   const globalTranslation = {
     zh_CN: {
       "🌐 Direct": "🌐 直连",
-      "🚀 Transport": "🚀 链式传输",
       "🙋 Select": "🙋 手动选择",
       "🔍 Google": "🔍 谷歌服务",
       "🐈 Git": "🐈 开发服务",
