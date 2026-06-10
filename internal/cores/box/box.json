@@ -855,9 +855,9 @@
     ],
     "final": "🙋 Select",
     "auto_detect_interface": true,
-    "default_http_client": "http-direct",
+    "default_http_client": "http-bootstrap",
     "default_domain_resolver": {
-      "server": "dns-cn",
+      "server": "dns-bootstrap",
       "rewrite_ttl": 3600,
       "strategy": "prefer_ipv4",
       "disable_optimistic_cache": true
