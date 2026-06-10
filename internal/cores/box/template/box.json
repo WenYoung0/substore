@@ -6,8 +6,9 @@
   },
   "http_clients": [
     {
-      "tag": "http-direct",
+      "tag": "http-bootstrap",
       "engine": "go",
+      "detour": "direct-bootstrap",
       "tls": {
         "enabled": true
       }
