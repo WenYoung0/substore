@@ -20,6 +20,11 @@
         "tag": "dns-local"
       },
       {
+        "tag": "dns-bootstrap",
+        "type": "udp",
+        "server": "223.5.5.5"
+      },
+      {
         "tag": "dns-cn",
         "type": "https",
         "server": "223.5.5.5"
@@ -163,7 +168,7 @@
           }
         ],
         "action": "route",
-        "outbound": "Direct"
+        "outbound": "🌐 Direct"
       },
       {
         "type": "logical",
@@ -186,7 +191,7 @@
           "geoip-cn"
         ],
         "action": "route",
-        "outbound": "Direct"
+        "outbound": "🌐 Direct"
       },
       {
         "port": [
@@ -228,7 +233,7 @@
           "@geosite-geolocation-cn"
         ],
         "action": "route",
-        "outbound": "Direct"
+        "outbound": "🌐 Direct"
       },
       {
         "rule_set": [
@@ -242,7 +247,7 @@
         "rule_set": [
           "geosite-geolocation-cn"
         ],
-        "outbound": "Direct"
+        "outbound": "🌐 Direct"
       }
     ],
     "rule_set": [
@@ -477,16 +482,21 @@
   "outbounds": [
     {
       "type": "direct",
-      "tag": "Direct",
+      "tag": "direct-bootstrap",
+      "domain_resolver": "dns-bootstrap"
+    },
+    {
+      "type": "direct",
+      "tag": "🌐 Direct",
       "domain_resolver": "dns-cn"
     },
     {
       "type": "selector",
       "tag": "🙋 Select",
       "outbounds": [
-        "Direct"
+        "🌐 Direct"
       ],
-      "default": "Direct",
+      "default": "🌐 Direct",
       "interrupt_exist_connections": true
     }
   ]
