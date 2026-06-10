@@ -114,6 +114,7 @@ const applyTransport = ({
   proxies = [],
   config = {},
   experimental = {},
+  ua = {},
   ...rest
 }) => {
   const transportGroups = featureTransport.func.completeTransport({
@@ -131,6 +132,7 @@ const applyTransport = ({
       config.outbounds = [transportGroup, ...config.outbounds];
     }
   });
+
   return {
     proxies: proxies.filter(
       (proxy) =>
@@ -139,6 +141,7 @@ const applyTransport = ({
     ),
     experimental,
     config,
+    ua,
     ...rest,
   };
 };
@@ -453,6 +456,7 @@ const applyTranslation = ({ config = {}, ua = undefined, ...rest }) => {
   const globalTranslation = {
     zh_CN: {
       "🌐 Direct": "🌐 直连",
+      "🚀 Transport": "🚀 链式传输",
       "🙋 Select": "🙋 手动选择",
       "🔍 Google": "🔍 谷歌服务",
       "🐈 Git": "🐈 开发服务",
@@ -490,7 +494,8 @@ const generateContext = async () => {
     experimental: {},
     ua: uaLookup(
       $options?._req?.headers?.["user-agent"] ||
-        $options?._req?.headers?.["User-Agent"],
+        $options?._req?.headers?.["User-Agent"] ||
+        context.test?.ua,
     ),
   };
 
