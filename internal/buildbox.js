@@ -459,60 +459,6 @@ const applyPlatformSettings = ({ config = {}, ua = undefined, ...rest }) => {
   return ret;
 };
 
-const applyDomesticOutbound = ({ config = {}, experimental = {}, ...rest }) => {
-  if (experimental.enable_domestic) {
-    const domesticOutboundSelctorName = "🏠 Domestic";
-
-    const selectOutbound = JSON.parse(
-      JSON.stringify(config.outbounds.find((out) => out.tag == "🙋 Select")),
-    );
-
-    (config.route?.rules ?? []).map((r) => {
-      if (r.outbound === directOutbound)
-        r.outbound = domesticOutboundSelctorName;
-    });
-    if (config.dns?.servers) {
-      config.dns.servers = config.dns.servers.map((ds) => {
-        const unManagedDNSType = [
-          "tailscale",
-          "hosts",
-          "dhcp",
-          "mdns",
-          "fakeip",
-          "resolved",
-        ];
-
-        if (unManagedDNSType.includes(ds.type)) return;
-
-        if (ds.type === "local")
-          ds = {
-            ...ds,
-            ...((config.dns?.servers ?? []).find((ds) => ds.tag == "dns-cn") ??
-              {}),
-
-            tag: ds.tag,
-          };
-
-        if (!ds.detour) ds.detour = domesticOutboundSelctorName;
-
-        return ds;
-      });
-    }
-
-    selectOutbound.tag = domesticOutboundSelctorName;
-    selectOutbound.default = directOutbound;
-    if (!(selectOutbound.outbounds ?? []).includes(directOutbound))
-      selectOutbound.outbounds = [
-        directOutbound,
-        ...(selectOutbound.outbounds ?? []),
-      ];
-
-    config.outbounds = [...(config.outbounds ?? []), selectOutbound];
-  }
-
-  return { config, experimental, ...rest };
-};
-
 const applySuperSecretSettingsFunc = (...rest) => {
   if (context.secret?.superSecretSettings) {
     return context.secret?.superSecretSettings;
@@ -538,7 +484,6 @@ const applyTranslation = ({ config = {}, ua = undefined, ...rest }) => {
       "✈️ TelegramDC1(NA)": "✈️ 电报DC1 (北美)",
       "✈️ TelegramDC4(EU)": "✈️ 电报DC4 (欧洲)",
       "✈️ TelegramDC5(AP)": "✈️ 电报DC5 (亚太)",
-      "🏠 Domestic": "🏠 国内服务",
     },
   };
 
@@ -616,7 +561,6 @@ const { config, proxies, endpoints } = await generateContext()
   .then(applyTransport)
   .then(applyGeoSiteGeoIP)
   .then(applyPushGroup)
-  .then(applyDomesticOutbound)
   .then(applyBoostrapDirect)
   .then(applyDnsEnhanced)
   .then(applyEndpoints)
