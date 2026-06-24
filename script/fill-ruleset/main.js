@@ -17,15 +17,15 @@ const generateConfig = {
         name +
         ".srs",
       upstreamGeoipURL: (name) =>
-        "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/srs/" +
+        "https://raw.githubusercontent.com/duakc/geoip/refs/heads/release/srs/" +
         name.slice(name.indexOf("-") + 1, name.length) +
         ".srs",
       localGeoipURL: (name) =>
-        "https://raw.githubusercontent.com/wenyoung0/substore/refs/heads/rule/rule-set/ip/srs/" +
+        "https://raw.githubusercontent.com/duakc/substore/refs/heads/rule/rule-set/ip/srs/" +
         name +
         ".srs",
       localGeositeURL: (name) =>
-        "https://raw.githubusercontent.com/wenyoung0/substore/refs/heads/rule/rule-set/domain/srs/" +
+        "https://raw.githubusercontent.com/duakc/substore/refs/heads/rule/rule-set/domain/srs/" +
         name +
         ".srs",
       domain: "../../ruleset/domain/srs",
@@ -37,15 +37,15 @@ const generateConfig = {
         name.slice(name.indexOf("-") + 1, name.length) +
         ".mrs",
       upstreamGeoipURL: (name) =>
-        "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/" +
+        "https://raw.githubusercontent.com/duakc/geoip/refs/heads/release/mrs/" +
         name.slice(name.indexOf("-") + 1, name.length) +
         ".mrs",
       localGeoipURL: (name) =>
-        "https://raw.githubusercontent.com/wenyoung0/substore/refs/heads/rule/rule-set/ip/mrs/" +
+        "https://raw.githubusercontent.com/duakc/substore/refs/heads/rule/rule-set/ip/mrs/" +
         name +
         ".mrs",
       localGeositeURL: (name) =>
-        "https://raw.githubusercontent.com/wenyoung0/substore/refs/heads/rule/rule-set/domain/mrs/" +
+        "https://raw.githubusercontent.com/duakc/substore/refs/heads/rule/rule-set/domain/mrs/" +
         name +
         ".classical", // use classical to get best compability
       domain: "../../ruleset/domain/mrs",

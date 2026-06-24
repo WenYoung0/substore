@@ -324,14 +324,14 @@ rule-providers:
     interval: 86400
     behavior: ipcidr
     url: >-
-      https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/cn.mrs
+      https://raw.githubusercontent.com/duakc/geoip/refs/heads/release/mrs/cn.mrs
   geoip-private:
     type: http
     format: mrs
     interval: 86400
     behavior: ipcidr
     url: >-
-      https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/private.mrs
+      https://raw.githubusercontent.com/duakc/geoip/refs/heads/release/mrs/private.mrs
   geosite-akamai@cn:
     type: http
     format: mrs

@@ -726,7 +726,7 @@
         "tag": "geoip-cn",
         "type": "remote",
         "format": "binary",
-        "url": "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/srs/cn.srs"
+        "url": "https://raw.githubusercontent.com/duakc/geoip/refs/heads/release/srs/cn.srs"
       },
       {
         "tag": "geosite-apple",
