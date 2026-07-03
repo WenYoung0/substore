@@ -1,5 +1,9 @@
 .PHONY: all
-all: install_binary ruleset check
+all: install_binary internal_build ruleset check
+
+.PHONY: internal_build
+internal_build:
+	node internal/build/main.js
 
 .PHONY: check
 check:
