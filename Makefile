@@ -3,7 +3,7 @@ all: install_binary bundle_build ruleset check
 
 .PHONY: bundle_build
 bundle_build:
-	node internal/build/main.js
+	cd script/bundle-build && npm install && node main.js
 
 .PHONY: check
 check:

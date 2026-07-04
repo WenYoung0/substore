@@ -1,0 +1,15 @@
+{
+  "name": "bundle-build",
+  "version": "1.0.0",
+  "description": "Assemble internal/build/src parts into buildbox/buildcat (+ minified).",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "run": "node main.js"
+  },
+  "dependencies": {
+    "terser": "^5.36.0"
+  }
+}
