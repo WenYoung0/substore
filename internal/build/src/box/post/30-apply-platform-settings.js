@@ -10,7 +10,7 @@ const applyPlatformSettings = ({ config = {}, ua = undefined, ...rest }) => {
       if (ua.SFM) {
         // on macos , only set ipv6 dns address to fix the program
         // which read the /etc/resolv.conf as major dns resolver config.
-        if (!tunInbound.dns_address)
+        if (tunInbound.dns_address)
           tunInbound.dns_address = tunInbound.dns_address.filter((addr) =>
             addr.includes(":"),
           );
