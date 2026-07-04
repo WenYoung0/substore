@@ -1064,19 +1064,14 @@ const sortProxies = ({ proxies }) => {
   return finalProxies;
 };
 
-const locationObj = { load: true, func: {}, const: {} };
-locationObj.func.getFull = getFull;
-locationObj.func.getLocation = getLocation;
-locationObj.func.getOrder = getOrder;
-locationObj.func.getArea = getArea;
-locationObj.func.sortProxies = sortProxies;
-
-locationObj.const.locationEntries = locationEntries;
-
-context.young = {
-  ...(context.young || {}),
-  features: {
-    ...(context.young?.features || {}),
-    location: locationObj,
+context.features = {
+  ...(context.features ?? {}),
+  location: {
+    getFull,
+    getLocation,
+    getOrder,
+    getArea,
+    sortProxies,
+    locationEntries,
   },
 };

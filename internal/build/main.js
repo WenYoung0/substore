@@ -1,16 +1,23 @@
-// Assembles a flat Sub-Store script from the per-step source files under
-// src/<core>/, walking the PIPELINE stages below in order:
+// Assembles a flat, self-contained Sub-Store script from the per-step source
+// files under src/<core>/, walking the PIPELINE stages below in order:
 //
-//   00-header.js        shared consts/helpers (no @call, definitions only)
-//   00-entry.js         pipeline seed              (@call = generateContext())
-//   pre/NN-*.js         steps on {config, proxies, endpoints} (pre-produce)
-//   00-post-entry.js    produce bridge             (@call = assembleConfig)
-//   post/NN-*.js        steps on the assembled {config} (config now has nodes)
+//   header.js        shared consts/helpers (no @call, definitions only)
+//   entry.js         pipeline seed              (@call = generateContext())
+//   pre/NN-*.js       steps on {config, proxies, endpoints} (pre-produce)
+//   post-entry.js    produce bridge             (@call = assembleConfig)
+//   post/NN-*.js      steps on the assembled {config} (config now has nodes)
 //
-// Each chained file declares how it is invoked with a one-line header, e.g.
+// Each file may carry `// @<key> = <value>` meta headers (value free of , @ =):
 //   // @call = applyTransport                 -> .then(applyTransport)
 //   // @call = applySuperSecretSettingsFunc() -> .then(applySuperSecretSettingsFunc())
 //   // @call = generateContext()              -> the seed (first @call), awaited
+//   // @import = location                      -> declares a feature dependency
+// Unknown meta keys are a build error (see META_KEYS).
+//
+// Every needed feature (transitively; a feature may @import another) is inlined
+// ONCE at the top of the output, each wrapped in its own IIFE so its internal
+// names can't collide, populating context.features.<name>. Load order comes
+// from features/load-order (dependencies first).
 //
 // Ordering within a directory stage is by the NN- prefix. Files with no @call
 // (the header) are emitted as definitions only. Missing stages are skipped.
@@ -21,6 +28,7 @@ const fs = require("fs");
 const path = require("path");
 
 const buildDir = __dirname;
+const featuresDir = path.join(buildDir, "..", "..", "features");
 
 const targets = [
   { src: "src/box", out: "../buildbox.js" },
@@ -29,13 +37,7 @@ const targets = [
 
 // ordered pipeline stages per core. a ".js" entry is a single file; any other
 // entry is a directory of NN-*.js steps expanded in filename order.
-const PIPELINE = [
-  "00-header.js",
-  "00-entry.js",
-  "pre",
-  "00-post-entry.js",
-  "post",
-];
+const PIPELINE = ["header.js", "entry.js", "pre", "post-entry.js", "post"];
 
 const banner = (srcRel) =>
   [
@@ -51,20 +53,75 @@ const listJs = (dir) =>
         .sort()
     : [];
 
-// split a source file into its @call directive (if any) and its body.
-const readPart = (file) => {
+// known meta headers and their arity: "one" (at most once) or "many".
+const META_KEYS = { call: "one", import: "many" };
+
+// parse `// @key = value` headers from a source file. Unknown keys, malformed
+// values (empty or containing , @ =), and duplicate "one" keys are build errors.
+// returns { call: string|null, imports: string[], body: string }.
+const parseMeta = (file) => {
   const lines = fs.readFileSync(file, "utf8").split("\n");
-  let call = null;
+  const collected = {}; // key -> value ("one") | value[] ("many")
   const body = [];
   for (const line of lines) {
-    const m = line.match(/^\/\/\s*@call\s*=\s*(.+?)\s*$/);
-    if (m && call === null) {
-      call = m[1];
+    const m = line.match(/^\/\/\s*@(\w+)\s*=\s*(.*)$/);
+    if (!m) {
+      body.push(line);
       continue;
     }
-    body.push(line);
+    const key = m[1];
+    const value = m[2].trim();
+    if (!(key in META_KEYS)) {
+      throw new Error(`${file}: unknown meta header "@${key}"`);
+    }
+    if (value === "" || /[,@=]/.test(value)) {
+      throw new Error(
+        `${file}: invalid value for "@${key}" (non-empty, no , @ =): "${value}"`,
+      );
+    }
+    if (META_KEYS[key] === "one") {
+      if (key in collected) throw new Error(`${file}: duplicate "@${key}"`);
+      collected[key] = value;
+    } else {
+      (collected[key] ??= []).push(value);
+    }
   }
-  return { call, body: body.join("\n").replace(/\n+$/, "") };
+  return {
+    call: collected.call ?? null,
+    imports: collected.import ?? [],
+    body: body.join("\n").replace(/\n+$/, ""),
+  };
+};
+
+const featureFile = (name) => path.join(featuresDir, name, "load.js");
+
+const loadOrder = () =>
+  fs
+    .readFileSync(path.join(featuresDir, "load-order"), "utf8")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith("#"));
+
+// resolve the transitive set of features required by the given @import names.
+const resolveFeatures = (rootImports, order) => {
+  const needed = new Set();
+  const queue = [...rootImports];
+  while (queue.length) {
+    const name = queue.shift();
+    if (needed.has(name)) continue;
+    if (!order.includes(name)) {
+      throw new Error(
+        `@import "${name}" is not listed in features/load-order`,
+      );
+    }
+    const file = featureFile(name);
+    if (!fs.existsSync(file)) {
+      throw new Error(`feature "${name}" not found at ${file}`);
+    }
+    needed.add(name);
+    queue.push(...parseMeta(file).imports);
+  }
+  return needed;
 };
 
 const buildTarget = ({ src, out }) => {
@@ -83,9 +140,22 @@ const buildTarget = ({ src, out }) => {
     throw new Error(`no source files found under ${dir}`);
   }
 
-  const parts = files.map(readPart);
+  const parts = files.map(parseMeta);
 
-  // the chain follows the same file order: first @call is the seed (awaited),
+  // inline every needed feature once, in manifest order, each in its own IIFE.
+  const order = loadOrder();
+  const needed = resolveFeatures(
+    parts.flatMap((p) => p.imports),
+    order,
+  );
+  const featureBlocks = order
+    .filter((name) => needed.has(name))
+    .map((name) => {
+      const { body } = parseMeta(featureFile(name));
+      return `// feature: ${name}\n(() => {\n${body}\n})();`;
+    });
+
+  // the chain follows the source file order: first @call is the seed (awaited),
   // every subsequent @call is a .then(...) step.
   const calls = parts.filter((p) => p.call).map((p) => p.call);
   if (calls.length === 0) {
@@ -96,17 +166,21 @@ const buildTarget = ({ src, out }) => {
     `await ${seed}` + steps.map((c) => `\n  .then(${c})`).join("") + ";";
 
   const body =
-    [banner(src), ...parts.map((p) => p.body), chain].join("\n\n") + "\n";
+    [banner(src), ...featureBlocks, ...parts.map((p) => p.body), chain].join(
+      "\n\n",
+    ) + "\n";
 
   fs.writeFileSync(path.join(buildDir, out), body);
-  return { files: files.length, steps: calls.length };
+  return { files: files.length, features: featureBlocks.length, steps: calls.length };
 };
 
 for (const target of targets) {
-  const { files, steps } = buildTarget(target);
+  const { files, features, steps } = buildTarget(target);
   const rel = path.relative(
     path.join(buildDir, ".."),
     path.join(buildDir, target.out),
   );
-  console.log(`generated internal/${rel} from ${files} parts, ${steps} steps`);
+  console.log(
+    `generated internal/${rel} from ${files} parts, ${features} features, ${steps} steps`,
+  );
 }

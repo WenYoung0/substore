@@ -1,0 +1,4 @@
+# Feature load order (dependencies first).
+# Consumed by internal/build/main.js to inline features into buildbox/buildcat.
+location
+transport

@@ -1,4 +1,5 @@
-const featureLocation = context.young.features.location;
+// @import = location
+const featureLocation = context.features.location;
 
 const isTransport = ({ proxy }) => {
   return proxy?.properties?.transport || proxy?.properties?.transport?.is;
@@ -33,7 +34,7 @@ const completeTransport = ({ proxies, detourName, fallback }) => {
 
   const transportGroups = {};
   for (const tp of transportProxies) {
-    const transportLocation = featureLocation.func.getLocation(tp);
+    const transportLocation = featureLocation.getLocation(tp);
 
     if (transportGroups[transportLocation] === undefined) {
       transportGroups[transportLocation] = {
@@ -56,7 +57,7 @@ const completeTransport = ({ proxies, detourName, fallback }) => {
       else if (Array.isArray(dp.properties.destination.require))
         destinationRequiredLocation.push(...dp.properties.destination.require);
     } else {
-      const destinationLocation = featureLocation.func.getLocation(dp);
+      const destinationLocation = featureLocation.getLocation(dp);
       if (destinationLocation !== "")
         destinationRequiredLocation.push(destinationLocation);
 
@@ -82,16 +83,11 @@ const completeTransport = ({ proxies, detourName, fallback }) => {
   return transportGroups;
 };
 
-const transportObj = { load: true, func: {}, const: {} };
-
-transportObj.func.completeTransport = completeTransport;
-transportObj.func.isTransport = isTransport;
-transportObj.func.isDestionation = isDestionation;
-
-context.young = {
-  ...(context.young || {}),
-  features: {
-    ...(context.young?.features || {}),
-    transport: transportObj,
+context.features = {
+  ...(context.features ?? {}),
+  transport: {
+    completeTransport,
+    isTransport,
+    isDestionation,
   },
 };

@@ -1,4 +1,5 @@
 // @call = applyPushGroup
+// @import = location
 const applyPushGroup = ({ proxies = [], config = {}, ...rest }) => {
   const out = proxies.filter(
     (proxy) =>
@@ -24,21 +25,21 @@ const applyPushGroup = ({ proxies = [], config = {}, ...rest }) => {
           ...out
             .filter(
               (o) =>
-                featureLocation.func.getArea(o) === "AREA_NORTH_AMERICA" ||
-                featureLocation.func.getLocation(o) == "JP",
+                context.features.location.getArea(o) === "AREA_NORTH_AMERICA" ||
+                context.features.location.getLocation(o) == "JP",
             )
             .map((o) => o.name),
         );
       } else if (["✈️ TelegramDC4(EU)"].includes(selector.tag)) {
         selector.outbounds.push(
           ...out
-            .filter((o) => featureLocation.func.getArea(o) === "AREA_EUROPE")
+            .filter((o) => context.features.location.getArea(o) === "AREA_EUROPE")
             .map((o) => o.name),
         );
       } else if (["✈️ TelegramDC5(AP)"].includes(selector.tag)) {
         selector.outbounds.push(
           ...out
-            .filter((o) => featureLocation.func.getArea(o) === "AREA_ASIA")
+            .filter((o) => context.features.location.getArea(o) === "AREA_ASIA")
             .map((o) => o.name),
         );
       }

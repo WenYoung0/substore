@@ -1,15 +1,18 @@
-const featureTransport = context.young.features.transport;
-const featureLocation = context.young.features.location;
-
-const directBootstrapOutbound = "direct-bootstrap";
-const directOutbound = "🌐 Direct";
-
-const directHTTPClient = "http-bootstrap";
-const productionPlatform = "sing-box";
+context.const = {
+  ...(context.const ?? {}),
+  platform: "sing-box",
+  outbound: {
+    direct: "🌐 Direct",
+    directBootstrap: "direct-bootstrap",
+  },
+  ruleset: { bootstrapHTTPClient: "http-bootstrap" },
+  dns: { bootstrapDNSTag: "dns-cn" },
+};
 
 const produce = (proxies = []) => {
-  return JSON.parse(ProxyUtils.produce([...proxies], productionPlatform))
-    .outbounds;
+  return JSON.parse(
+    ProxyUtils.produce([...proxies], context.const.platform),
+  ).outbounds;
 };
 
 const produceEndpoint = (endpoints = []) => {
@@ -20,7 +23,7 @@ const produceEndpoint = (endpoints = []) => {
           (e) => e.type === "tailscale" || e.type === "wireguard",
         ),
       ],
-      productionPlatform,
+      context.const.platform,
     ),
   ).endpoints;
 };

@@ -1,4 +1,5 @@
 // @call = applyTransport
+// @import = transport
 const applyTransport = ({
   proxies = [],
   config = {},
@@ -6,7 +7,7 @@ const applyTransport = ({
   ua = {},
   ...rest
 }) => {
-  const transportGroups = featureTransport.func.completeTransport({
+  const transportGroups = context.features.transport.completeTransport({
     proxies: proxies,
     detourName: (cca2) => {
       let defaultTransportName = "🚀 Transport";
@@ -39,7 +40,7 @@ const applyTransport = ({
   return {
     proxies: proxies.filter(
       (proxy) =>
-        !featureTransport.func.isDestionation({ proxy }) ||
+        !context.features.transport.isDestionation({ proxy }) ||
         "dialer-proxy" in proxy,
     ),
     experimental,

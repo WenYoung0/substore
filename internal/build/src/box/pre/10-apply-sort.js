@@ -1,6 +1,7 @@
 // @call = applySortAndCompability
+// @import = location
 const applySortAndCompability = ({ proxies = [], ...rest }) => {
-  const sortedProxies = featureLocation.func.sortProxies({ proxies });
+  const sortedProxies = context.features.location.sortProxies({ proxies });
 
   // Notice heer , different platform has different name selector (tag or name)
   const names = produce(proxies).map((pp) => pp.tag);

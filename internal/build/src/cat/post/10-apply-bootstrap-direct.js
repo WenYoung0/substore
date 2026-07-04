@@ -16,7 +16,7 @@ const applyBoostrapDirect = ({ config = {}, ...rest }) => {
         )
       ) {
         ruleset.url = `https://${ghproxy}/${ruleset.url}`;
-        ruleset.proxy = directDetourOutbound;
+        ruleset.proxy = context.const.outbound.directDetour;
       }
     });
   }

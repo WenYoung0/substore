@@ -31,16 +31,20 @@ const applyInternalDNSResolver = ({ config = {}, proxies = [], ...rest }) => {
     if ((props.type === "https" || props.type === "h3") && props.path !== "") {
       singDns.path = props.path;
     }
+
+    // a dns server addressed by a domain needs a bootstrap resolver to
+    // look up that address itself.
+    if (isDomain(singDns.server)) {
+      singDns.domain_resolver = { server: context.const.dns.bootstrapDNSTag };
+    }
     return singDns;
   };
 
   // some airports ship their own dns. expose each as a sing-box dns server and
-  // resolve the proxy's own server domain through it via the outbound's
-  // domain_resolver field (sub-store passes `_domain_resolver` through). the
-  // matching dns.rules entries keep route-level (external) resolution of those
-  // same domains consistent with the internal outbound resolution.
+  // point the proxy's outbound.domain_resolver at it (sub-store passes
+  // `_domain_resolver` through). the matching route-level dns.rules are added
+  // later in post from the produced outbounds (see apply-internal-dns-rules).
   const dnsServers = {};
-  const servedDomains = {};
 
   for (const proxy of proxies) {
     if (!proxy.properties?.dns) continue;
@@ -48,11 +52,6 @@ const applyInternalDNSResolver = ({ config = {}, proxies = [], ...rest }) => {
     const singDns = buildSingDns(proxy);
     dnsServers[singDns.tag] = singDns;
     proxy._domain_resolver = { server: singDns.tag };
-
-    if (isDomain(proxy.server)) {
-      servedDomains[singDns.tag] = servedDomains[singDns.tag] ?? new Set();
-      servedDomains[singDns.tag].add(proxy.server);
-    }
   }
 
   if (Object.keys(dnsServers).length === 0) {
@@ -64,17 +63,6 @@ const applyInternalDNSResolver = ({ config = {}, proxies = [], ...rest }) => {
     ...(config.dns.servers ?? []),
     ...Object.values(dnsServers),
   ];
-
-  const domainRules = Object.entries(servedDomains)
-    .filter(([, domains]) => domains.size > 0)
-    .map(([server, domains]) => ({
-      domain: [...domains],
-      action: "route",
-      server,
-    }));
-  if (domainRules.length > 0) {
-    config.dns.rules = [...domainRules, ...(config.dns.rules ?? [])];
-  }
 
   return { config, proxies, ...rest };
 };
