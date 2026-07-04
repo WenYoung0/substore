@@ -47,11 +47,10 @@ const applyInternalDNSResolver = ({ config = {}, proxies = [], ...rest }) => {
 
     const singDns = buildSingDns(proxy);
     dnsServers[singDns.tag] = singDns;
-    proxy._domain_resolver = singDns.tag;
+    proxy._domain_resolver = { server: singDns.tag };
 
     if (isDomain(proxy.server)) {
-      servedDomains[singDns.tag] =
-        servedDomains[singDns.tag] ?? new Set();
+      servedDomains[singDns.tag] = servedDomains[singDns.tag] ?? new Set();
       servedDomains[singDns.tag].add(proxy.server);
     }
   }
