@@ -22,9 +22,11 @@ const applyInternalDNSResolver = ({ config = {}, proxies = [], ...rest }) => {
       props.port = dns.port ?? 0;
     }
 
-    const tag = ["dns", props.type, props.server, props.path, props.port]
-      .filter((v) => v)
-      .join("_");
+    const tag =
+      "dns-" +
+      [props.type, props.server, props.path, props.port]
+        .filter((v) => v)
+        .join("_");
 
     const singDns = { type: props.type, server: props.server, tag };
     if (props.port) singDns.server_port = props.port;

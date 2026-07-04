@@ -6,13 +6,12 @@ context.const = {
     directBootstrap: "direct-bootstrap",
   },
   ruleset: { bootstrapHTTPClient: "http-bootstrap" },
-  dns: { bootstrapDNSTag: "dns-cn" },
+  dns: { bootstrapDNSTag: "dns-bootstrap" },
 };
 
 const produce = (proxies = []) => {
-  return JSON.parse(
-    ProxyUtils.produce([...proxies], context.const.platform),
-  ).outbounds;
+  return JSON.parse(ProxyUtils.produce([...proxies], context.const.platform))
+    .outbounds;
 };
 
 const produceEndpoint = (endpoints = []) => {

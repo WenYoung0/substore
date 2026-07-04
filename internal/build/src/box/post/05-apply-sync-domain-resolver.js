@@ -15,21 +15,38 @@ const applySyncDomainResolver = ({ config = {}, ...rest }) => {
   // internal outbound resolution instead of diverging.
   const servedDomains = {};
   for (const outbound of config.outbounds ?? []) {
-    const tag = resolverTag(outbound.domain_resolver);
-    if (!tag || !isDomain(outbound.server)) continue;
+    if (!isDomain(outbound.server)) continue;
+
+    let tag = resolverTag(outbound.domain_resolver);
+    if (!tag) {
+      const routeDefaultResolver = config?.route?.default_domain_resolver;
+      if (routeDefaultResolver && typeof routeDefaultResolver === "string") {
+        tag = routeDefaultResolver;
+      } else if (
+        routeDefaultResolver.server &&
+        typeof routeDefaultResolver.server === "string"
+      ) {
+        tag = routeDefaultResolver.server;
+      } else {
+        tag = context.const.dns.bootstrapDNSTag;
+      }
+    }
+
     servedDomains[tag] = servedDomains[tag] ?? new Set();
     servedDomains[tag].add(outbound.server);
   }
 
-  const domainRules = Object.entries(servedDomains).map(([server, domains]) => ({
-    domain: [...domains],
-    action: "route",
-    server,
-  }));
-  if (domainRules.length > 0) {
-    config.dns = config.dns ?? {};
-    config.dns.rules = [...domainRules, ...(config.dns.rules ?? [])];
-  }
+  config.dns = {
+    ...(config.dns ?? {}),
+    rules: [
+      ...(Object.entries(servedDomains).map(([server, domains]) => ({
+        domain: [...domains],
+        action: "route",
+        server,
+      })) ?? []),
+      ...(config.dns.rules ?? []),
+    ],
+  };
 
   return { config, ...rest };
 };
