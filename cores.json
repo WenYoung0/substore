@@ -3,12 +3,12 @@
     {
       "type": "box",
       "binary_name": "sing-box",
-      "version": "1.14.0-alpha.37"
+      "version": "1.14.0-alpha.39"
     },
     {
       "type": "cat",
       "binary_name": "mihomo",
-      "version": "1.19.21"
+      "version": "1.19.27"
     }
   ]
 }

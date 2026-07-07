@@ -37,6 +37,7 @@ const generateContext = async () => {
         "anytls",
         "tor",
         "ssh",
+        "snell",
       ].includes(proxy.type),
     );
     generated.endpoints = produced.filter((proxy) =>
