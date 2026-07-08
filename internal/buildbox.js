@@ -1321,6 +1321,7 @@ const generateContext = async () => {
         "anytls",
         "tor",
         "ssh",
+        "snell",
       ].includes(proxy.type),
     );
     generated.endpoints = produced.filter((proxy) =>
@@ -1468,14 +1469,18 @@ const applyPushGroup = ({ proxies = [], config = {}, ...rest }) => {
             .filter(
               (o) =>
                 context.features.location.getArea(o) === "AREA_NORTH_AMERICA" ||
-                context.features.location.getLocation(o) == "JP",
+                context.features.location.getLocation(o) === "JP",
             )
             .map((o) => o.name),
         );
       } else if (["✈️ TelegramDC4(EU)"].includes(selector.tag)) {
         selector.outbounds.push(
           ...out
-            .filter((o) => context.features.location.getArea(o) === "AREA_EUROPE")
+            .filter(
+              (o) =>
+                context.features.location.getArea(o) === "AREA_EUROPE" ||
+                context.features.location.getLocation(o) === "HK",
+            )
             .map((o) => o.name),
         );
       } else if (["✈️ TelegramDC5(AP)"].includes(selector.tag)) {

@@ -1,3 +1,6 @@
+GIT_BRANCH=$(shell git branch --show-current)
+REPO_NAME=duakc/substore
+
 .PHONY: all
 all: install_binary bundle_build ruleset check
 

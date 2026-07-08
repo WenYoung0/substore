@@ -1227,6 +1227,7 @@ const generateContext = async () => {
         "sudoku",
         "masque",
         "trusttunnel",
+        "snell",
       ].includes(proxy.type),
     );
   }
