@@ -1817,11 +1817,10 @@ const applyDnsEnhanced = ({ config = {}, experimental = {}, ...rest }) => {
   }
 
   // no local
-  if (experimental.dns_local_use_dhcp && Array.isArray(config?.dns?.servers)) {
+  if (experimental.dns_local_use_dhcp && Array.isArray(config?.dns?.servers))
     config.dns.servers
       .filter((server) => server.type === "local")
-      .forEach((server) => server.type === "dhcp");
-  }
+      .forEach((server) => (server.type = "dhcp"));
 
   return { config, experimental, ...rest };
 };
