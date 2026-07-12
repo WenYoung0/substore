@@ -1816,6 +1816,13 @@ const applyDnsEnhanced = ({ config = {}, experimental = {}, ...rest }) => {
     });
   }
 
+  // no local
+  if (experimental.dns_local_use_dhcp && Array.isArray(dns?.servers)) {
+    dns.servers
+      .filter((server) => server.type === "local")
+      .forEach((server) => server.type === "dhcp");
+  }
+
   return { config, experimental, ...rest };
 };
 
