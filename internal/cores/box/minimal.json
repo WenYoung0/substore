@@ -135,6 +135,9 @@
           },
           {
             "protocol": "dns"
+          },
+          {
+            "inbound": "dns-in"
           }
         ],
         "action": "hijack-dns"
