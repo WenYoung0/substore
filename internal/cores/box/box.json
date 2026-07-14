@@ -23,7 +23,7 @@
       {
         "tag": "dns-bootstrap",
         "type": "udp",
-        "server": "223.5.5.5"
+        "server": "119.29.29.29"
       },
       {
         "tag": "dns-cn",
