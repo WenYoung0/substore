@@ -292,7 +292,6 @@ rule-providers:
     type: inline
     behavior: classical
     payload:
-      - DOMAIN-SUFFIX,nodeseek.com
       - DOMAIN-SUFFIX,iwara.tv
   _geosite-google-play@cn:
     type: inline
