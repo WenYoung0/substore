@@ -16,7 +16,6 @@ DOMAIN-SUFFIX,gitlab.gnome.org
 DOMAIN-SUFFIX,gitlab.alpinelinux.org
 DOMAIN-SUFFIX,bitbucket.org
 DOMAIN-SUFFIX,pagure.io
-DOMAIN-SUFFIX,codeberg.org
 DOMAIN-SUFFIX,android.googlesource.com
 DOMAIN-SUFFIX,chromium.googlesource.com
 DOMAIN-SUFFIX,git.postgresql.org

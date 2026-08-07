@@ -16,7 +16,8 @@ gitlab.gnome.org
 gitlab.alpinelinux.org
 bitbucket.org
 pagure.io
-codeberg.org
+# moved to geolocation-eu
+# codeberg.org
 android.googlesource.com
 chromium.googlesource.com
 git.postgresql.org

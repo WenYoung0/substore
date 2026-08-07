@@ -256,7 +256,6 @@ rule-providers:
       - DOMAIN-SUFFIX,gitlab.alpinelinux.org
       - DOMAIN-SUFFIX,bitbucket.org
       - DOMAIN-SUFFIX,pagure.io
-      - DOMAIN-SUFFIX,codeberg.org
       - DOMAIN-SUFFIX,android.googlesource.com
       - DOMAIN-SUFFIX,chromium.googlesource.com
       - DOMAIN-SUFFIX,git.postgresql.org
@@ -293,6 +292,7 @@ rule-providers:
     behavior: classical
     payload:
       - DOMAIN-SUFFIX,iwara.tv
+      - DOMAIN-SUFFIX,codeberg.org
   _geosite-google-play@cn:
     type: inline
     behavior: classical

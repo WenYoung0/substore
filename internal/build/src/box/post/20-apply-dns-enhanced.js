@@ -46,6 +46,6 @@ const applyDnsEnhanced = ({ config = {}, experimental = {}, ...rest }) => {
     config.dns.servers
       .filter((server) => server.type === "local")
       .forEach((server) => (server.type = "dhcp"));
-
+  
   return { config, experimental, ...rest };
 };
