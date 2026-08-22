@@ -11,11 +11,7 @@ const operator = (proxies, targetPlatform, context) => {
   );
 
   return proxies.map((proxy) => {
-    const serverHost = proxy?.server;
-    const hit = serverHost
-      ? domainRules.find(([pattern]) => domainMatch(serverHost, pattern))
-      : undefined;
-
+    const hit = domainRules.find(([pattern]) => domainMatch(proxy, pattern));
     const dnsServer = parseStringAsDNS(hit ? hit[1] : undefined);
     if (dnsServer) {
       return {
@@ -31,8 +27,6 @@ const operator = (proxies, targetPlatform, context) => {
 };
 
 const domainMatch = (domain, pattern) => {
-  if (typeof domain !== "string") return false;
-
   if (pattern.startsWith("+.")) {
     const base = pattern.slice(2);
     return domain === base || domain.endsWith("." + base);
@@ -57,25 +51,22 @@ const parseStringAsDNS = (dnsServer) => {
   if (dnsServer.includes("://")) {
     jsURL = new URL(dnsServer);
   } else {
-    let fixed = dnsServer;
+    let fixed = input;
 
     // IPv6: 1:1:1:1... -> [1:1:1:1...]
-    if (
-      !dnsServer.startsWith("[") &&
-      (dnsServer.match(/:/g) || []).length > 1
-    ) {
-      fixed = `[${dnsServer}]`;
+    if (!input.startsWith("[") && (input.match(/:/g) || []).length > 1) {
+      fixed = `[${input}]`;
     }
 
     jsURL = new URL(`udp://${fixed}`);
   }
 
-  const schema = jsURL.protocol.replace(":", "");
+  schema = jsURL.protocol.replace(":", "");
 
   return {
     server: jsURL.hostname,
-    server_port: jsURL.port ? parseInt(jsURL.port, 10) : 0,
-    type: schema,
+    server_port: jsURL.port ? parseInt(url.port, 10) : 0,
+    type: jsURL.protocol.replace(":", ""),
     path: jsURL.pathname,
   };
 };
