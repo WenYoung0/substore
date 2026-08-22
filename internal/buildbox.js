@@ -1534,6 +1534,8 @@ const applyInternalDNSResolver = ({ config = {}, proxies = [], ...rest }) => {
     if (isDomain(singDns.server)) {
       singDns.domain_resolver = { server: context.const.dns.bootstrapDNSTag };
     }
+
+    singDns.detour = context.const.outbound.direct;
     return singDns;
   };
 
