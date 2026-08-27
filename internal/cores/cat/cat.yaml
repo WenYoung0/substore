@@ -212,7 +212,7 @@ rule-providers:
     payload:
       - DOMAIN-SUFFIX,dns.weixin.qq.com
       - DOMAIN-SUFFIX,api.installer.xiaomi.com
-      - DOMAIN-SUFFIX,userlocation.googleapis.com
+      - DOMAIN-SUFFIX,userlocations.googleapis.com
   _geosite-category-ai-!cn:
     type: inline
     behavior: classical

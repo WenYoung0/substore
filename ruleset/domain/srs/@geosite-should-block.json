@@ -5,7 +5,7 @@
       "domain_suffix": [
         "dns.weixin.qq.com",
         "api.installer.xiaomi.com",
-        "userlocation.googleapis.com"
+        "userlocations.googleapis.com"
       ]
     }
   ]
