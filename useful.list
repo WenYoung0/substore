@@ -1,6 +1,9 @@
 # proxies
-proxies/airports/flowercloud/operator/override-host.js
-proxies/airports/ikuuu/operator/lookup-dns-server.js
+proxies/airports/flowercloud/operator/host.js
+proxies/airports/ikuuu/operator/dns.js
+proxies/airports/jeeyio/operator/dns.js
+
+proxies/common/operator.js
 
 # buildscript
 internal/buildbox.js
@@ -13,3 +16,7 @@ internal/cores/box/box.json
 internal/cores/box/enhanced.json
 internal/cores/box/minimal.json
 internal/cores/cat/cat.yaml
+internal/cores/box/box.min.json
+internal/cores/box/enhanced.min.json
+internal/cores/box/minimal.min.json
+internal/cores/cat/cat.min.yaml

@@ -11,12 +11,10 @@ const applyTransport = ({
     proxies: proxies,
     detourName: (cca2) => {
       let defaultTransportName = "🚀 Transport";
-      const trnaslation = {
-        zh_CN: "🚀 链式传输",
-        en_US: defaultTransportName,
-      };
-      if (ua && ua.language in trnaslation) {
-        defaultTransportName = trnaslation[ua.language];
+      if (ua?.isZhCN) {
+        defaultTransportName = "🚀 链式传输";
+      } else if (ua?.isZhTW) {
+        defaultTransportName = "🚀 鏈式傳輸";
       }
       if (!cca2) {
         return defaultTransportName;

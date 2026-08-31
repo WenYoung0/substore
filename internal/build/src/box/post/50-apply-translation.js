@@ -19,13 +19,13 @@ const applyTranslation = ({ config = {}, ua = undefined, ...rest }) => {
     },
   };
 
-  if (!config || !ua || !(ua.language in globalTranslation)) {
+  if (!config || !ua || !ua.isZhCN) {
     return ret;
   }
 
   let jsonConfig = JSON.stringify(config);
-  Object.keys(globalTranslation[ua.language]).map((raw) => {
-    const target = globalTranslation[ua.language][raw];
+  Object.keys(globalTranslation.zh_CN).map((raw) => {
+    const target = globalTranslation.zh_CN[raw];
     jsonConfig = jsonConfig.replaceAll(raw, target);
   });
 

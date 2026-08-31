@@ -27,78 +27,108 @@ const produceEndpoint = (endpoints = []) => {
   ).endpoints;
 };
 
+const createSemverInfo = () => ({
+  full: "",
+  major: 0,
+  minor: 0,
+  patch: 0,
+  prerelease: "",
+  build: "",
+  // sing-box
+  alphaVersion: 0,
+});
+
 const parseSemver = (version) => {
-  const defaultSemverInfo = {
-    full: "",
-    major: 0,
-    minor: 0,
-    patch: 0,
-    prerelease: "",
-    build: "",
-    // sing-box
-    alphaVersion: 0,
-  };
-  if (!version) return defaultSemverInfo;
+  const defaultSemverInfo = createSemverInfo();
+
+  if (typeof version !== "string" || version.trim() === "") {
+    return defaultSemverInfo;
+  }
 
   const semverRegex =
     /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
 
-  const match = version.match(semverRegex);
-
-  if (match) {
-    const [full, major, minor, patch, prerelease, build] = match;
-    if (prerelease) {
-      defaultSemverInfo.alphaVersion = Number(prerelease.split(".")[1]);
-    }
-    defaultSemverInfo.full = full;
-    defaultSemverInfo.major = Number(major);
-    defaultSemverInfo.minor = Number(minor);
-    defaultSemverInfo.patch = Number(patch);
-    defaultSemverInfo.prerelease = prerelease;
-    defaultSemverInfo.build = build;
+  const match = version.trim().match(semverRegex);
+  if (!match) {
     return defaultSemverInfo;
-  } else {
-    throw new Error("Parse Semver failed");
+  }
+
+  const [full, major, minor, patch, prerelease = "", build = ""] = match;
+  const alphaMatch = prerelease.match(/(?:^|\.)alpha\.(\d+)(?:\.|$)/);
+
+  defaultSemverInfo.full = full;
+  defaultSemverInfo.major = Number(major);
+  defaultSemverInfo.minor = Number(minor);
+  defaultSemverInfo.patch = Number(patch);
+  defaultSemverInfo.prerelease = prerelease;
+  defaultSemverInfo.build = build;
+  defaultSemverInfo.alphaVersion = alphaMatch ? Number(alphaMatch[1]) : 0;
+  return defaultSemverInfo;
+};
+
+const createUaInfo = () => ({
+  SFM: false,
+  SFI: false,
+  SFT: false,
+  SFA: false,
+  SFD: false,
+  SFW: false,
+  SFL: false,
+  isZhCN: false,
+  isZhTW: false,
+  isEnUS: false,
+  isFa: false,
+  isRu: false,
+  version: parseSemver(),
+});
+
+const applyUaLanguage = (uaInfo, language) => {
+  const normalized = language.trim().replaceAll("-", "_").toLowerCase();
+  if (!normalized) return;
+
+  if (/^zh(?:_|$)/.test(normalized)) {
+    if (/(?:^|_)(?:hant|tw|hk|mo)(?:_|$)/.test(normalized)) {
+      uaInfo.isZhTW = true;
+    } else {
+      uaInfo.isZhCN = true;
+    }
+  } else if (/^en(?:_|$)/.test(normalized)) {
+    uaInfo.isEnUS = true;
+  } else if (/^fa(?:_|$)/.test(normalized)) {
+    uaInfo.isFa = true;
+  } else if (/^ru(?:_|$)/.test(normalized)) {
+    uaInfo.isRu = true;
   }
 };
 
 const uaLookup = (ua = "") => {
-  if (ua === "") {
+  if (typeof ua !== "string" || ua.trim() === "") {
     return undefined;
   }
 
-  const defaultUaInfo = {
-    SFM: false,
-    SFI: false,
-    SFT: false,
-    SFA: false,
-    version: parseSemver(undefined),
-    language: "",
-  };
+  const defaultUaInfo = createUaInfo();
+  const uaMatched = ua
+    .trim()
+    .match(/^([A-Z]{3})\s+\(sing-box\s+([^;()\s]+);\s*language\s+([^)]+)\)$/);
 
-  const regex =
-    /^([^/]+)\/(\S+) \((?:Build )?([^;]+); sing-box ([^;]+); language ([^)]+)\)$/;
-
-  const uaMatched = ua.match(regex);
-  if (!uaMatched || uaMatched.length < 6) {
+  if (
+    !uaMatched ||
+    !["SFM", "SFI", "SFT", "SFA", "SFD", "SFW", "SFL"].includes(
+      uaMatched[1],
+    )
+  ) {
     return defaultUaInfo;
   }
 
-  defaultUaInfo.SFM = uaMatched[1] === "SFM";
-  defaultUaInfo.SFI = uaMatched[1] === "SFI";
-  defaultUaInfo.SFT = uaMatched[1] === "SFT";
-  defaultUaInfo.SFA = uaMatched[1] === "SFA";
-
-  defaultUaInfo.version = parseSemver(uaMatched[2]);
-
-  // 语言处理
-  if (defaultUaInfo.SFM || defaultUaInfo.SFI || defaultUaInfo.SFT) {
-    defaultUaInfo.language = uaMatched[5].startsWith("zh-Hans")
-      ? "zh_CN"
-      : "en_US";
-  } else if (defaultUaInfo.SFA) {
-    defaultUaInfo.language = uaMatched[5];
+  const client = uaMatched[1];
+  const version = parseSemver(uaMatched[2]);
+  if (!version.full) {
+    return defaultUaInfo;
   }
+
+  defaultUaInfo[client] = true;
+  defaultUaInfo.version = version;
+  applyUaLanguage(defaultUaInfo, uaMatched[3]);
 
   return defaultUaInfo;
 };

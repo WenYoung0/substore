@@ -43,7 +43,7 @@
     ],
     "rules": [
       {
-        "preferred_by": "mdns",
+        "preferred_by": "dns-mdns",
         "action": "route",
         "server": "dns-mdns"
       },
@@ -55,7 +55,7 @@
             "rule_set": "geosite-private"
           },
           {
-            "preferred_by": "local"
+            "preferred_by": "dns-local"
           }
         ],
         "server": "dns-local"

@@ -33,7 +33,7 @@ const applyEndpoints = ({ config = {}, endpoints = [], ...rest }) => {
           {
             action: "route",
             outbound: tsep.name,
-            preferred_by: "tailscale",
+            preferred_by: tsep.name,
           },
           ...(config.route?.rules ?? []),
         ],
@@ -52,7 +52,7 @@ const applyEndpoints = ({ config = {}, endpoints = [], ...rest }) => {
         rules: [
           {
             action: "evaluate",
-            preferred_by: "tailscale",
+            preferred_by: "dns-" + tsep.name,
             server: "dns-" + tsep.name,
             tag: "resolve-evaluate-tailscale-" + tsep.name,
           },
@@ -77,7 +77,7 @@ const applyEndpoints = ({ config = {}, endpoints = [], ...rest }) => {
           {
             action: "route",
             outbound: wgep.name,
-            preferred_by: "wireguard",
+            preferred_by: wgep.name,
           },
           ...(config.route?.rules ?? []),
         ],

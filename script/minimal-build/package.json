@@ -1,0 +1,16 @@
+{
+  "name": "minimal-build",
+  "version": "1.0.0",
+  "description": "Minify generated scripts and rendered configuration files.",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "../minimal.js",
+  "scripts": {
+    "run": "node ../minimal.js"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1",
+    "terser": "^5.36.0"
+  }
+}
