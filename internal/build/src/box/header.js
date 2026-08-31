@@ -102,3 +102,8 @@ const uaLookup = (ua = "") => {
 
   return defaultUaInfo;
 };
+
+const findTun = (config = {}) => {
+  const found = (config?.inbounds ?? []).filter((inb) => inb.type === "tun");
+  return found.length > 0 ? found[0] : undefined;
+};

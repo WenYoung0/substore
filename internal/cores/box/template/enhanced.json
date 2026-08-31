@@ -1,5 +1,5 @@
 {
-  "$schema": "https://github.com/jiang-zhexin/typebox/releases/download/v1.14.15/schema.json",
+  "$schema": "https://raw.githubusercontent.com/SagerNet/sing-box/v1.14.0/docs/schema.json",
   "log": {
     "disabled": false,
     "level": "warn"
@@ -16,6 +16,10 @@
   ],
   "dns": {
     "servers": [
+      {
+        "tag": "dns-mdns",
+        "type": "mdns"
+      },
       {
         "tag": "dns-local",
         "type": "local"
@@ -37,9 +41,15 @@
         "detour": "🙋 Select"
       },
       {
-        "tag": "dns-ecs",
+        "tag": "dns-ecs-google",
         "type": "https",
         "server": "8.8.8.8",
+        "detour": "🙋 Select"
+      },
+      {
+        "tag": "dns-ecs-quad9",
+        "type": "https",
+        "server": "9.9.9.11",
         "detour": "🙋 Select"
       },
       {
@@ -57,13 +67,22 @@
     ],
     "rules": [
       {
-        "rule_set": "geosite-private",
-        "server": "dns-local"
+        "preferred_by": "mdns",
+        "action": "route",
+        "server": "dns-mdns"
       },
       {
-        "clash_mode": "IPv4Only",
-        "query_type": "AAAA",
-        "action": "reject"
+        "type": "logical",
+        "mode": "or",
+        "rules": [
+          {
+            "rule_set": "geosite-private"
+          },
+          {
+            "preferred_by": "local"
+          }
+        ],
+        "server": "dns-local"
       },
       {
         "type": "logical",
@@ -80,21 +99,21 @@
         "action": "reject"
       },
       {
+        "clash_mode": "IPv4Only",
+        "query_type": "AAAA",
+        "action": "reject"
+      },
+      {
         "query_type": ["HTTPS", "SVCB"],
         "action": "reject"
       },
       {
         "clash_mode": "Global",
-        "server": "dns-remote"
+        "server": "dns-final"
       },
       {
         "rule_set": "@geosite-should-block",
         "action": "reject"
-      },
-      {
-        "rule_set": "geosite-netflix",
-        "action": "route",
-        "server": "dns-entertainment"
       },
       {
         "type": "logical",
@@ -118,88 +137,83 @@
               25, 67, 68, 110, 123, 143, 179, 465, 546, 547, 587, 995, 8899,
               8733
             ]
+          },
+          {
+            "query_type": ["A", "AAAA"],
+            "invert": true
           }
         ],
         "action": "route",
         "server": "dns-cn"
       },
       {
+        "query_type": ["A", "AAAA"],
+        "rule_set": ["geosite-geolocation-!cn"],
+        "action": "route",
+        "rewrite_ttl": 1,
+        "server": "dns-fake"
+      },
+      {
+        "rule_set": "geosite-cn",
+        "server": "dns-local"
+      },
+      {
+        "tag": "ecs-google",
+        "action": "evaluate",
+        "server": "dns-ecs-google",
+        "client_subnet": "0.0.0.0/0"
+      },
+      {
+        "tag": "ecs-quad9",
+        "action": "evaluate",
+        "server": "dns-ecs-quad9",
+        "client_subnet": "0.0.0.0/0"
+      },
+      {
+        "match_response": "ecs-google",
+        "response_rcode": "NOERROR",
+        "ip_accept_any": true,
+        "invert": true,
+        "race": true,
+        "action": "respond"
+      },
+      {
+        "match_response": "ecs-quad9",
+        "response_rcode": "NOERROR",
+        "ip_accept_any": true,
+        "invert": true,
+        "race": true,
+        "action": "respond"
+      },
+      {
+        "match_response": "ecs-google",
+        "race": true,
+        "rule_set": ["geoip-cn", "@geoip-direct"],
+        "ip_is_private": true,
+        "ip_accept_any": true,
+        "response_rcode": "NOERROR",
+        "action": "respond"
+      },
+      {
+        "match_response": "ecs-quad9",
+        "race": true,
+        "rule_set": ["geoip-cn", "@geoip-direct"],
+        "ip_is_private": true,
+        "ip_accept_any": true,
+        "response_rcode": "NOERROR",
+        "action": "respond"
+      },
+      {
         "type": "logical",
         "mode": "and",
         "rules": [
           {
             "query_type": ["A", "AAAA"]
-          },
-          {
-            "rule_set": ["geosite-geolocation-!cn"]
           },
           {
             "rule_set": [
               "@geosite-fakeip-filter",
               "geosite-connectivity-check"
-            ],
-            "invert": true
-          }
-        ],
-        "action": "route",
-        "server": "dns-fake",
-        "rewrite_ttl": 1
-      },
-      {
-        "query_type": ["A", "AAAA"],
-        "rule_set": "geosite-cn",
-        "server": "dns-local"
-      },
-      {
-        "action": "evaluate",
-        "server": "dns-ecs",
-        "client_subnet": "0.0.0.0/0"
-      },
-      {
-        "type": "logical",
-        "mode": "or",
-        "rules": [
-          {
-            "match_response": true,
-            "response_rcode": "NOERROR",
-            "invert": true
-          },
-          {
-            "match_response": true,
-            "query_type": ["A", "AAAA"],
-            "ip_accept_any": true,
-            "invert": true
-          }
-        ],
-        "action": "respond"
-      },
-      {
-        "type": "logical",
-        "mode": "and",
-        "rules": [
-          {
-            "query_type": ["A", "AAAA"]
-          },
-          {
-            "match_response": true,
-            "rule_set": ["geoip-cn", "@geoip-direct"],
-            "ip_is_private": true
-          }
-        ],
-        "action": "respond"
-      },
-      {
-        "type": "logical",
-        "mode": "and",
-        "rules": [
-          {
-            "query_type": ["A", "AAAA"]
-          },
-          {
-            "rule_set": [
-              "@geosite-fakeip-filter",
-              "geosite-connectivity-check",
-              "geosite-category-games-!cn"
             ],
             "invert": true
           }
@@ -323,6 +337,7 @@
           "geosite-category-games@cn",
           "geosite-microsoft@cn",
           "geosite-apple@cn",
+          "@geosite-direct",
           "@geosite-akamai@cn",
           "@geosite-steam@cn",
           "@geosite-google-play@cn",

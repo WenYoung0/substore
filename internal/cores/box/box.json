@@ -1,5 +1,5 @@
 {
-  "$schema": "https://github.com/jiang-zhexin/typebox/releases/download/v1.14.15/schema.json",
+  "$schema": "https://raw.githubusercontent.com/SagerNet/sing-box/v1.14.0/docs/schema.json",
   "log": {
     "disabled": false,
     "level": "warn"
@@ -21,6 +21,10 @@
         "type": "local"
       },
       {
+        "type": "mdns",
+        "tag": "dns-mdns"
+      },
+      {
         "tag": "dns-bootstrap",
         "type": "udp",
         "server": "223.5.5.5"
@@ -37,9 +41,15 @@
         "detour": "🙋 Select"
       },
       {
-        "tag": "dns-ecs",
+        "tag": "dns-ecs-google",
         "type": "https",
         "server": "8.8.8.8",
+        "detour": "🙋 Select"
+      },
+      {
+        "tag": "dns-ecs-quad9",
+        "type": "https",
+        "server": "9.9.9.11",
         "detour": "🙋 Select"
       },
       {
@@ -87,7 +97,21 @@
     ],
     "rules": [
       {
-        "rule_set": "geosite-private",
+        "preferred_by": "mdns",
+        "action": "route",
+        "server": "dns-mdns"
+      },
+      {
+        "type": "logical",
+        "mode": "or",
+        "rules": [
+          {
+            "rule_set": "geosite-private"
+          },
+          {
+            "preferred_by": "local"
+          }
+        ],
         "server": "dns-local"
       },
       {
@@ -214,10 +238,6 @@
         "server": "dns-entertainment"
       },
       {
-        "query_type": [
-          "A",
-          "AAAA"
-        ],
         "rule_set": "geosite-cn",
         "server": "dns-local"
       },
@@ -229,50 +249,64 @@
         "server": "dns-final"
       },
       {
+        "invert": true,
+        "query_type": [
+          "A",
+          "AAAA"
+        ],
+        "action": "route",
+        "server": "dns-cn"
+      },
+      {
+        "tag": "ecs-google",
         "action": "evaluate",
-        "server": "dns-ecs",
+        "server": "dns-ecs-google",
         "client_subnet": "0.0.0.0/0"
       },
       {
-        "type": "logical",
-        "mode": "or",
-        "rules": [
-          {
-            "match_response": true,
-            "response_rcode": "NOERROR",
-            "invert": true
-          },
-          {
-            "match_response": true,
-            "query_type": [
-              "A",
-              "AAAA"
-            ],
-            "ip_accept_any": true,
-            "invert": true
-          }
-        ],
+        "tag": "ecs-quad9",
+        "action": "evaluate",
+        "server": "dns-ecs-quad9",
+        "client_subnet": "0.0.0.0/0"
+      },
+      {
+        "match_response": "ecs-google",
+        "response_rcode": "NOERROR",
+        "ip_accept_any": true,
+        "invert": true,
+        "race": true,
         "action": "respond"
       },
       {
-        "type": "logical",
-        "mode": "and",
-        "rules": [
-          {
-            "query_type": [
-              "A",
-              "AAAA"
-            ]
-          },
-          {
-            "match_response": true,
-            "rule_set": [
-              "geoip-cn",
-              "@geoip-direct"
-            ],
-            "ip_is_private": true
-          }
+        "match_response": "ecs-quad9",
+        "response_rcode": "NOERROR",
+        "ip_accept_any": true,
+        "invert": true,
+        "race": true,
+        "action": "respond"
+      },
+      {
+        "match_response": "ecs-google",
+        "race": true,
+        "rule_set": [
+          "geoip-cn",
+          "@geoip-direct"
         ],
+        "ip_accept_any": true,
+        "ip_is_private": true,
+        "response_rcode": "NOERROR",
+        "action": "respond"
+      },
+      {
+        "match_response": "ecs-quad9",
+        "race": true,
+        "rule_set": [
+          "geoip-cn",
+          "@geoip-direct"
+        ],
+        "ip_accept_any": true,
+        "ip_is_private": true,
+        "response_rcode": "NOERROR",
         "action": "respond"
       }
     ],
@@ -426,6 +460,7 @@
           "geosite-category-games@cn",
           "geosite-microsoft@cn",
           "geosite-apple@cn",
+          "@geosite-direct",
           "@geosite-akamai@cn",
           "@geosite-steam@cn",
           "@geosite-google-play@cn",
@@ -875,6 +910,14 @@
       "secret": "20002000"
     }
   },
+  "services": [
+    {
+      "type": "api",
+      "tag": "service-main-api",
+      "listen": "127.0.0.1",
+      "listen_port": 9091
+    }
+  ],
   "inbounds": [
     {
       "type": "tun",
@@ -889,7 +932,6 @@
         "172.27.0.2",
         "fdfe:dcba:9876::2"
       ],
-      "endpoint_independent_nat": true,
       "route_exclude_address": [
         "10.0.0.0/8",
         "172.16.0.0/12",

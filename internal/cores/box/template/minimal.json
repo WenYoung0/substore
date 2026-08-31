@@ -1,5 +1,5 @@
 {
-  "$schema": "https://github.com/jiang-zhexin/typebox/releases/download/v1.14.15/schema.json",
+  "$schema": "https://raw.githubusercontent.com/SagerNet/sing-box/v1.14.0/docs/schema.json",
   "log": {
     "disabled": false,
     "level": "warn"
@@ -21,6 +21,10 @@
         "tag": "dns-local"
       },
       {
+        "type": "mdns",
+        "tag": "dns-mdns"
+      },
+      {
         "tag": "dns-bootstrap",
         "type": "udp",
         "server": "223.5.5.5"
@@ -39,7 +43,21 @@
     ],
     "rules": [
       {
-        "rule_set": "geosite-private",
+        "preferred_by": "mdns",
+        "action": "route",
+        "server": "dns-mdns"
+      },
+      {
+        "type": "logical",
+        "mode": "or",
+        "rules": [
+          {
+            "rule_set": "geosite-private"
+          },
+          {
+            "preferred_by": "local"
+          }
+        ],
         "server": "dns-local"
       },
       {
@@ -234,7 +252,6 @@
       "auto_route": true,
       "dns_mode": "hijack",
       "dns_address": ["172.27.0.2", "fdfe:dcba:9876::2"],
-      "endpoint_independent_nat": true,
       "route_exclude_address": [
         "10.0.0.0/8",
         "172.16.0.0/12",
