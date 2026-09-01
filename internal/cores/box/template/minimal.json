@@ -244,6 +244,14 @@
       "secret": "20002000"
     }
   },
+  "services": [
+    {
+      "type": "api",
+      "tag": "service-main-api",
+      "listen": "127.0.0.1",
+      "listen_port": 9091
+    }
+  ],
   "inbounds": [
     {
       "type": "tun",

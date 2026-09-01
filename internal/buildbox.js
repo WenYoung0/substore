@@ -1489,8 +1489,9 @@ const applyPushGroup = ({ proxies = [], config = {}, ...rest }) => {
           "🙋 Select",
           "🔍 Google",
           "🐈 Git",
-          "🪟 Microsoft",
-          "📺 Entertainment",
+          "📦 Microsoft",
+          "🎬 Entertainment",
+          "📺 Youtube",
           "🤖 AI-Service",
           "🍎 Apple",
         ].includes(selector.tag)
@@ -1865,8 +1866,12 @@ const applyPlatformSettings = ({ config = {}, ua = undefined, ...rest }) => {
           tunInbound.dns_address = tunInbound.dns_address.filter((addr) =>
             addr.includes(":"),
           );
+
         // on macos , gvisor has better performance.
         tunInbound.stack = "gvisor";
+
+        if (tunInbound.platform?.http_proxy?.enabled)
+          tunInbound.platform.http_proxy.enabled = false;
       }
     });
 
@@ -1884,30 +1889,101 @@ const applySuperSecretSettingsFunc = () => {
 const applyTranslation = ({ config = {}, ua = undefined, ...rest }) => {
   const ret = { config, ua, ...rest };
 
-  const globalTranslation = {
-    zh_CN: {
-      "🌐 Direct": "🌐 直连",
-      "🙋 Select": "🙋 手动选择",
-      "🔍 Google": "🔍 谷歌服务",
-      "🐈 Git": "🐈 开发服务",
-      "🪟 Microsoft": "🪟 微软服务",
-      "📺 Entertainment": "📺 流媒体",
-      "🤖 AI-Service": "🤖 AI服务",
-      "🍎 Apple": "🍎 苹果服务",
-
-      "✈️ TelegramDC1(NA)": "✈️ 电报DC1 (北美)",
-      "✈️ TelegramDC4(EU)": "✈️ 电报DC4 (欧洲)",
-      "✈️ TelegramDC5(AP)": "✈️ 电报DC5 (亚太)",
+  const translations = {
+    "🌐 Direct": {
+      zh_CN: "🌐 直连",
+      zh_TW: "🌐 直連",
+      fa: "🌐 اتصال مستقیم",
+      ru: "🌐 Прямое подключение",
+    },
+    "🙋 Select": {
+      zh_CN: "🙋 手动选择",
+      zh_TW: "🙋 手動選擇",
+      fa: "🙋 انتخاب دستی",
+      ru: "🙋 Ручной выбор",
+    },
+    "🔍 Google": {
+      zh_CN: "🔍 谷歌服务",
+      zh_TW: "🔍 谷歌服務",
+      fa: "🔍 سرویس‌های گوگل",
+      ru: "🔍 Сервисы Google",
+    },
+    "🐈 Git": {
+      zh_CN: "🐈 开发服务",
+      zh_TW: "🐈 開發服務",
+      fa: "🐈 سرویس‌های توسعه",
+      ru: "🐈 Сервисы разработки",
+    },
+    "📦 Microsoft": {
+      zh_CN: "📦 微软服务",
+      zh_TW: "📦 微軟服務",
+      fa: "📦 سرویس‌های مایکروسافت",
+      ru: "📦 Сервисы Microsoft",
+    },
+    "📺 Youtube": {
+      zh_CN: "📺 油管",
+      zh_TW: "📺 油管",
+      fa: "📺 یوتیوب",
+      ru: "📺 YouTube",
+    },
+    "🎬 Entertainment": {
+      zh_CN: "🎬 流媒体",
+      zh_TW: "🎬 串流媒體",
+      fa: "🎬 سرگرمی",
+      ru: "🎬 Развлечения",
+    },
+    "🤖 AI-Service": {
+      zh_CN: "🤖 AI服务",
+      zh_TW: "🤖 AI 服務",
+      fa: "🤖 سرویس هوش مصنوعی",
+      ru: "🤖 Сервисы ИИ",
+    },
+    "🍎 Apple": {
+      zh_CN: "🍎 苹果服务",
+      zh_TW: "🍎 蘋果服務",
+      fa: "🍎 سرویس‌های اپل",
+      ru: "🍎 Сервисы Apple",
+    },
+    "✈️ TelegramDC1(NA)": {
+      zh_CN: "✈️ 电报DC1 (北美)",
+      zh_TW: "✈️ 電報DC1 (北美)",
+      fa: "✈️ تلگرام DC1 (آمریکای شمالی)",
+      ru: "✈️ Telegram DC1 (Северная Америка)",
+    },
+    "✈️ TelegramDC4(EU)": {
+      zh_CN: "✈️ 电报DC4 (欧洲)",
+      zh_TW: "✈️ 電報DC4 (歐洲)",
+      fa: "✈️ تلگرام DC4 (اروپا)",
+      ru: "✈️ Telegram DC4 (Европа)",
+    },
+    "✈️ TelegramDC5(AP)": {
+      zh_CN: "✈️ 电报DC5 (亚太)",
+      zh_TW: "✈️ 電報DC5 (亞太)",
+      fa: "✈️ تلگرام DC5 (آسیا-اقیانوسیه)",
+      ru: "✈️ Telegram DC5 (Азиатско-Тихоокеанский регион)",
     },
   };
 
-  if (!config || !ua || !ua.isZhCN) {
+  let translation;
+  if (ua?.isZhCN) {
+    translation = "zh_CN";
+  } else if (ua?.isZhTW) {
+    translation = "zh_TW";
+  } else if (ua?.isEnUS) {
+    translation = "en_US";
+  } else if (ua?.isFa) {
+    translation = "fa";
+  } else if (ua?.isRu) {
+    translation = "ru";
+  }
+
+  if (!config || !translation) {
     return ret;
   }
 
   let jsonConfig = JSON.stringify(config);
-  Object.keys(globalTranslation.zh_CN).map((raw) => {
-    const target = globalTranslation.zh_CN[raw];
+  Object.entries(translations).map(([raw, localized]) => {
+    const target = localized[translation] ?? raw;
     jsonConfig = jsonConfig.replaceAll(raw, target);
   });
 
@@ -1915,7 +1991,7 @@ const applyTranslation = ({ config = {}, ua = undefined, ...rest }) => {
 };
 
 const emitContent = ({ config = {} }) => {
-  $content = JSON.stringify(config, null, 2);
+  $content = JSON.stringify(config);
   return { config };
 };
 

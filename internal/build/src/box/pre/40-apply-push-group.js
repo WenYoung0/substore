@@ -13,8 +13,9 @@ const applyPushGroup = ({ proxies = [], config = {}, ...rest }) => {
           "🙋 Select",
           "🔍 Google",
           "🐈 Git",
-          "🪟 Microsoft",
-          "📺 Entertainment",
+          "📦 Microsoft",
+          "🎬 Entertainment",
+          "📺 Youtube",
           "🤖 AI-Service",
           "🍎 Apple",
         ].includes(selector.tag)

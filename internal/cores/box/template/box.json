@@ -41,15 +41,9 @@
         "detour": "🙋 Select"
       },
       {
-        "tag": "dns-ecs-google",
+        "tag": "dns-ecs",
         "type": "https",
         "server": "8.8.8.8",
-        "detour": "🙋 Select"
-      },
-      {
-        "tag": "dns-ecs-quad9",
-        "type": "https",
-        "server": "9.9.9.11",
         "detour": "🙋 Select"
       },
       {
@@ -74,7 +68,7 @@
         "tag": "dns-microsoft",
         "type": "https",
         "server": "1.1.1.1",
-        "detour": "🪟 Microsoft"
+        "detour": "📦 Microsoft"
       },
       {
         "tag": "dns-europe",
@@ -92,7 +86,13 @@
         "tag": "dns-entertainment",
         "type": "https",
         "server": "1.1.1.1",
-        "detour": "📺 Entertainment"
+        "detour": "🎬 Entertainment"
+      },
+      {
+        "tag": "dns-youtube",
+        "type": "https",
+        "server": "1.1.1.1",
+        "detour": "📺 Youtube"
       }
     ],
     "rules": [
@@ -173,6 +173,11 @@
         "server": "dns-cn"
       },
       {
+        "rule_set": ["geosite-youtube"],
+        "action": "route",
+        "server": "dns-youtube"
+      },
+      {
         "rule_set": ["geosite-google"],
         "action": "route",
         "server": "dns-google"
@@ -227,36 +232,21 @@
         "server": "dns-cn"
       },
       {
-        "tag": "ecs-google",
+        "tag": "resolve-evaluate-ecs",
         "action": "evaluate",
-        "server": "dns-ecs-google",
+        "server": "dns-ecs",
         "client_subnet": "0.0.0.0/0"
       },
       {
-        "tag": "ecs-quad9",
-        "action": "evaluate",
-        "server": "dns-ecs-quad9",
-        "client_subnet": "0.0.0.0/0"
-      },
-      {
-        "match_response": "ecs-google",
+        "match_response": "resolve-evaluate-ecs",
         "response_rcode": "NOERROR",
         "ip_accept_any": true,
         "invert": true,
-        "race": true,
         "action": "respond"
       },
       {
-        "match_response": "ecs-quad9",
-        "response_rcode": "NOERROR",
-        "ip_accept_any": true,
-        "invert": true,
-        "race": true,
-        "action": "respond"
-      },
-      {
-        "match_response": "ecs-google",
-        "race": true,
+        "query_type": "A",
+        "match_response": "resolve-evaluate-ecs",
         "rule_set": ["geoip-cn", "@geoip-direct"],
         "ip_accept_any": true,
         "ip_is_private": true,
@@ -264,13 +254,14 @@
         "action": "respond"
       },
       {
-        "match_response": "ecs-quad9",
-        "race": true,
+        "query_type": "AAAA",
+        "match_response": "resolve-evaluate-ecs",
         "rule_set": ["geoip-cn", "@geoip-direct"],
         "ip_accept_any": true,
         "ip_is_private": true,
         "response_rcode": "NOERROR",
-        "action": "respond"
+        "action": "route",
+        "server": "dns-cn"
       }
     ],
     "final": "dns-final",
@@ -402,6 +393,11 @@
         "outbound": "🌐 Direct"
       },
       {
+        "rule_set": ["geosite-youtube"],
+        "action": "route",
+        "outbound": "📺 Youtube"
+      },
+      {
         "rule_set": ["geosite-google"],
         "action": "route",
         "outbound": "🔍 Google"
@@ -425,7 +421,7 @@
       },
       {
         "rule_set": "geosite-microsoft",
-        "outbound": "🪟 Microsoft"
+        "outbound": "📦 Microsoft"
       },
       {
         "rule_set": ["geosite-geolocation-cn"],
@@ -442,7 +438,7 @@
           "geosite-reddit",
           "@geosite-cloudflare-challenge"
         ],
-        "outbound": "📺 Entertainment"
+        "outbound": "🎬 Entertainment"
       }
     ],
     "rule_set": [
@@ -602,7 +598,7 @@
     },
     {
       "type": "selector",
-      "tag": "🪟 Microsoft",
+      "tag": "📦 Microsoft",
       "outbounds": ["🙋 Select"],
       "default": "🙋 Select",
       "interrupt_exist_connections": true
@@ -623,7 +619,14 @@
     },
     {
       "type": "selector",
-      "tag": "📺 Entertainment",
+      "tag": "📺 Youtube",
+      "outbounds": ["🙋 Select"],
+      "default": "🙋 Select",
+      "interrupt_exist_connections": true
+    },
+    {
+      "type": "selector",
+      "tag": "🎬 Entertainment",
       "outbounds": ["🙋 Select"],
       "default": "🙋 Select",
       "interrupt_exist_connections": true

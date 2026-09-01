@@ -41,22 +41,10 @@
         "detour": "🙋 Select"
       },
       {
-        "tag": "dns-ecs-google",
+        "tag": "dns-ecs",
         "type": "https",
         "server": "8.8.8.8",
         "detour": "🙋 Select"
-      },
-      {
-        "tag": "dns-ecs-quad9",
-        "type": "https",
-        "server": "9.9.9.11",
-        "detour": "🙋 Select"
-      },
-      {
-        "tag": "dns-entertainment",
-        "type": "https",
-        "server": "1.1.1.1",
-        "detour": "📺 Entertainment"
       },
       {
         "tag": "dns-fake",
@@ -113,8 +101,16 @@
         "action": "reject"
       },
       {
+        "query_type": [
+          "A",
+          "AAAA"
+        ],
         "clash_mode": "Global",
-        "server": "dns-final"
+        "server": "dns-fake"
+      },
+      {
+        "clash_mode": "Global",
+        "server": "dns-remote"
       },
       {
         "rule_set": "@geosite-should-block",
@@ -183,56 +179,42 @@
         "server": "dns-local"
       },
       {
-        "tag": "ecs-google",
+        "tag": "resolve-evaluate-ecs",
         "action": "evaluate",
-        "server": "dns-ecs-google",
+        "server": "dns-ecs",
         "client_subnet": "0.0.0.0/0"
       },
       {
-        "tag": "ecs-quad9",
-        "action": "evaluate",
-        "server": "dns-ecs-quad9",
-        "client_subnet": "0.0.0.0/0"
-      },
-      {
-        "match_response": "ecs-google",
+        "match_response": "resolve-evaluate-ecs",
         "response_rcode": "NOERROR",
         "ip_accept_any": true,
         "invert": true,
-        "race": true,
         "action": "respond"
       },
       {
-        "match_response": "ecs-quad9",
-        "response_rcode": "NOERROR",
-        "ip_accept_any": true,
-        "invert": true,
-        "race": true,
-        "action": "respond"
-      },
-      {
-        "match_response": "ecs-google",
-        "race": true,
+        "query_type": "A",
+        "match_response": "resolve-evaluate-ecs",
         "rule_set": [
           "geoip-cn",
           "@geoip-direct"
         ],
-        "ip_is_private": true,
         "ip_accept_any": true,
+        "ip_is_private": true,
         "response_rcode": "NOERROR",
         "action": "respond"
       },
       {
-        "match_response": "ecs-quad9",
-        "race": true,
+        "query_type": "AAAA",
+        "match_response": "resolve-evaluate-ecs",
         "rule_set": [
           "geoip-cn",
           "@geoip-direct"
         ],
-        "ip_is_private": true,
         "ip_accept_any": true,
+        "ip_is_private": true,
         "response_rcode": "NOERROR",
-        "action": "respond"
+        "action": "route",
+        "server": "dns-cn"
       },
       {
         "type": "logical",
@@ -371,16 +353,6 @@
         "action": "reject"
       },
       {
-        "type": "logical",
-        "mode": "and",
-        "rules": [
-          {
-            "inbound": [
-              "mixed-in"
-            ],
-            "invert": true
-          }
-        ],
         "action": "sniff",
         "sniffer": [
           "http",
@@ -408,6 +380,13 @@
         ],
         "action": "route",
         "outbound": "🌐 Direct"
+      },
+      {
+        "rule_set": [
+          "geosite-youtube"
+        ],
+        "action": "route",
+        "outbound": "📺 Youtube"
       },
       {
         "rule_set": [
@@ -440,7 +419,7 @@
       },
       {
         "rule_set": "geosite-microsoft",
-        "outbound": "🪟 Microsoft"
+        "outbound": "📦 Microsoft"
       },
       {
         "rule_set": [
@@ -462,7 +441,7 @@
           "geosite-reddit",
           "@geosite-cloudflare-challenge"
         ],
-        "outbound": "📺 Entertainment"
+        "outbound": "🎬 Entertainment"
       }
     ],
     "rule_set": [
@@ -853,6 +832,12 @@
         "type": "remote",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-telegram.srs"
+      },
+      {
+        "tag": "geosite-youtube",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-youtube.srs"
       }
     ],
     "final": "🙋 Select",
@@ -879,6 +864,14 @@
       "secret": "20002000"
     }
   },
+  "services": [
+    {
+      "type": "api",
+      "tag": "service-main-api",
+      "listen": "127.0.0.1",
+      "listen_port": 9091
+    }
+  ],
   "inbounds": [
     {
       "type": "tun",
@@ -893,7 +886,6 @@
         "172.27.0.2",
         "fdfe:dcba:9876::2"
       ],
-      "endpoint_independent_nat": true,
       "route_exclude_address": [
         "10.0.0.0/8",
         "172.16.0.0/12",
@@ -982,7 +974,7 @@
     },
     {
       "type": "selector",
-      "tag": "🪟 Microsoft",
+      "tag": "📦 Microsoft",
       "outbounds": [
         "🙋 Select"
       ],
@@ -1009,7 +1001,16 @@
     },
     {
       "type": "selector",
-      "tag": "📺 Entertainment",
+      "tag": "📺 Youtube",
+      "outbounds": [
+        "🙋 Select"
+      ],
+      "default": "🙋 Select",
+      "interrupt_exist_connections": true
+    },
+    {
+      "type": "selector",
+      "tag": "🎬 Entertainment",
       "outbounds": [
         "🙋 Select"
       ],

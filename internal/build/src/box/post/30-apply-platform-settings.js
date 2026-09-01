@@ -14,8 +14,12 @@ const applyPlatformSettings = ({ config = {}, ua = undefined, ...rest }) => {
           tunInbound.dns_address = tunInbound.dns_address.filter((addr) =>
             addr.includes(":"),
           );
+
         // on macos , gvisor has better performance.
         tunInbound.stack = "gvisor";
+
+        if (tunInbound.platform?.http_proxy?.enabled)
+          tunInbound.platform.http_proxy.enabled = false;
       }
     });
 
