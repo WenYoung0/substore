@@ -9,11 +9,11 @@ bundle: bundle_script ruleset
 
 .PHONY: bundle_script
 bundle_script:
-	cd script/bundle-build && npm install && node main.js
+	cd script/bundle-build && pnpm install && node main.js
 
 .PHONY: minimal
 minimal:
-	cd script/minimal-build && npm install && node ../minimal.js
+	cd script/minimal-build && pnpm install && node ../minimal.js
 
 .PHONY: check
 check:
@@ -29,7 +29,7 @@ check:
 .PHONY: ruleset
 ruleset: clean_ruleset
 	cd script/generate-ruleset && go mod tidy && RULESET_SILENT_WARN=1 go run . --from "../../ruleset/data" --output "../../ruleset" --srs --mrs --all
-	cd script/fill-ruleset && npm install && node main.js
+	cd script/fill-ruleset && pnpm install && node main.js
 
 .PHONY: clean_ruleset
 clean_ruleset:

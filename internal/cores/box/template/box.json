@@ -245,23 +245,12 @@
         "action": "respond"
       },
       {
-        "query_type": "A",
         "match_response": "resolve-evaluate-ecs",
         "rule_set": ["geoip-cn", "@geoip-direct"],
         "ip_accept_any": true,
         "ip_is_private": true,
         "response_rcode": "NOERROR",
         "action": "respond"
-      },
-      {
-        "query_type": "AAAA",
-        "match_response": "resolve-evaluate-ecs",
-        "rule_set": ["geoip-cn", "@geoip-direct"],
-        "ip_accept_any": true,
-        "ip_is_private": true,
-        "response_rcode": "NOERROR",
-        "action": "route",
-        "server": "dns-cn"
       }
     ],
     "final": "dns-final",
