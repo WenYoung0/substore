@@ -1038,9 +1038,10 @@
       "type": "selector",
       "tag": "🐈 Git",
       "outbounds": [
+        "📦 Microsoft",
         "🙋 Select"
       ],
-      "default": "🙋 Select",
+      "default": "📦 Microsoft",
       "interrupt_exist_connections": true
     },
     {
@@ -1056,9 +1057,10 @@
       "type": "selector",
       "tag": "📺 Youtube",
       "outbounds": [
+        "🔍 Google",
         "🙋 Select"
       ],
-      "default": "🙋 Select",
+      "default": "🔍 Google",
       "interrupt_exist_connections": true
     },
     {

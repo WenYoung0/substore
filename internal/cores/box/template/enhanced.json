@@ -507,8 +507,8 @@
     {
       "type": "selector",
       "tag": "🐈 Git",
-      "outbounds": ["🙋 Select"],
-      "default": "🙋 Select",
+      "outbounds": ["📦 Microsoft", "🙋 Select"],
+      "default": "📦 Microsoft",
       "interrupt_exist_connections": true
     },
     {
@@ -521,8 +521,8 @@
     {
       "type": "selector",
       "tag": "📺 Youtube",
-      "outbounds": ["🙋 Select"],
-      "default": "🙋 Select",
+      "outbounds": ["🔍 Google", "🙋 Select"],
+      "default": "🔍 Google",
       "interrupt_exist_connections": true
     },
     {
